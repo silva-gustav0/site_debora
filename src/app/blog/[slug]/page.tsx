@@ -1,9 +1,25 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { blogPosts } from "@/lib/data";
 import { ArrowLeft, Clock, Calendar, ArrowRight } from "lucide-react";
+
+const postImages: Record<string, string> = {
+  "beneficios-limpeza-pele":
+    "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1200&q=85",
+  "drenagem-linfatica-saude":
+    "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1200&q=85",
+  "skincare-em-casa":
+    "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=1200&q=85",
+  "poder-da-massagem":
+    "https://images.unsplash.com/photo-1498579150354-977475b7ea0b?auto=format&fit=crop&w=1200&q=85",
+  "peeling-renove-pele":
+    "https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&w=1200&q=85",
+  "rituais-de-spa":
+    "https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1200&q=85",
+};
 
 const catColors: Record<string, string> = {
   "Cuidados com a Pele": "#C8737A",
@@ -173,26 +189,22 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         {/* Article */}
         <section className="py-16 bg-[#FDFAF7]">
           <div className="max-w-3xl mx-auto px-6 lg:px-10">
-            {/* Banner image placeholder */}
-            <div
-              className="w-full h-64 sm:h-80 rounded-2xl mb-12 relative overflow-hidden"
-              style={{
-                background: `linear-gradient(135deg, ${color}20, ${color}40)`,
-              }}
-            >
+            {/* Banner image */}
+            <div className="w-full h-64 sm:h-80 rounded-2xl mb-12 relative overflow-hidden shadow-[0_16px_50px_rgba(200,115,122,0.15)]">
+              <Image
+                src={postImages[slug] || postImages["beneficios-limpeza-pele"]}
+                alt={post.title}
+                fill
+                priority
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 768px"
+              />
               <div
-                className="absolute inset-0 flex items-center justify-center"
+                className="absolute inset-0"
                 style={{
-                  backgroundImage: `radial-gradient(circle at 30% 50%, ${color}30 0%, transparent 60%)`,
+                  background: `linear-gradient(160deg, ${color}10 0%, transparent 50%)`,
                 }}
-              >
-                <span
-                  className="text-5xl font-light italic text-rose-200/60"
-                  style={{ fontFamily: "var(--font-cormorant), serif" }}
-                >
-                  CD
-                </span>
-              </div>
+              />
             </div>
 
             {/* Lead */}
@@ -300,12 +312,15 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                   className="group block rounded-xl overflow-hidden hover-lift"
                   style={{ background: "white", border: "1px solid #F9C7CE" }}
                 >
-                  <div
-                    className="h-36"
-                    style={{
-                      background: `linear-gradient(135deg, ${catColors[p.category] || "#C8737A"}15, ${catColors[p.category] || "#C8737A"}30)`,
-                    }}
-                  />
+                  <div className="relative h-36 overflow-hidden">
+                    <Image
+                      src={postImages[p.slug] || postImages["beneficios-limpeza-pele"]}
+                      alt={p.title}
+                      fill
+                      className="object-cover transition-transform duration-400 group-hover:scale-105"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                    />
+                  </div>
                   <div className="p-5">
                     <span
                       className="text-[9.5px] tracking-widest uppercase block mb-2"

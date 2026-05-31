@@ -8,14 +8,14 @@ const contactInfo = [
   {
     icon: MapPin,
     label: "Endereço",
-    value: "Rua das Flores, 123 — Centro\nSão Paulo — SP",
-    link: null,
+    value: "Rua Yilidio Figueiredo, 468\nCentro de Perus — São Paulo, SP",
+    link: "https://maps.google.com/?q=Rua+Yilidio+Figueiredo+468+Centro+de+Perus+São+Paulo",
   },
   {
     icon: Phone,
     label: "Telefone & WhatsApp",
-    value: "(11) 99999-9999",
-    link: "https://wa.me/5511999999999",
+    value: "(11) 98427-1714",
+    link: "https://wa.me/5511984271714",
   },
   {
     icon: Mail,
@@ -32,8 +32,8 @@ const contactInfo = [
   {
     icon: AtSign,
     label: "Instagram",
-    value: "@clinicadebora",
-    link: "https://instagram.com/clinicadebora",
+    value: "@deborasilvaesteticaebemestar",
+    link: "https://instagram.com/deborasilvaesteticaebemestar",
   },
 ];
 
@@ -141,14 +141,14 @@ export default function Contact() {
                     className="text-sm font-light text-rose-700"
                     style={{ fontFamily: "var(--font-cormorant), serif" }}
                   >
-                    Rua das Flores, 123 — São Paulo
+                    Rua Yilidio Figueiredo, 468<br />Centro de Perus — SP
                   </p>
                   <a
-                    href="https://maps.google.com"
+                    href="https://maps.google.com/?q=Rua+Yilidio+Figueiredo+468+Centro+de+Perus+São+Paulo"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[10px] tracking-widest uppercase text-gold-600 hover:text-gold-700 mt-1 block"
-                    style={{ fontFamily: "var(--font-lato), sans-serif" }}
+                    className="text-[10px] tracking-widest uppercase hover:opacity-70 mt-1 block"
+                    style={{ fontFamily: "var(--font-lato), sans-serif", color: "#C9973A" }}
                   >
                     Ver no Google Maps →
                   </a>

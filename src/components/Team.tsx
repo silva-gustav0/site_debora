@@ -1,5 +1,17 @@
+import Image from "next/image";
 import AnimateIn from "./AnimateIn";
 import { teamMembers } from "@/lib/data";
+
+const teamPhotos: Record<string, string> = {
+  debora:
+    "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=400&q=80",
+  ana:
+    "https://images.unsplash.com/photo-1607746882042-944635dfe10e?auto=format&fit=crop&w=400&q=80",
+  mariana:
+    "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=400&q=80",
+  juliana:
+    "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80",
+};
 
 export default function Team() {
   return (
@@ -12,8 +24,8 @@ export default function Team() {
           </AnimateIn>
           <AnimateIn animation="up" delay={100}>
             <h2
-              className="text-4xl sm:text-5xl font-light text-rose-900 mt-4 mb-5"
-              style={{ fontFamily: "var(--font-cormorant), serif" }}
+              className="text-4xl sm:text-5xl font-light mt-4 mb-5"
+              style={{ fontFamily: "var(--font-cormorant), serif", color: "#4A1820" }}
             >
               Profissionais{" "}
               <em className="italic font-normal" style={{ color: "#C8737A" }}>
@@ -26,8 +38,8 @@ export default function Team() {
           </AnimateIn>
           <AnimateIn animation="up" delay={300}>
             <p
-              className="text-base font-light text-text-secondary max-w-md leading-7"
-              style={{ fontFamily: "var(--font-lato), sans-serif" }}
+              className="text-base font-light max-w-md leading-7"
+              style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B4C52" }}
             >
               Uma equipe apaixonada pelo que faz, unida pelo compromisso com a
               excelência e pelo cuidado genuíno com cada cliente.
@@ -47,40 +59,36 @@ export default function Team() {
                   boxShadow: "0 2px 20px rgba(200,115,122,0.07)",
                 }}
               >
-                {/* Avatar area */}
-                <div
-                  className="h-52 flex items-center justify-center relative overflow-hidden"
-                  style={{
-                    background: `linear-gradient(160deg, ${member.color}15 0%, ${member.color}30 100%)`,
-                  }}
-                >
-                  {/* Decorative ring */}
-                  <div
-                    className="absolute w-36 h-36 rounded-full opacity-20"
-                    style={{ border: `1.5px solid ${member.color}` }}
+                {/* Photo */}
+                <div className="relative h-60 overflow-hidden">
+                  <Image
+                    src={teamPhotos[member.id]}
+                    alt={member.name}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   />
+                  {/* Brand color overlay on hover */}
                   <div
-                    className="absolute w-28 h-28 rounded-full opacity-15"
-                    style={{ border: `1px solid ${member.color}` }}
-                  />
-
-                  <div
-                    className="relative w-20 h-20 rounded-full flex items-center justify-center text-white text-2xl font-light shadow-lg z-10"
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-400"
                     style={{
-                      fontFamily: "var(--font-cormorant), serif",
-                      background: `linear-gradient(135deg, ${member.color}, ${member.color}CC)`,
-                      fontSize: "28px",
+                      background: `linear-gradient(160deg, ${member.color}20 0%, transparent 60%)`,
                     }}
-                  >
-                    {member.initials}
-                  </div>
+                  />
+                  {/* Bottom gradient for text readability */}
+                  <div
+                    className="absolute bottom-0 left-0 right-0 h-16"
+                    style={{
+                      background: "linear-gradient(to top, rgba(44,26,30,0.25), transparent)",
+                    }}
+                  />
                 </div>
 
                 {/* Info */}
                 <div className="p-6">
                   <h3
-                    className="text-xl font-light text-rose-800 mb-0.5"
-                    style={{ fontFamily: "var(--font-cormorant), serif" }}
+                    className="text-xl font-light mb-0.5"
+                    style={{ fontFamily: "var(--font-cormorant), serif", color: "#4A1820" }}
                   >
                     {member.name}
                   </h3>
@@ -95,8 +103,8 @@ export default function Team() {
                   </p>
 
                   <p
-                    className="text-[13px] font-light leading-6 text-text-secondary mb-5"
-                    style={{ fontFamily: "var(--font-lato), sans-serif" }}
+                    className="text-[13px] font-light leading-6 mb-5"
+                    style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B4C52" }}
                   >
                     {member.bio}
                   </p>

@@ -1,3 +1,5 @@
+import Image from "next/image";
+import AnimateIn from "./AnimateIn";
 import { ArrowRight, Star } from "lucide-react";
 
 export default function Hero() {
@@ -10,177 +12,145 @@ export default function Hero() {
           "linear-gradient(135deg, #FFF5F7 0%, #FDFAF7 40%, #FFF8E7 80%, #FDFAF7 100%)",
       }}
     >
-      {/* Decorative circles */}
+      {/* Background radial glows */}
       <div
-        className="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full opacity-[0.06] pointer-events-none"
-        style={{ background: "radial-gradient(circle, #C8737A 0%, transparent 70%)" }}
+        className="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full pointer-events-none"
+        style={{ background: "radial-gradient(circle, rgba(200,115,122,0.07) 0%, transparent 70%)" }}
       />
       <div
-        className="absolute -bottom-20 -left-20 w-[400px] h-[400px] rounded-full opacity-[0.05] pointer-events-none"
-        style={{ background: "radial-gradient(circle, #C9973A 0%, transparent 70%)" }}
+        className="absolute -bottom-20 -left-20 w-[400px] h-[400px] rounded-full pointer-events-none"
+        style={{ background: "radial-gradient(circle, rgba(201,151,58,0.05) 0%, transparent 70%)" }}
       />
 
       {/* Floating petal shapes */}
       <div
-        className="animate-float absolute top-[20%] right-[8%] w-20 h-28 opacity-[0.12] pointer-events-none"
+        className="animate-float absolute top-[20%] right-[8%] w-20 h-28 opacity-[0.12] pointer-events-none hidden lg:block"
         style={{
           background: "linear-gradient(160deg, #C8737A, #F4C2C2)",
           borderRadius: "60% 40% 70% 30% / 50% 50% 50% 50%",
-          animationDelay: "0s",
         }}
       />
       <div
-        className="animate-float absolute top-[55%] right-[18%] w-12 h-16 opacity-[0.1] pointer-events-none"
+        className="animate-float absolute top-[55%] right-[18%] w-12 h-16 opacity-[0.1] pointer-events-none hidden lg:block"
         style={{
           background: "linear-gradient(160deg, #C9973A, #E8C882)",
           borderRadius: "50% 50% 30% 70% / 60% 40% 60% 40%",
           animationDelay: "2s",
         }}
       />
-      <div
-        className="animate-float absolute top-[35%] left-[5%] w-10 h-14 opacity-[0.08] pointer-events-none"
-        style={{
-          background: "linear-gradient(160deg, #8B3A42, #C8737A)",
-          borderRadius: "40% 60% 60% 40% / 50% 50% 50% 50%",
-          animationDelay: "4s",
-        }}
-      />
 
-      {/* Thin gold vertical line — decorative */}
-      <div className="absolute left-[calc(50%-400px)] top-0 h-full w-px opacity-[0.06] hidden xl:block"
-        style={{ background: "linear-gradient(180deg, transparent, #C9973A 30%, #C9973A 70%, transparent)" }} />
+      <div className="relative max-w-7xl mx-auto px-6 lg:px-10 pt-28 pb-20 w-full">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
 
-      <div className="relative max-w-7xl mx-auto px-6 lg:px-10 pt-32 pb-20 w-full">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          {/* Text column */}
+          {/* ── Text column ── */}
           <div>
-            {/* Badge */}
-            <div
-              className="inline-flex items-center gap-2 mb-8 px-4 py-2 rounded-full border border-rose-200"
-              style={{ background: "rgba(255,245,247,0.8)" }}
-              data-animate="fade"
-            >
-              <Star size={11} className="text-gold-500 fill-gold-300" />
-              <span className="section-label" style={{ color: "#C9973A" }}>
-                Clínica Premium de Estética
-              </span>
-            </div>
+            <AnimateIn animation="fade">
+              <div
+                className="inline-flex items-center gap-2 mb-7 px-4 py-2 rounded-full border border-rose-200"
+                style={{ background: "rgba(255,245,247,0.8)" }}
+              >
+                <Star size={11} className="text-gold-500 fill-gold-300" style={{ color: "#C9973A" }} />
+                <span className="section-label">Clínica Premium de Estética</span>
+              </div>
+            </AnimateIn>
 
-            {/* Heading */}
-            <h1
-              className="text-5xl sm:text-6xl lg:text-7xl font-light leading-[1.1] text-rose-900 mb-6"
-              style={{ fontFamily: "var(--font-cormorant), serif" }}
-              data-animate="up"
-              data-delay="100"
-            >
-              Sua Beleza,
-              <br />
-              <em className="font-normal italic" style={{ color: "#C8737A" }}>
-                Nossa Arte
-              </em>
-            </h1>
+            <AnimateIn animation="up" delay={100}>
+              <h1
+                className="text-5xl sm:text-6xl lg:text-7xl font-light leading-[1.1] text-rose-900 mb-5"
+                style={{ fontFamily: "var(--font-cormorant), serif", color: "#4A1820" }}
+              >
+                Sua Beleza,
+                <br />
+                <em className="font-normal italic" style={{ color: "#C8737A" }}>
+                  Nossa Arte
+                </em>
+              </h1>
+            </AnimateIn>
 
-            {/* Divider */}
-            <div
-              className="gold-line mb-6"
-              data-animate="scale"
-              data-delay="200"
-              style={{ transformOrigin: "left" }}
-            />
+            <AnimateIn animation="scale" delay={200}>
+              <div className="gold-line mb-6" />
+            </AnimateIn>
 
-            {/* Subtitle */}
-            <p
-              className="text-base font-light leading-7 text-text-secondary max-w-md mb-10"
-              style={{ fontFamily: "var(--font-lato), sans-serif" }}
-              data-animate="up"
-              data-delay="300"
-            >
-              Transformamos cuidados estéticos em experiências sensoriais
-              únicas. Do tratamento facial ao ritual de SPA, cada visita é
-              pensada para realçar sua beleza natural e renovar sua energia.
-            </p>
+            <AnimateIn animation="up" delay={300}>
+              <p
+                className="text-base font-light leading-7 max-w-md mb-9"
+                style={{
+                  fontFamily: "var(--font-lato), sans-serif",
+                  color: "#6B4C52",
+                }}
+              >
+                Transformamos cuidados estéticos em experiências sensoriais
+                únicas. Do tratamento facial ao ritual de SPA, cada visita é
+                pensada para realçar sua beleza natural e renovar sua energia.
+              </p>
+            </AnimateIn>
 
-            {/* CTAs */}
-            <div
-              className="flex flex-col sm:flex-row gap-4"
-              data-animate="up"
-              data-delay="400"
-            >
-              <a href="#agendamento" className="btn-primary">
-                Agendar Consulta <ArrowRight size={15} />
-              </a>
-              <a href="#servicos" className="btn-outline">
-                Nossos Serviços
-              </a>
-            </div>
+            <AnimateIn animation="up" delay={400}>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <a href="#agendamento" className="btn-primary">
+                  Agendar Consulta <ArrowRight size={15} />
+                </a>
+                <a href="#servicos" className="btn-outline">
+                  Nossos Serviços
+                </a>
+              </div>
+            </AnimateIn>
 
-            {/* Stats */}
-            <div
-              className="flex gap-10 mt-14 pt-10 border-t border-rose-100"
-              data-animate="up"
-              data-delay="500"
-            >
-              {[
-                { value: "15+", label: "Anos de experiência" },
-                { value: "2.400+", label: "Clientes atendidas" },
-                { value: "12", label: "Tratamentos exclusivos" },
-              ].map((s) => (
-                <div key={s.label}>
-                  <div
-                    className="text-3xl font-light text-rose-700 leading-none mb-1"
-                    style={{ fontFamily: "var(--font-cormorant), serif" }}
-                  >
-                    {s.value}
+            <AnimateIn animation="up" delay={500}>
+              <div className="flex gap-10 mt-12 pt-10 border-t border-rose-100">
+                {[
+                  { value: "15+", label: "Anos de experiência" },
+                  { value: "2.400+", label: "Clientes atendidas" },
+                  { value: "12", label: "Tratamentos exclusivos" },
+                ].map((s) => (
+                  <div key={s.label}>
+                    <div
+                      className="text-3xl font-light leading-none mb-1"
+                      style={{ fontFamily: "var(--font-cormorant), serif", color: "#8B3A42" }}
+                    >
+                      {s.value}
+                    </div>
+                    <div
+                      className="text-[11px] tracking-[0.12em] uppercase"
+                      style={{ fontFamily: "var(--font-lato), sans-serif", color: "#9C7A80" }}
+                    >
+                      {s.label}
+                    </div>
                   </div>
-                  <div
-                    className="text-[11px] tracking-[0.12em] uppercase text-text-muted"
-                    style={{ fontFamily: "var(--font-lato), sans-serif" }}
-                  >
-                    {s.label}
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            </AnimateIn>
           </div>
 
-          {/* Visual column */}
-          <div
-            className="relative hidden lg:flex items-center justify-center"
-            data-animate="fade"
-            data-delay="200"
-          >
-            {/* Main card */}
-            <div
-              className="relative w-[360px] h-[460px] rounded-2xl overflow-hidden shadow-[0_32px_80px_rgba(200,115,122,0.2)]"
-              style={{
-                background:
-                  "linear-gradient(160deg, #FFE8ED 0%, #FFF0C4 50%, #FFE8ED 100%)",
-              }}
-            >
-              {/* Stylised photo placeholder with initials/icon */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+          {/* ── Visual column ── */}
+          <AnimateIn animation="right" delay={200} className="hidden lg:block">
+            <div className="relative">
+              {/* Main hero image */}
+              <div
+                className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden shadow-[0_32px_80px_rgba(200,115,122,0.22)]"
+              >
+                <Image
+                  src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80"
+                  alt="Tratamento estético na Clínica Débora"
+                  fill
+                  priority
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
+                {/* Rose overlay for brand harmony */}
                 <div
-                  className="w-28 h-28 rounded-full flex items-center justify-center shadow-lg"
-                  style={{ background: "linear-gradient(135deg, #C8737A, #8B3A42)" }}
-                >
-                  <span
-                    className="text-4xl font-light text-white/90 italic"
-                    style={{ fontFamily: "var(--font-cormorant), serif" }}
-                  >
-                    CD
-                  </span>
-                </div>
-                <p
-                  className="text-rose-700 text-base tracking-widest uppercase font-light mt-2"
-                  style={{ fontFamily: "var(--font-lato), sans-serif", fontSize: "10px" }}
-                >
-                  Clínica Débora
-                </p>
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      "linear-gradient(160deg, rgba(200,115,122,0.08) 0%, rgba(201,151,58,0.04) 100%)",
+                  }}
+                />
               </div>
 
-              {/* Floating tag */}
+              {/* Floating review card */}
               <div
-                className="absolute bottom-8 left-1/2 -translate-x-1/2 w-[240px] bg-white/90 backdrop-blur-sm rounded-xl px-5 py-3 shadow-md"
+                className="absolute bottom-8 left-1/2 -translate-x-1/2 w-[240px] bg-white/92 backdrop-blur-md rounded-xl px-5 py-3 shadow-lg"
+                style={{ border: "1px solid #F9C7CE" }}
               >
                 <div className="flex items-center gap-3">
                   <div
@@ -191,83 +161,95 @@ export default function Hero() {
                   </div>
                   <div>
                     <div
-                      className="text-[11px] font-light tracking-wide text-text-muted uppercase"
-                      style={{ fontFamily: "var(--font-lato), sans-serif" }}
+                      className="text-[10px] font-light tracking-wide uppercase"
+                      style={{ fontFamily: "var(--font-lato), sans-serif", color: "#9C7A80" }}
                     >
-                      Avaliação
+                      Avaliação das Clientes
                     </div>
                     <div
-                      className="text-sm font-semibold text-rose-700"
-                      style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "16px" }}
+                      className="font-semibold"
+                      style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "18px", color: "#8B3A42" }}
                     >
-                      ★★★★★ <span className="text-xs text-text-muted font-light">5.0</span>
+                      ★★★★★{" "}
+                      <span style={{ fontSize: "13px", color: "#9C7A80", fontWeight: 300 }}>
+                        5.0
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Secondary floating card */}
-            <div
-              className="absolute -left-8 top-16 bg-white rounded-xl shadow-[0_8px_40px_rgba(201,151,58,0.15)] p-4 w-44"
-              style={{ border: "1px solid #F9C7CE" }}
-            >
-              <div className="gold-line mb-3" />
+              {/* Promo card top-left */}
               <div
-                className="text-[22px] font-light text-gold-600 leading-none"
-                style={{ fontFamily: "var(--font-cormorant), serif" }}
+                className="absolute -left-6 top-12 bg-white rounded-xl shadow-[0_8px_40px_rgba(201,151,58,0.18)] p-4 w-44"
+                style={{ border: "1px solid #F9C7CE" }}
               >
-                Promo
+                <div className="gold-line mb-3" />
+                <div
+                  className="font-light leading-tight mb-1"
+                  style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "20px", color: "#C9973A" }}
+                >
+                  Promoção
+                </div>
+                <div
+                  className="uppercase tracking-widest mb-2"
+                  style={{ fontFamily: "var(--font-lato), sans-serif", fontSize: "9px", color: "#9C7A80" }}
+                >
+                  Limpeza de Pele
+                </div>
+                <div
+                  style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "22px", color: "#C8737A", fontWeight: 400 }}
+                >
+                  R$ 99,90
+                </div>
+                <div
+                  style={{ fontFamily: "var(--font-lato), sans-serif", fontSize: "10px", color: "#9C7A80", textDecoration: "line-through" }}
+                >
+                  R$ 120,00
+                </div>
               </div>
-              <div
-                className="text-[10px] tracking-widest uppercase text-text-muted mt-1"
-                style={{ fontFamily: "var(--font-lato), sans-serif" }}
-              >
-                Limpeza de Pele
-              </div>
-              <div
-                className="text-rose-600 font-semibold mt-2 text-sm"
-                style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "18px" }}
-              >
-                R$ 99,90
-              </div>
-              <div className="text-[9px] text-text-muted line-through" style={{fontFamily:"var(--font-lato)"}}>
-                R$ 120,00
-              </div>
-            </div>
 
-            {/* Third small card */}
-            <div
-              className="absolute -right-4 bottom-20 bg-white rounded-xl shadow-[0_8px_40px_rgba(200,115,122,0.15)] p-4 w-40"
-              style={{ border: "1px solid #F9C7CE" }}
-            >
+              {/* Next appointment card bottom-right */}
               <div
-                className="text-[11px] uppercase tracking-widest text-text-muted mb-2"
-                style={{ fontFamily: "var(--font-lato), sans-serif" }}
+                className="absolute -right-4 bottom-20 bg-white rounded-xl shadow-[0_8px_40px_rgba(200,115,122,0.18)] p-4 w-44"
+                style={{ border: "1px solid #F9C7CE" }}
               >
-                Próximo horário
+                <div
+                  className="uppercase tracking-widest mb-2"
+                  style={{ fontFamily: "var(--font-lato), sans-serif", fontSize: "9px", color: "#9C7A80" }}
+                >
+                  Próximo horário
+                </div>
+                <div
+                  style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "20px", color: "#8B3A42", fontWeight: 300 }}
+                >
+                  Hoje 14:30
+                </div>
+                <div
+                  style={{ fontFamily: "var(--font-lato), sans-serif", fontSize: "11px", color: "#9C7A80", marginTop: "4px" }}
+                >
+                  Day SPA Completo
+                </div>
               </div>
+
+              {/* Decorative accent rings */}
               <div
-                className="text-rose-700 font-light text-xl"
-                style={{ fontFamily: "var(--font-cormorant), serif" }}
-              >
-                Hoje 14:30
-              </div>
+                className="absolute -bottom-4 -right-4 w-24 h-24 rounded-full"
+                style={{ border: "1.5px solid rgba(201,151,58,0.3)" }}
+              />
               <div
-                className="mt-2 text-[10px] text-text-muted"
-                style={{ fontFamily: "var(--font-lato), sans-serif" }}
-              >
-                Day SPA Completo
-              </div>
+                className="absolute -top-3 -left-3 w-14 h-14 rounded-full"
+                style={{ border: "1px solid rgba(200,115,122,0.25)" }}
+              />
             </div>
-          </div>
+          </AnimateIn>
         </div>
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-50">
-        <span className="section-label text-[9px]">Rolar</span>
-        <div className="animate-scroll w-px h-6 bg-rose-400" />
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-40">
+        <span className="section-label" style={{ fontSize: "9px" }}>Rolar</span>
+        <div className="animate-scroll w-px h-6" style={{ background: "#C8737A" }} />
       </div>
     </section>
   );

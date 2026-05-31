@@ -1,10 +1,8 @@
 export type Service = {
   id: string;
-  category: "facial" | "corporal" | "spa" | "bemestar";
+  category: "facial" | "corporal" | "terapias";
   title: string;
   description: string;
-  duration: string;
-  price: string;
   highlight?: boolean;
 };
 
@@ -29,116 +27,136 @@ export type BlogPost = {
 };
 
 export const services: Service[] = [
+  // ── Estética Facial ──────────────────────────────
   {
     id: "limpeza-pele",
     category: "facial",
     title: "Limpeza de Pele",
     description:
-      "Tratamento profundo que remove impurezas, pontos negros e células mortas, deixando a pele renovada e com brilho natural.",
-    duration: "60 min",
-    price: "R$ 120",
+      "Tratamento profundo que remove impurezas, cravos e células mortas, deixando a pele renovada, suave e com brilho natural.",
     highlight: true,
   },
   {
-    id: "peeling",
+    id: "tratamento-melasma",
+    category: "facial",
+    title: "Tratamento para Melasma",
+    description:
+      "Protocolo especializado com ativos despigmentantes que reduzem manchas escuras e uniformizam o tom da pele de forma segura.",
+  },
+  {
+    id: "microagulhamento",
+    category: "facial",
+    title: "Microagulhamento",
+    description:
+      "Técnica de indução percutânea de colágeno que trata cicatrizes, poros dilatados, linhas de expressão e melhora a textura da pele.",
+    highlight: true,
+  },
+  {
+    id: "hidratacoes",
+    category: "facial",
+    title: "Hidratações",
+    description:
+      "Infusão de ativos hidratantes de alta concentração que restauram o viço, a elasticidade e a barreira de proteção da pele.",
+  },
+  {
+    id: "peeling-quimico",
     category: "facial",
     title: "Peeling Químico",
     description:
-      "Renovação celular com ácidos de alta performance. Minimiza manchas, poros dilatados e linhas de expressão.",
-    duration: "45 min",
-    price: "R$ 180",
+      "Renovação celular com ácidos de alta performance que minimizam manchas, poros dilatados e linhas de expressão.",
   },
   {
-    id: "hidratacao",
+    id: "peeling-natural",
     category: "facial",
-    title: "Hidratação Profunda",
+    title: "Peeling Natural",
     description:
-      "Infusão de ativos hidratantes de última geração que restauram o viço e a elasticidade da pele.",
-    duration: "50 min",
-    price: "R$ 140",
+      "Esfoliação com ingredientes naturais que renovam a camada superficial da pele de forma suave, sem agressões.",
   },
   {
-    id: "design-sobrancelha",
+    id: "rejuvenescimento",
     category: "facial",
-    title: "Design de Sobrancelha",
+    title: "Rejuvenescimento",
     description:
-      "Modelagem personalizada que realça o olhar e harmoniza os traços do rosto com técnica profissional.",
-    duration: "30 min",
-    price: "R$ 60",
-  },
-  {
-    id: "massagem",
-    category: "corporal",
-    title: "Massagem Relaxante",
-    description:
-      "Técnica sueca com óleos essenciais premium que libera tensões, alivia estresse e promove bem-estar profundo.",
-    duration: "60 min",
-    price: "R$ 160",
+      "Tratamento combinado de técnicas e ativos que estimulam a produção de colágeno, firmam a pele e reduzem os sinais do envelhecimento.",
     highlight: true,
   },
   {
-    id: "drenagem",
+    id: "clareamento",
+    category: "facial",
+    title: "Clareamento",
+    description:
+      "Protocolo com ativos clareadores que uniformizam o tom da pele, reduzindo manchas de sol, cicatrizes e hiperpigmentações.",
+  },
+  {
+    id: "tratamento-acne",
+    category: "facial",
+    title: "Tratamento para Acne",
+    description:
+      "Combinação de limpeza profunda, ativos antibacterianos e calmantes para controlar a acne e prevenir novas lesões.",
+  },
+
+  // ── Estética Corporal ─────────────────────────────
+  {
+    id: "depilacao-cera",
+    category: "corporal",
+    title: "Depilação com Cera",
+    description:
+      "Remoção suave e eficaz dos pelos com cera, deixando a pele lisa e macia por muito mais tempo do que métodos convencionais.",
+  },
+  {
+    id: "drenagem-linfatica",
     category: "corporal",
     title: "Drenagem Linfática",
     description:
-      "Manobras manuais suaves que estimulam o sistema linfático, reduzem edemas e promovem desintoxicação.",
-    duration: "60 min",
-    price: "R$ 150",
-  },
-  {
-    id: "modelagem",
-    category: "corporal",
-    title: "Modelagem Corporal",
-    description:
-      "Combina técnicas de massagem modeladora com produtos específicos para contornar e firmar o corpo.",
-    duration: "75 min",
-    price: "R$ 190",
-  },
-  {
-    id: "day-spa",
-    category: "spa",
-    title: "Day SPA Completo",
-    description:
-      "Experiência imersiva de relaxamento com banho de imersão, esfoliação, massagem e tratamento facial.",
-    duration: "3 horas",
-    price: "R$ 380",
+      "Manobras manuais suaves que estimulam o sistema linfático, reduzindo edemas, eliminando toxinas e promovendo bem-estar.",
     highlight: true,
   },
   {
-    id: "ritual-beleza",
-    category: "spa",
-    title: "Ritual de Beleza",
+    id: "plastica-pes",
+    category: "corporal",
+    title: "Plástica dos Pés",
     description:
-      "Jornada sensorial com aromaterapia, música ambiente, chás especiais e tratamentos personalizados.",
-    duration: "2 horas",
-    price: "R$ 260",
+      "Tratamento completo para os pés que inclui esfoliação, hidratação intensa e cuidados especiais para calosidades e fissuras.",
   },
   {
-    id: "escalda-pes",
-    category: "spa",
-    title: "Escalda Pés & Reflexologia",
+    id: "pos-operatorio",
+    category: "corporal",
+    title: "Pós Operatório",
     description:
-      "Banho terapêutico com ervas medicinais seguido de massagem reflexa nos pés para equilíbrio do organismo.",
-    duration: "50 min",
-    price: "R$ 100",
+      "Acompanhamento especializado no período pós-cirúrgico com drenagem linfática e técnicas que aceleram a recuperação e minimizam edemas.",
+    highlight: true,
+  },
+
+  // ── Terapias Complementares ───────────────────────
+  {
+    id: "auriculoterapia",
+    category: "terapias",
+    title: "Auriculoterapia",
+    description:
+      "Técnica de acupuntura auricular que estimula pontos específicos da orelha para promover equilíbrio físico, emocional e alívio da dor.",
   },
   {
-    id: "aromaterapia",
-    category: "bemestar",
-    title: "Aromaterapia",
+    id: "ventosaterapia",
+    category: "terapias",
+    title: "Ventosaterapia",
     description:
-      "Uso terapêutico de óleos essenciais puros para equilibrar emoções, aliviar ansiedade e promover saúde.",
-    duration: "60 min",
-    price: "R$ 130",
+      "Terapia com ventosas que aumenta a circulação sanguínea, alivia tensões musculares, reduz celulite e promove desintoxicação.",
+    highlight: true,
   },
   {
-    id: "meditacao",
-    category: "bemestar",
-    title: "Meditação Guiada",
+    id: "day-spa",
+    category: "terapias",
+    title: "Day Spa",
     description:
-      "Sessão conduzida por profissional especializada que promove clareza mental, redução do estresse e autoconhecimento.",
-    duration: "45 min",
-    price: "R$ 90",
+      "Experiência imersiva de relaxamento com banho de imersão, esfoliação corporal, hidratação e massagem. Um dia dedicado a você.",
+  },
+  {
+    id: "massagem-relaxante",
+    category: "terapias",
+    title: "Massagem Relaxante",
+    description:
+      "Técnica com movimentos suaves e fluidos com óleos essenciais premium que liberam tensões, aliviam estresse e renovam as energias.",
+    highlight: true,
   },
 ];
 
@@ -148,7 +166,7 @@ export const teamMembers: TeamMember[] = [
     name: "Débora Silva",
     role: "Fundadora & Esteticista Sênior",
     bio: "Com mais de 15 anos de experiência em estética avançada, Débora fundou a clínica com a missão de oferecer tratamentos de excelência em um ambiente acolhedor e transformador.",
-    specialties: ["Tratamentos Faciais", "Peeling Avançado", "Gestão Clínica"],
+    specialties: ["Tratamentos Faciais", "Microagulhamento", "Rejuvenescimento"],
     initials: "DS",
     color: "#C8737A",
   },
@@ -156,26 +174,26 @@ export const teamMembers: TeamMember[] = [
     id: "ana",
     name: "Ana Costa",
     role: "Especialista Corporal",
-    bio: "Formada em Estética e Cosmetologia, Ana é referência em técnicas corporais e drenagem linfática. Atende com sensibilidade e precisão cada necessidade da cliente.",
-    specialties: ["Drenagem Linfática", "Modelagem Corporal", "Massoterapia"],
+    bio: "Formada em Estética e Cosmetologia, Ana é referência em técnicas corporais, drenagem linfática e cuidados pós-operatórios.",
+    specialties: ["Drenagem Linfática", "Pós Operatório", "Depilação"],
     initials: "AC",
     color: "#C9973A",
   },
   {
     id: "mariana",
     name: "Mariana Santos",
-    role: "Especialista em Imagem",
-    bio: "Maquiadora artística e especialista em design de sobrancelhas, Mariana transforma olhares e realça a beleza natural de cada cliente com técnica e sensibilidade.",
-    specialties: ["Design de Sobrancelhas", "Maquiagem Artística", "Colorimetria"],
+    role: "Especialista Facial",
+    bio: "Especializada em tratamentos faciais avançados, Mariana atua com precisão no tratamento de melasma, acne e rejuvenescimento.",
+    specialties: ["Melasma", "Tratamento de Acne", "Peeling"],
     initials: "MS",
     color: "#8B3A42",
   },
   {
     id: "juliana",
     name: "Juliana Oliveira",
-    role: "Terapeuta & SPA Manager",
-    bio: "Especializada em terapias holísticas e rituais de bem-estar, Juliana cria experiências sensoriais únicas que equilibram corpo, mente e espírito.",
-    specialties: ["Aromaterapia", "Reflexologia", "Rituais de SPA"],
+    role: "Terapeuta Complementar",
+    bio: "Especializada em terapias holísticas, Juliana integra auriculoterapia, ventosaterapia e técnicas de bem-estar para equilibrar corpo e mente.",
+    specialties: ["Auriculoterapia", "Ventosaterapia", "Massagem"],
     initials: "JO",
     color: "#A85B63",
   },
@@ -231,7 +249,7 @@ export const blogPosts: BlogPost[] = [
   {
     slug: "rituais-de-spa",
     category: "SPA & Relaxamento",
-    title: "Rituais de SPA: Uma Experiência Transformadora",
+    title: "Day Spa: Uma Experiência Transformadora",
     excerpt:
       "Mergulhe no universo do bem-estar e descubra como um dia de SPA pode redefinir sua relação com o autocuidado e a autoestima.",
     date: "5 Abr 2025",
@@ -240,10 +258,9 @@ export const blogPosts: BlogPost[] = [
 ];
 
 export const categoryLabels: Record<string, string> = {
-  facial: "Estética Facial",
+  facial:   "Estética Facial",
   corporal: "Estética Corporal",
-  spa: "SPA",
-  bemestar: "Bem-Estar",
+  terapias: "Terapias Complementares",
 };
 
 export const timeSlots = [
@@ -252,3 +269,18 @@ export const timeSlots = [
   "14:00", "14:30", "15:00", "15:30",
   "16:00", "16:30", "17:00", "17:30",
 ];
+
+// ── Real clinic contact data ──────────────────────
+export const clinicInfo = {
+  name:      "Débora Silva Estética e Bem-Estar",
+  shortName: "Clínica Débora",
+  address:   "Rua Yilidio Figueiredo, 468",
+  neighborhood: "Centro de Perus",
+  city:      "São Paulo — SP",
+  phone:     "(11) 98427-1714",
+  whatsapp:  "5511984271714",
+  instagram: "@deborasilvaesteticaebemestar",
+  instagramUrl: "https://instagram.com/deborasilvaesteticaebemestar",
+  email:     "contato@clinicadebora.com.br",
+  hours:     "Seg–Sex: 9h às 19h  |  Sáb: 9h às 14h",
+};

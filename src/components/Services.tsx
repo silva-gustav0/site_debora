@@ -1,25 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { Clock, Tag, Sparkles, Leaf, Waves, Sun } from "lucide-react";
+import { Sparkles, Waves, Heart } from "lucide-react";
 import AnimateIn from "./AnimateIn";
 import { services, categoryLabels, type Service } from "@/lib/data";
 
-const CATEGORIES = ["all", "facial", "corporal", "spa", "bemestar"] as const;
+const CATEGORIES = ["all", "facial", "corporal", "terapias"] as const;
 
 const catIcons: Record<string, React.ElementType> = {
-  all: Sparkles,
-  facial: Sparkles,
+  all:      Sparkles,
+  facial:   Sparkles,
   corporal: Waves,
-  spa: Leaf,
-  bemestar: Sun,
+  terapias: Heart,
 };
 
 const catColors: Record<string, { bg: string; text: string; border: string }> = {
   facial:   { bg: "#FFF5F7",  text: "#C8737A",  border: "#F9C7CE"  },
   corporal: { bg: "#FFF8E7",  text: "#C9973A",  border: "#E8C882"  },
-  spa:      { bg: "#F5FFF8",  text: "#4A9B6F",  border: "#B2DFC4"  },
-  bemestar: { bg: "#F5F7FF",  text: "#6A7BC9",  border: "#C4CAE8"  },
+  terapias: { bg: "#F5F7FF",  text: "#6A7BC9",  border: "#C4CAE8"  },
 };
 
 function ServiceCard({ s, index }: { s: Service; index: number }) {
@@ -74,22 +72,14 @@ function ServiceCard({ s, index }: { s: Service; index: number }) {
           {s.description}
         </p>
 
-        <div className="flex items-center justify-between pt-4 border-t border-rose-50">
-          <div className="flex items-center gap-1.5 text-text-muted">
-            <Clock size={12} />
-            <span
-              className="text-[11px]"
-              style={{ fontFamily: "var(--font-lato), sans-serif" }}
-            >
-              {s.duration}
-            </span>
-          </div>
-          <div
-            className="text-xl font-light text-rose-600"
-            style={{ fontFamily: "var(--font-cormorant), serif" }}
+        <div className="pt-4 border-t border-rose-50">
+          <a
+            href="#agendamento"
+            className="text-[11px] tracking-widest uppercase flex items-center gap-1.5 hover:gap-3 transition-all duration-200"
+            style={{ fontFamily: "var(--font-lato), sans-serif", color: "#C8737A" }}
           >
-            {s.price}
-          </div>
+            Agendar este serviço →
+          </a>
         </div>
       </div>
     </AnimateIn>

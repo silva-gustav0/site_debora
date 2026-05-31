@@ -11,13 +11,13 @@ const navLinks = [
   { label: "Contato", href: "#contato" },
 ];
 
-const services = [
+const servicesList = [
   "Limpeza de Pele",
+  "Microagulhamento",
   "Peeling Químico",
-  "Massagem Relaxante",
   "Drenagem Linfática",
-  "Day SPA Completo",
-  "Aromaterapia",
+  "Ventosaterapia",
+  "Massagem Relaxante",
 ];
 
 export default function Footer() {
@@ -64,8 +64,8 @@ export default function Footer() {
             {/* Social */}
             <div className="flex gap-3">
               {[
-                { icon: AtSign, href: "https://instagram.com/clinicadebora", label: "Instagram" },
-                { icon: Phone, href: "https://wa.me/5511999999999", label: "WhatsApp" },
+                { icon: AtSign, href: "https://instagram.com/deborasilvaesteticaebemestar", label: "Instagram" },
+                { icon: Phone, href: "https://wa.me/5511984271714", label: "WhatsApp" },
                 { icon: Mail, href: "mailto:contato@clinicadebora.com.br", label: "Email" },
               ].map((s) => (
                 <a
@@ -127,7 +127,7 @@ export default function Footer() {
               Serviços
             </h4>
             <ul className="flex flex-col gap-2.5">
-              {services.map((s) => (
+              {servicesList.map((s) => (
                 <li key={s}>
                   <a
                     href="#servicos"
@@ -151,8 +151,8 @@ export default function Footer() {
             </h4>
             <div className="flex flex-col gap-4">
               {[
-                { icon: MapPin, text: "Rua das Flores, 123\nCentro — São Paulo, SP" },
-                { icon: Phone, text: "(11) 99999-9999\nSeg–Sex 9h–19h | Sáb 9h–14h" },
+                { icon: MapPin, text: "Rua Yilidio Figueiredo, 468\nCentro de Perus — São Paulo, SP" },
+                { icon: Phone, text: "(11) 98427-1714\nSeg–Sex 9h–19h | Sáb 9h–14h" },
                 { icon: Mail, text: "contato@clinicadebora.com.br" },
               ].map((item, i) => (
                 <div key={i} className="flex gap-3 items-start">

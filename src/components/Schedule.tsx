@@ -186,7 +186,7 @@ export default function Schedule() {
                         <option value="">Selecione um tratamento</option>
                         {services.map((s) => (
                           <option key={s.id} value={s.id}>
-                            {s.title} — {s.price}
+                            {s.title}
                           </option>
                         ))}
                       </select>
@@ -200,26 +200,18 @@ export default function Schedule() {
                             const svc = services.find((s) => s.id === selectedService);
                             return svc ? (
                               <div>
-                                <div className="flex justify-between items-start mb-2">
-                                  <span
-                                    className="text-lg font-light text-rose-700"
-                                    style={{ fontFamily: "var(--font-cormorant), serif" }}
-                                  >
-                                    {svc.title}
-                                  </span>
-                                  <span
-                                    className="text-rose-500 font-light"
-                                    style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "18px" }}
-                                  >
-                                    {svc.price}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-1.5 text-text-muted">
-                                  <Clock size={11} />
-                                  <span className="text-[11px]" style={{ fontFamily: "var(--font-lato), sans-serif" }}>
-                                    {svc.duration}
-                                  </span>
-                                </div>
+                                <span
+                                  className="text-lg font-light text-rose-700 block mb-2"
+                                  style={{ fontFamily: "var(--font-cormorant), serif" }}
+                                >
+                                  {svc.title}
+                                </span>
+                                <p
+                                  className="text-[12px] font-light leading-5"
+                                  style={{ fontFamily: "var(--font-lato), sans-serif", color: "#9C7A80" }}
+                                >
+                                  {svc.description}
+                                </p>
                               </div>
                             ) : null;
                           })()}
