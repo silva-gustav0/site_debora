@@ -8,32 +8,32 @@ const contactInfo = [
   {
     icon: MapPin,
     label: "Endereço",
-    value: "Rua Yilidio Figueiredo, 468\nCentro de Perus — São Paulo, SP",
-    link: "https://maps.google.com/?q=Rua+Yilidio+Figueiredo+468+Centro+de+Perus+São+Paulo",
+    value: "Av. Paulista, 1337 - Bela Vista\nSão Paulo — SP",
+    link: "https://maps.google.com/?q=Av.+Paulista+1337+Bela+Vista+São+Paulo",
   },
   {
     icon: Phone,
-    label: "Telefone & WhatsApp",
-    value: "(11) 98427-1714",
-    link: "https://wa.me/5511984271714",
+    label: "Telefone",
+    value: "(11) 6578-2211",
+    link: "tel:+551165782211",
   },
   {
     icon: Mail,
     label: "E-mail",
-    value: "contato@clinicadebora.com.br",
-    link: "mailto:contato@clinicadebora.com.br",
+    value: "contato@talissaestetica.com.br",
+    link: "mailto:contato@talissaestetica.com.br",
   },
   {
     icon: Clock,
     label: "Horário de Atendimento",
-    value: "Seg–Sex: 9h às 19h\nSáb: 9h às 14h",
+    value: "Seg–Sex: 9h às 20h\nSáb: 9h às 16h\nDom: Fechado",
     link: null,
   },
   {
     icon: AtSign,
     label: "Instagram",
-    value: "@deborasilvaesteticaebemestar",
-    link: "https://instagram.com/deborasilvaesteticaebemestar",
+    value: "@talissaesteticaebemestar",
+    link: "https://instagram.com/talissaesteticaebemestar",
   },
 ];
 
@@ -141,10 +141,10 @@ export default function Contact() {
                     className="text-sm font-light text-rose-700"
                     style={{ fontFamily: "var(--font-cormorant), serif" }}
                   >
-                    Rua Yilidio Figueiredo, 468<br />Centro de Perus — SP
+                    Av. Paulista, 1337<br />Bela Vista — São Paulo, SP
                   </p>
                   <a
-                    href="https://maps.google.com/?q=Rua+Yilidio+Figueiredo+468+Centro+de+Perus+São+Paulo"
+                    href="https://maps.google.com/?q=Av.+Paulista+1337+Bela+Vista+São+Paulo"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[10px] tracking-widest uppercase hover:opacity-70 mt-1 block"

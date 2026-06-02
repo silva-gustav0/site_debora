@@ -29,8 +29,8 @@ const catColors: Record<string, string> = {
 };
 
 export const metadata = {
-  title: "Blog | Clínica Débora",
-  description: "Dicas de beleza, cuidados com a pele e bem-estar do blog da Clínica Débora.",
+  title: "Blog | Talissa Estética e Bem Estar",
+  description: "Dicas de beleza, cuidados com a pele e bem-estar do blog da Talissa Estética e Bem Estar.",
 };
 
 export default function BlogPage() {

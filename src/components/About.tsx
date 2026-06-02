@@ -6,7 +6,7 @@ const pillars = [
   {
     icon: Heart,
     title: "Missão",
-    text: "Proporcionar experiências transformadoras de beleza e bem-estar, unindo ciência estética e cuidado humano para realçar a beleza autêntica de cada cliente.",
+    text: "Promover bem-estar, autoestima e qualidade de vida às mulheres por meio de serviços de estética e relaxamento realizados com profissionalismo, segurança e atendimento humanizado.",
     gradient: "linear-gradient(135deg,#C8737A,#8B3A42)",
     bg: "linear-gradient(135deg,#FFF5F7,#FDFAF7)",
     border: "#F9C7CE",
@@ -14,7 +14,7 @@ const pillars = [
   {
     icon: Eye,
     title: "Visão",
-    text: "Ser a clínica de estética de referência em atendimento premium, reconhecida pela excelência técnica, ambiente acolhedor e resultados que superam expectativas.",
+    text: "Ser referência local em estética e bem-estar feminino, reconhecida pela excelência no atendimento, ambiente acolhedor e fidelização das clientes.",
     gradient: "linear-gradient(135deg,#C9973A,#A87B25)",
     bg: "linear-gradient(135deg,#FFF8E7,#FDFAF7)",
     border: "#E8C882",
@@ -22,7 +22,7 @@ const pillars = [
   {
     icon: Diamond,
     title: "Valores",
-    text: "Ética e transparência em cada atendimento. Compromisso com a excelência, respeito à individualidade e dedicação contínua à evolução profissional.",
+    text: "Ética, empatia e atendimento humanizado em cada sessão. Compromisso com a excelência, respeito à individualidade e dedicação ao bem-estar feminino.",
     gradient: "linear-gradient(135deg,#C8737A,#C9973A)",
     bg: "linear-gradient(135deg,#FFF5F7,#FFF8E7)",
     border: "#F4A6B0",
@@ -45,7 +45,7 @@ export default function About() {
             >
               Sobre a{" "}
               <em className="italic font-normal" style={{ color: "#C8737A" }}>
-                Clínica Débora
+                Talissa
               </em>
             </h2>
           </AnimateIn>
@@ -59,12 +59,13 @@ export default function About() {
           {/* Photo */}
           <AnimateIn animation="left" delay={100}>
             <div className="relative">
-              <div className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden shadow-[0_24px_70px_rgba(200,115,122,0.18)]">
+              <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-[0_24px_70px_rgba(200,115,122,0.18)]">
                 <Image
-                  src="https://images.unsplash.com/photo-1560750588-73207b1ef5b8?auto=format&fit=crop&w=800&q=80"
-                  alt="Tratamento estético na Clínica Débora"
+                  src="/images/talissa/img4.png"
+                  alt="Espaço da Talissa Estética e Bem Estar"
                   fill
-                  className="object-cover"
+                  className="object-contain"
+                  style={{ background: "#FDFAF7" }}
                   sizes="(max-width: 1024px) 100vw, 50vw"
                 />
                 <div
@@ -86,13 +87,13 @@ export default function About() {
                   className="italic font-light leading-6"
                   style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "17px", color: "#8B3A42" }}
                 >
-                  "Cada cliente merece sair se sentindo a melhor versão de si mesma."
+                  "Cada mulher merece um espaço de cuidado, acolhimento e bem-estar verdadeiros."
                 </p>
                 <p
                   className="mt-2 uppercase tracking-widest"
                   style={{ fontFamily: "var(--font-lato), sans-serif", fontSize: "9px", color: "#C9973A" }}
                 >
-                  Débora Silva — Fundadora
+                  Talissa — Estética &amp; Bem Estar
                 </p>
               </div>
 
@@ -115,29 +116,27 @@ export default function About() {
                 className="text-base font-light leading-8 mb-6"
                 style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B4C52" }}
               >
-                Fundada há mais de 15 anos por Débora Silva, a Clínica Débora
-                nasceu do sonho de criar um espaço onde cada cliente se sinta
-                verdadeiramente cuidada. Localizada no coração de São Paulo,
-                nossa clínica combina técnicas estéticas avançadas com um
-                ambiente de acolhimento e sofisticação.
+                A Talissa Estética e Bem Estar é uma clínica de prestação de
+                serviços estéticos dedicada exclusivamente ao público feminino.
+                Nosso espaço foi pensado para oferecer conforto, acolhimento,
+                segurança e experiências únicas de autocuidado em São Paulo.
               </p>
               <p
                 className="text-base font-light leading-8 mb-8"
                 style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B4C52" }}
               >
-                Nossa equipe de profissionais altamente especializadas se dedica
-                a oferecer tratamentos personalizados que respeitam a
-                individualidade de cada pele e corpo. Utilizamos apenas produtos
-                de alta performance e equipamentos de última geração para
-                garantir resultados seguros e duradouros.
+                Nossa equipe de profissionais dedicadas e capacitadas está
+                comprometida com a excelência no atendimento. Trabalhamos com
+                ética, empatia e atendimento humanizado, proporcionando
+                experiências únicas de cuidado, autoestima e bem-estar.
               </p>
 
               <div className="flex flex-col gap-4">
                 {[
-                  "Profissionais com certificação internacional",
-                  "Produtos veganos e livres de crueldade animal",
-                  "Protocolo de higiene e segurança certificado",
-                  "Ambiente adaptado para portadores de necessidades especiais",
+                  "Atendimento exclusivo ao público feminino",
+                  "Profissionais certificadas e em constante atualização",
+                  "Protocolos de higiene e segurança rigorosos",
+                  "Ambiente moderno, sofisticado e acolhedor",
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <div

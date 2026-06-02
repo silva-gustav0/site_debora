@@ -13,10 +13,7 @@ const navLinks = [
 
 const servicesList = [
   "Limpeza de Pele",
-  "Microagulhamento",
-  "Peeling Químico",
   "Drenagem Linfática",
-  "Ventosaterapia",
   "Massagem Relaxante",
 ];
 
@@ -41,13 +38,13 @@ export default function Footer() {
                 className="text-2xl font-light tracking-wide text-rose-200 mb-0.5"
                 style={{ fontFamily: "var(--font-cormorant), serif" }}
               >
-                Clínica Débora
+                Talissa
               </div>
               <div
                 className="text-[9px] tracking-[0.3em] uppercase"
                 style={{ fontFamily: "var(--font-lato), sans-serif", color: "#C9973A" }}
               >
-                Estética &amp; Bem-Estar
+                Estética &amp; Bem Estar
               </div>
             </div>
             <div
@@ -64,9 +61,9 @@ export default function Footer() {
             {/* Social */}
             <div className="flex gap-3">
               {[
-                { icon: AtSign, href: "https://instagram.com/deborasilvaesteticaebemestar", label: "Instagram" },
-                { icon: Phone, href: "https://wa.me/5511984271714", label: "WhatsApp" },
-                { icon: Mail, href: "mailto:contato@clinicadebora.com.br", label: "Email" },
+                { icon: AtSign, href: "https://instagram.com/talissaesteticaebemestar", label: "Instagram" },
+                { icon: Phone, href: "tel:+551165782211", label: "Telefone" },
+                { icon: Mail, href: "mailto:contato@talissaestetica.com.br", label: "Email" },
               ].map((s) => (
                 <a
                   key={s.label}
@@ -151,9 +148,9 @@ export default function Footer() {
             </h4>
             <div className="flex flex-col gap-4">
               {[
-                { icon: MapPin, text: "Rua Yilidio Figueiredo, 468\nCentro de Perus — São Paulo, SP" },
-                { icon: Phone, text: "(11) 98427-1714\nSeg–Sex 9h–19h | Sáb 9h–14h" },
-                { icon: Mail, text: "contato@clinicadebora.com.br" },
+                { icon: MapPin, text: "Av. Paulista, 1337 - Bela Vista\nSão Paulo — SP" },
+                { icon: Phone, text: "(11) 6578-2211\nSeg–Sex 9h–20h | Sáb 9h–16h" },
+                { icon: Mail, text: "contato@talissaestetica.com.br" },
               ].map((item, i) => (
                 <div key={i} className="flex gap-3 items-start">
                   <item.icon
@@ -182,7 +179,7 @@ export default function Footer() {
             className="text-[11px] font-light text-rose-200/40"
             style={{ fontFamily: "var(--font-lato), sans-serif" }}
           >
-            © {new Date().getFullYear()} Clínica Débora. Todos os direitos reservados.
+            © {new Date().getFullYear()} Talissa Estética e Bem Estar. Todos os direitos reservados.
           </p>
           <p
             className="flex items-center gap-1.5 text-[11px] font-light text-rose-200/40"

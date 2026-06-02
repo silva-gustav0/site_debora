@@ -1,97 +1,36 @@
 "use client";
 
-import { useState } from "react";
-import { Sparkles, Waves, Heart } from "lucide-react";
 import AnimateIn from "./AnimateIn";
-import { services, categoryLabels, type Service } from "@/lib/data";
+import { services } from "@/lib/data";
+import { Sparkles, Waves, Heart, ArrowRight, Tag } from "lucide-react";
 
-const CATEGORIES = ["all", "facial", "corporal", "terapias"] as const;
-
-const catIcons: Record<string, React.ElementType> = {
-  all:      Sparkles,
-  facial:   Sparkles,
-  corporal: Waves,
-  terapias: Heart,
+const serviceConfig: Record<string, {
+  Icon: React.ElementType;
+  color: string;
+  bg: string;
+  border: string;
+}> = {
+  "limpeza-pele": {
+    Icon: Sparkles,
+    color: "#C8737A",
+    bg: "#FFF5F7",
+    border: "#F9C7CE",
+  },
+  "drenagem-linfatica": {
+    Icon: Waves,
+    color: "#C9973A",
+    bg: "#FFF8E7",
+    border: "#E8C882",
+  },
+  "massagem-relaxante": {
+    Icon: Heart,
+    color: "#6A7BC9",
+    bg: "#F5F7FF",
+    border: "#C4CAE8",
+  },
 };
-
-const catColors: Record<string, { bg: string; text: string; border: string }> = {
-  facial:   { bg: "#FFF5F7",  text: "#C8737A",  border: "#F9C7CE"  },
-  corporal: { bg: "#FFF8E7",  text: "#C9973A",  border: "#E8C882"  },
-  terapias: { bg: "#F5F7FF",  text: "#6A7BC9",  border: "#C4CAE8"  },
-};
-
-function ServiceCard({ s, index }: { s: Service; index: number }) {
-  const colors = catColors[s.category];
-  return (
-    <AnimateIn animation="up" delay={Math.min(index * 80, 600) as any}>
-      <div
-        className="hover-lift relative rounded-xl p-6 flex flex-col h-full group cursor-default"
-        style={{
-          background: "white",
-          border: "1px solid #F9C7CE",
-          boxShadow: "0 2px 16px rgba(200,115,122,0.06)",
-        }}
-      >
-        {s.highlight && (
-          <div
-            className="absolute top-4 right-4 px-2 py-0.5 rounded-full text-[9px] tracking-widest uppercase"
-            style={{
-              background: "linear-gradient(135deg,#C9973A,#E8C882)",
-              color: "white",
-              fontFamily: "var(--font-lato), sans-serif",
-            }}
-          >
-            Destaque
-          </div>
-        )}
-
-        {/* Category badge */}
-        <div
-          className="inline-flex items-center gap-1.5 w-fit px-2.5 py-1 rounded-full mb-4"
-          style={{ background: colors.bg, border: `1px solid ${colors.border}` }}
-        >
-          <span
-            className="text-[9.5px] tracking-widest uppercase"
-            style={{ fontFamily: "var(--font-lato), sans-serif", color: colors.text }}
-          >
-            {categoryLabels[s.category]}
-          </span>
-        </div>
-
-        <h3
-          className="text-xl font-light text-rose-800 mb-2 leading-snug"
-          style={{ fontFamily: "var(--font-cormorant), serif" }}
-        >
-          {s.title}
-        </h3>
-
-        <p
-          className="text-sm font-light leading-6.5 text-text-muted flex-1 mb-5"
-          style={{ fontFamily: "var(--font-lato), sans-serif" }}
-        >
-          {s.description}
-        </p>
-
-        <div className="pt-4 border-t border-rose-50">
-          <a
-            href="#agendamento"
-            className="text-[11px] tracking-widest uppercase flex items-center gap-1.5 hover:gap-3 transition-all duration-200"
-            style={{ fontFamily: "var(--font-lato), sans-serif", color: "#C8737A" }}
-          >
-            Agendar este serviço →
-          </a>
-        </div>
-      </div>
-    </AnimateIn>
-  );
-}
 
 export default function Services() {
-  const [active, setActive] = useState<(typeof CATEGORIES)[number]>("all");
-
-  const filtered =
-    active === "all" ? services : services.filter((s) => s.category === active);
-
   return (
     <section
       id="servicos"
@@ -123,59 +62,108 @@ export default function Services() {
               className="text-base font-light text-text-secondary max-w-lg leading-7"
               style={{ fontFamily: "var(--font-lato), sans-serif" }}
             >
-              Tratamentos cuidadosamente desenvolvidos para realçar sua beleza
-              natural e promover seu bem-estar de forma integral.
+              Atendimentos personalizados para cuidar da beleza, relaxamento e bem-estar feminino.
             </p>
           </AnimateIn>
         </div>
 
-        {/* Tabs */}
-        <AnimateIn animation="up" delay={200}>
-          <div className="flex flex-wrap justify-center gap-2 mb-12">
-            {CATEGORIES.map((cat) => {
-              const Icon = catIcons[cat];
-              const isActive = active === cat;
-              return (
-                <button
-                  key={cat}
-                  onClick={() => setActive(cat)}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full transition-all duration-300 text-[11px] tracking-[0.12em] uppercase"
+        {/* Service cards */}
+        <div className="grid sm:grid-cols-3 gap-7 mb-14">
+          {services.map((s, i) => {
+            const cfg = serviceConfig[s.id];
+            const Icon = cfg?.Icon ?? Sparkles;
+            return (
+              <AnimateIn key={s.id} animation="up" delay={i * 120 as any}>
+                <div
+                  className="hover-lift rounded-2xl p-8 flex flex-col h-full"
                   style={{
-                    fontFamily: "var(--font-lato), sans-serif",
-                    background: isActive
-                      ? "linear-gradient(135deg,#C8737A,#8B3A42)"
-                      : "white",
-                    color: isActive ? "white" : "#6B4C52",
-                    border: isActive ? "1.5px solid #C8737A" : "1.5px solid #F4C2C2",
-                    boxShadow: isActive
-                      ? "0 4px 16px rgba(200,115,122,0.3)"
-                      : "none",
+                    background: "white",
+                    border: `1px solid ${cfg?.border ?? "#F9C7CE"}`,
+                    boxShadow: "0 2px 24px rgba(200,115,122,0.07)",
                   }}
                 >
-                  <Icon size={12} />
-                  {cat === "all"
-                    ? "Todos"
-                    : categoryLabels[cat as keyof typeof categoryLabels]}
-                </button>
-              );
-            })}
-          </div>
-        </AnimateIn>
+                  <div
+                    className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6"
+                    style={{ background: cfg?.bg ?? "#FFF5F7", border: `1px solid ${cfg?.border ?? "#F9C7CE"}` }}
+                  >
+                    <Icon size={22} style={{ color: cfg?.color ?? "#C8737A" }} />
+                  </div>
 
-        {/* Cards grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {filtered.map((s, i) => (
-            <ServiceCard key={s.id} s={s} index={i} />
-          ))}
+                  <h3
+                    className="text-2xl font-light mb-3"
+                    style={{ fontFamily: "var(--font-cormorant), serif", color: "#4A1820" }}
+                  >
+                    {s.title}
+                  </h3>
+
+                  <p
+                    className="text-sm font-light leading-7 text-text-muted flex-1 mb-6"
+                    style={{ fontFamily: "var(--font-lato), sans-serif" }}
+                  >
+                    {s.description}
+                  </p>
+
+                  <a
+                    href="#agendamento"
+                    className="flex items-center gap-2 text-[11px] tracking-widest uppercase hover:gap-3 transition-all duration-200"
+                    style={{ fontFamily: "var(--font-lato), sans-serif", color: cfg?.color ?? "#C8737A" }}
+                  >
+                    Agendar <ArrowRight size={11} />
+                  </a>
+                </div>
+              </AnimateIn>
+            );
+          })}
         </div>
 
-        {/* CTA */}
-        <AnimateIn animation="up" delay={400}>
-          <div className="text-center mt-14">
-            <a href="#agendamento" className="btn-primary">
-              <Sparkles size={14} />
-              Agendar um Serviço
-            </a>
+        {/* Promo banner */}
+        <AnimateIn animation="up" delay={300}>
+          <div
+            className="rounded-2xl p-8 sm:p-10 flex flex-col sm:flex-row items-center justify-between gap-6"
+            style={{
+              background: "linear-gradient(135deg, #2C1A1E 0%, #3D2328 100%)",
+              border: "1px solid rgba(201,151,58,0.3)",
+            }}
+          >
+            <div className="flex items-start gap-4">
+              <div
+                className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: "linear-gradient(135deg,#C9973A,#E8C882)" }}
+              >
+                <Tag size={18} className="text-white" />
+              </div>
+              <div>
+                <p
+                  className="text-[10px] tracking-[0.3em] uppercase mb-1.5"
+                  style={{ fontFamily: "var(--font-lato), sans-serif", color: "#C9973A" }}
+                >
+                  Promoção de Inauguração
+                </p>
+                <h3
+                  className="text-2xl font-light text-white mb-1"
+                  style={{ fontFamily: "var(--font-cormorant), serif" }}
+                >
+                  Limpeza de Pele + 10 min Massagem Relaxante
+                </h3>
+                <p
+                  className="text-sm font-light"
+                  style={{ fontFamily: "var(--font-lato), sans-serif", color: "rgba(255,255,255,0.55)" }}
+                >
+                  Tratamento completo a preço especial de inauguração
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-col items-center sm:items-end gap-3 flex-shrink-0">
+              <div
+                className="text-4xl font-light leading-none"
+                style={{ fontFamily: "var(--font-cormorant), serif", color: "#E8C882" }}
+              >
+                R$ 300,00
+              </div>
+              <a href="#agendamento" className="btn-primary">
+                Aproveitar Oferta <ArrowRight size={13} />
+              </a>
+            </div>
           </div>
         </AnimateIn>
       </div>

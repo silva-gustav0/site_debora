@@ -50,7 +50,7 @@ export default function Hero() {
                 style={{ background: "rgba(255,245,247,0.8)" }}
               >
                 <Star size={11} className="text-gold-500 fill-gold-300" style={{ color: "#C9973A" }} />
-                <span className="section-label">Clínica Premium de Estética</span>
+                <span className="section-label">Exclusivo ao Público Feminino</span>
               </div>
             </AnimateIn>
 
@@ -79,9 +79,9 @@ export default function Hero() {
                   color: "#6B4C52",
                 }}
               >
-                Transformamos cuidados estéticos em experiências sensoriais
-                únicas. Do tratamento facial ao ritual de SPA, cada visita é
-                pensada para realçar sua beleza natural e renovar sua energia.
+                Um espaço criado especialmente para a mulher que se cuida. Da
+                limpeza de pele à massagem relaxante, cada atendimento é
+                personalizado com técnica, segurança e acolhimento genuíno.
               </p>
             </AnimateIn>
 
@@ -99,9 +99,9 @@ export default function Hero() {
             <AnimateIn animation="up" delay={500}>
               <div className="flex gap-10 mt-12 pt-10 border-t border-rose-100">
                 {[
-                  { value: "15+", label: "Anos de experiência" },
-                  { value: "2.400+", label: "Clientes atendidas" },
-                  { value: "12", label: "Tratamentos exclusivos" },
+                  { value: "3", label: "Serviços especializados" },
+                  { value: "100%", label: "Satisfação das clientes" },
+                  { value: "Excl.", label: "Público feminino" },
                 ].map((s) => (
                   <div key={s.label}>
                     <div
@@ -131,7 +131,7 @@ export default function Hero() {
               >
                 <Image
                   src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80"
-                  alt="Tratamento estético na Clínica Débora"
+                  alt="Tratamento estético na Talissa Estética e Bem Estar"
                   fill
                   priority
                   className="object-cover"
@@ -187,25 +187,20 @@ export default function Hero() {
                 <div className="gold-line mb-3" />
                 <div
                   className="font-light leading-tight mb-1"
-                  style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "20px", color: "#C9973A" }}
+                  style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "16px", color: "#C9973A" }}
                 >
-                  Promoção
+                  Inauguração
                 </div>
                 <div
                   className="uppercase tracking-widest mb-2"
-                  style={{ fontFamily: "var(--font-lato), sans-serif", fontSize: "9px", color: "#9C7A80" }}
+                  style={{ fontFamily: "var(--font-lato), sans-serif", fontSize: "8px", color: "#9C7A80" }}
                 >
-                  Limpeza de Pele
+                  Limpeza + Massagem
                 </div>
                 <div
                   style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "22px", color: "#C8737A", fontWeight: 400 }}
                 >
-                  R$ 99,90
-                </div>
-                <div
-                  style={{ fontFamily: "var(--font-lato), sans-serif", fontSize: "10px", color: "#9C7A80", textDecoration: "line-through" }}
-                >
-                  R$ 120,00
+                  R$ 300,00
                 </div>
               </div>
 
@@ -228,7 +223,7 @@ export default function Hero() {
                 <div
                   style={{ fontFamily: "var(--font-lato), sans-serif", fontSize: "11px", color: "#9C7A80", marginTop: "4px" }}
                 >
-                  Day SPA Completo
+                  Massagem Relaxante
                 </div>
               </div>
 

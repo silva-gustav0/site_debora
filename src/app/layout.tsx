@@ -18,13 +18,13 @@ const lato = Lato({
 });
 
 export const metadata: Metadata = {
-  title: "Clínica Débora | Estética & Bem-Estar",
+  title: "Talissa Estética e Bem Estar",
   description:
-    "Sua clínica de estética em São Paulo. Tratamentos faciais, corporais, SPA e bem-estar com profissionais especializadas. Agende sua consulta.",
-  keywords: "clínica estética, tratamento facial, massagem, spa, bem-estar, limpeza de pele",
+    "Clínica de estética exclusiva ao público feminino em São Paulo. Limpeza de pele, drenagem linfática, massagem relaxante. Promoção de inauguração. Agende sua consulta.",
+  keywords: "estética feminina, limpeza de pele, drenagem linfática, massagem relaxante, bem-estar, Av. Paulista",
   openGraph: {
-    title: "Clínica Débora | Estética & Bem-Estar",
-    description: "Sua beleza, nossa arte. Tratamentos premium em ambiente acolhedor.",
+    title: "Talissa Estética e Bem Estar",
+    description: "Sua beleza, nossa arte. Estética exclusiva ao público feminino.",
     type: "website",
   },
 };

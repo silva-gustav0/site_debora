@@ -47,7 +47,7 @@ A limpeza profissional realizada mensalmente ou bimestralmente, dependendo do ti
 
 **O que esperar do tratamento?**
 
-Na Clínica Débora, o protocolo de limpeza de pele começa com uma análise individualizada da sua pele. Cada etapa é personalizada: higienização suave, esfoliação, vapor, extração de impurezas, mask hidratante e finalização com protetor solar.
+Na Talissa Estética e Bem Estar, o protocolo de limpeza de pele começa com uma análise individualizada da sua pele. Cada etapa é personalizada: higienização suave, esfoliação, vapor, extração de impurezas, mask hidratante e finalização com protetor solar.
 
 O resultado imediato é uma pele visivelmente mais limpa, suave e radiante. Com a continuidade do tratamento, a melhora é progressiva e duradoura.
 
@@ -77,7 +77,7 @@ Embora seja amplamente conhecida pelos benefícios estéticos — como redução
 
 As manobras são suaves e rítmicas, aplicadas em direção aos linfonodos (gânglios). O movimento estimula a contração dos vasos linfáticos, acelerando o transporte da linfa e consequentemente a eliminação de líquidos retidos e toxinas.
 
-Na Clínica Débora, cada sessão é conduzida por profissionais certificadas, com protocolo adaptado às necessidades específicas de cada cliente.
+Na Talissa Estética e Bem Estar, cada sessão é conduzida por profissionais certificadas, com protocolo adaptado às necessidades específicas de cada cliente.
 
 **Indicações**
 
@@ -96,7 +96,7 @@ Ao longo deste conteúdo, compartilhamos conhecimentos técnicos de forma acess�
 
 Cuidar da aparência vai muito além da vaidade. É um ato de amor próprio que impacta diretamente na autoestima, na saúde mental e na forma como nos relacionamos com o mundo.
 
-Na Clínica Débora, acreditamos que cada pessoa merece se sentir bem consigo mesma. Por isso, nossos tratamentos são pensados de forma integrada, considerando não apenas o aspecto físico, mas o bem-estar emocional de cada cliente.
+Na Talissa Estética e Bem Estar, acreditamos que cada pessoa merece se sentir bem consigo mesma. Por isso, nossos tratamentos são pensados de forma integrada, considerando não apenas o aspecto físico, mas o bem-estar emocional de cada cliente.
 
 **Próximos passos**
 
@@ -111,7 +111,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const post = blogPosts.find((p) => p.slug === slug);
   if (!post) return { title: "Artigo não encontrado" };
   return {
-    title: `${post.title} | Blog Clínica Débora`,
+    title: `${post.title} | Blog Talissa Estética`,
     description: post.excerpt,
   };
 }

@@ -46,13 +46,13 @@ export default function Navbar() {
                 className="text-[22px] font-semibold tracking-wide"
                 style={{ fontFamily: "var(--font-cormorant), serif", color: "#8B3A42" }}
               >
-                Clínica Débora
+                Talissa
               </span>
               <span
                 className="text-[9px] font-light tracking-[0.3em] uppercase transition-opacity group-hover:opacity-70"
                 style={{ fontFamily: "var(--font-lato), sans-serif", color: "#C9973A" }}
               >
-                Estética &amp; Bem-Estar
+                Estética &amp; Bem Estar
               </span>
             </a>
 
@@ -100,7 +100,7 @@ export default function Navbar() {
               className="text-[22px] font-semibold tracking-wide"
               style={{ fontFamily: "var(--font-cormorant), serif", color: "#8B3A42" }}
             >
-              Clínica Débora
+              Talissa
             </span>
             <button
               className="p-2"
