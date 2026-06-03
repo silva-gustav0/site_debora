@@ -77,9 +77,9 @@ export default function About() {
                 />
               </div>
 
-              {/* Floating quote card */}
+              {/* Quote card below image */}
               <div
-                className="absolute bottom-6 left-0 right-0 mx-4 bg-white/92 backdrop-blur-md rounded-xl p-5 shadow-lg"
+                className="mt-4 mx-1 bg-white/92 backdrop-blur-md rounded-xl p-5 shadow-lg"
                 style={{ border: "1px solid #F9C7CE" }}
               >
                 <div className="gold-line mb-3" />
