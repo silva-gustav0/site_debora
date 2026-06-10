@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import { Menu, X } from "lucide-react";
 
 const NAV_LINKS = [
@@ -41,19 +42,15 @@ export default function Navbar() {
           <div className="flex items-center justify-between h-[72px]">
 
             {/* Logo */}
-            <a href={href("inicio")} className="flex flex-col leading-none group">
-              <span
-                className="text-[22px] font-semibold tracking-wide"
-                style={{ fontFamily: "var(--font-cormorant), serif", color: "#8B3A42" }}
-              >
-                Talissa
-              </span>
-              <span
-                className="text-[9px] font-light tracking-[0.3em] uppercase transition-opacity group-hover:opacity-70"
-                style={{ fontFamily: "var(--font-lato), sans-serif", color: "#C9973A" }}
-              >
-                Estética &amp; Bem Estar
-              </span>
+            <a href={href("inicio")} className="flex items-center group">
+              <Image
+                src="/images/talissa/logo.png"
+                alt="Talissa Estética e Bem Estar"
+                width={974}
+                height={414}
+                priority
+                className="h-12 w-auto transition-opacity group-hover:opacity-80"
+              />
             </a>
 
             {/* Desktop nav */}
@@ -96,12 +93,13 @@ export default function Navbar() {
             className="flex items-center justify-between px-6 h-[72px] border-b"
             style={{ borderColor: "#FFE8ED" }}
           >
-            <span
-              className="text-[22px] font-semibold tracking-wide"
-              style={{ fontFamily: "var(--font-cormorant), serif", color: "#8B3A42" }}
-            >
-              Talissa
-            </span>
+            <Image
+              src="/images/talissa/logo.png"
+              alt="Talissa Estética e Bem Estar"
+              width={974}
+              height={414}
+              className="h-10 w-auto"
+            />
             <button
               className="p-2"
               style={{ color: "#8B3A42" }}

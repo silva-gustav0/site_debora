@@ -3,7 +3,11 @@
     "allow": [
       "Bash(npm run *)",
       "WebFetch(domain:images.unsplash.com)",
-      "Bash(python)"
+      "Bash(python)",
+      "Bash(cp \"C:\\\\Users\\\\gusta\\\\.claude\\\\image-cache\\\\841ec56e-dab9-47aa-b508-100dcb5fbd59\\\\1.png\" \"C:\\\\git\\\\clinica_debora\\\\public\\\\images\\\\talissa\\\\logo.png\")",
+      "Bash(python -c \"from PIL import Image; im=Image.open\\(r'C:\\\\git\\\\clinica_debora\\\\public\\\\images\\\\talissa\\\\logo.png'\\); print\\(im.mode, im.size\\)\")",
+      "Bash(npx next *)",
+      "Bash(npx tsc *)"
     ]
   }
 }
