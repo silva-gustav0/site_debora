@@ -73,7 +73,7 @@ export default function Services() {
             const cfg = serviceConfig[s.id];
             const Icon = cfg?.Icon ?? Sparkles;
             return (
-              <AnimateIn key={s.id} animation="up" delay={i * 120 as any}>
+              <AnimateIn key={s.id} animation="up" delay={i * 120}>
                 <div
                   className="hover-lift rounded-2xl p-8 flex flex-col h-full"
                   style={{

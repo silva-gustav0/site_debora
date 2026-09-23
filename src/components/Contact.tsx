@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import AnimateIn from "./AnimateIn";
-import { MapPin, Phone, Mail, Clock, AtSign, Send, CheckCircle2 } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, AtSign, Send, CheckCircle2, AlertCircle } from "lucide-react";
+import { sendContactMessage } from "@/app/actions/public";
+import { maskPhone } from "@/lib/format";
 
 const contactInfo = [
   {
@@ -38,14 +40,19 @@ const contactInfo = [
 ];
 
 export default function Contact() {
-  const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", message: "", website: "" });
   const [sent, setSent] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, startTransition] = useTransition();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setTimeout(() => { setLoading(false); setSent(true); }, 1200);
+    setError(null);
+    startTransition(async () => {
+      const r = await sendContactMessage(form);
+      if (r.ok) setSent(true);
+      else setError(r.message);
+    });
   };
 
   return (
@@ -183,7 +190,7 @@ export default function Contact() {
                   Obrigada pelo seu contato. Retornaremos em até 24 horas.
                 </p>
                 <button
-                  onClick={() => { setSent(false); setForm({ name:"", email:"", phone:"", message:"" }); }}
+                  onClick={() => { setSent(false); setForm({ name:"", email:"", phone:"", message:"", website:"" }); }}
                   className="btn-outline mt-6"
                 >
                   Nova Mensagem
@@ -228,7 +235,7 @@ export default function Contact() {
                       placeholder="(11) 99999-9999"
                       className="form-input"
                       value={form.phone}
-                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                      onChange={(e) => setForm({ ...form, phone: maskPhone(e.target.value) })}
                     />
                   </div>
                 </div>
@@ -266,6 +273,18 @@ export default function Contact() {
                     onChange={(e) => setForm({ ...form, message: e.target.value })}
                   />
                 </div>
+
+                <input
+                  type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true"
+                  className="hidden" value={form.website}
+                  onChange={(e) => setForm({ ...form, website: e.target.value })}
+                />
+
+                {error && (
+                  <p className="mb-5 flex items-start gap-2 rounded-lg px-4 py-3 text-sm" style={{ background: "#FFF1F1", color: "#8B3A42", border: "1px solid #F4C2C2" }} role="alert">
+                    <AlertCircle size={16} className="mt-0.5 shrink-0" /> {error}
+                  </p>
+                )}
 
                 <button
                   type="submit"

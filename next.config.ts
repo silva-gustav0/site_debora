@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // Fotos do prontuário são comprimidas no navegador; o limite da Vercel é 4,5 MB.
+    serverActions: { bodySizeLimit: "4mb" },
+  },
   images: {
     remotePatterns: [
       {

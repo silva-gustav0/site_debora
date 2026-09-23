@@ -186,6 +186,8 @@ export default function Footer() {
             style={{ fontFamily: "var(--font-lato), sans-serif" }}
           >
             Feito com <Heart size={10} className="text-rose-500 fill-rose-500" /> em São Paulo
+            <span aria-hidden="true" className="mx-1">·</span>
+            <a href="/painel" className="hover:text-rose-200 transition-colors">Área da equipe</a>
           </p>
         </div>
       </div>

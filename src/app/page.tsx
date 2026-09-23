@@ -7,8 +7,14 @@ import Schedule from "@/components/Schedule";
 import BlogSection from "@/components/BlogSection";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
+import { getPublicConfig } from "@/app/actions/public";
 
-export default function Home() {
+// Serviços e horários vêm do banco; o painel revalida ao salvar, e isto é a rede de segurança.
+export const revalidate = 300;
+
+export default async function Home() {
+  const config = await getPublicConfig();
+
   return (
     <>
       <Navbar />
@@ -17,7 +23,7 @@ export default function Home() {
         <About />
         <Services />
         <Team />
-        <Schedule />
+        <Schedule config={config} />
         <BlogSection />
         <Contact />
       </main>

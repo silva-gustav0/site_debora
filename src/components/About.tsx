@@ -87,7 +87,7 @@ export default function About() {
                   className="italic font-light leading-6"
                   style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "17px", color: "#8B3A42" }}
                 >
-                  "Cada mulher merece um espaço de cuidado, acolhimento e bem-estar verdadeiros."
+                  “Cada mulher merece um espaço de cuidado, acolhimento e bem-estar verdadeiros.”
                 </p>
                 <p
                   className="mt-2 uppercase tracking-widest"
@@ -159,7 +159,7 @@ export default function About() {
         {/* Mission / Vision / Values */}
         <div className="grid md:grid-cols-3 gap-6">
           {pillars.map((p, i) => (
-            <AnimateIn key={p.title} animation="up" delay={i * 150 as any}>
+            <AnimateIn key={p.title} animation="up" delay={i * 150}>
               <div
                 className="hover-lift p-8 rounded-2xl relative overflow-hidden group"
                 style={{ background: p.bg, border: `1px solid ${p.border}` }}

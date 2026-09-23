@@ -153,7 +153,7 @@ export default function BlogSection() {
           {/* Secondary posts */}
           <div className="lg:col-span-2 flex flex-col gap-5">
             {rest.slice(0, 4).map((post, i) => (
-              <AnimateIn key={post.slug} animation="right" delay={i * 100 as any}>
+              <AnimateIn key={post.slug} animation="right" delay={i * 100}>
                 <Link
                   href={`/blog/${post.slug}`}
                   className="group flex gap-4 rounded-xl overflow-hidden hover-lift p-4"
