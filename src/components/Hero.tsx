@@ -1,8 +1,13 @@
 import Image from "next/image";
 import AnimateIn from "./AnimateIn";
 import { ArrowRight, Star } from "lucide-react";
+import { brl } from "@/lib/format";
+import type { Promotion, SiteContent } from "@/lib/site-content";
 
-export default function Hero() {
+export default function Hero({
+  content: c, brandName, promo,
+}: { content: SiteContent["hero"]; brandName: string; promo: Promotion | null }) {
+  const stats = c.stats.filter((s) => s.value.trim());
   return (
     <section
       id="inicio"
@@ -44,25 +49,25 @@ export default function Hero() {
 
           {/* ── Text column ── */}
           <div>
-            <AnimateIn animation="fade">
+            {c.badge && <AnimateIn animation="fade">
               <div
                 className="inline-flex items-center gap-2 mb-7 px-4 py-2 rounded-full border border-bronze-200"
                 style={{ background: "rgba(251,247,238,0.8)" }}
               >
                 <Star size={11} className="text-gold-500 fill-gold-300" style={{ color: "#C9973A" }} />
-                <span className="section-label">Para Mulheres e Homens</span>
+                <span className="section-label">{c.badge}</span>
               </div>
-            </AnimateIn>
+            </AnimateIn>}
 
             <AnimateIn animation="up" delay={100}>
               <h1
                 className="text-5xl sm:text-6xl lg:text-7xl font-light leading-[1.1] text-bronze-900 mb-5"
                 style={{ fontFamily: "var(--font-cormorant), serif", color: "#3B2A12" }}
               >
-                Sua Beleza,
-                <br />
+                {c.title}
+                {c.title_highlight && <br />}
                 <em className="font-normal italic" style={{ color: "#9A6F1E" }}>
-                  Nossa Arte
+                  {c.title_highlight}
                 </em>
               </h1>
             </AnimateIn>
@@ -79,30 +84,24 @@ export default function Hero() {
                   color: "#6B5A4B",
                 }}
               >
-                Um espaço criado especialmente para quem se cuida. Da
-                limpeza de pele à massagem relaxante, cada atendimento é
-                personalizado com técnica, segurança e acolhimento genuíno.
+                {c.subtitle}
               </p>
             </AnimateIn>
 
             <AnimateIn animation="up" delay={400}>
               <div className="flex flex-col sm:flex-row gap-4">
                 <a href="#agendamento" className="btn-primary">
-                  Agendar Consulta <ArrowRight size={15} />
+                  {c.cta_primary} <ArrowRight size={15} />
                 </a>
                 <a href="#servicos" className="btn-outline">
-                  Nossos Serviços
+                  {c.cta_secondary}
                 </a>
               </div>
             </AnimateIn>
 
-            <AnimateIn animation="up" delay={500}>
+            {stats.length > 0 && <AnimateIn animation="up" delay={500}>
               <div className="flex gap-10 mt-12 pt-10 border-t border-bronze-100">
-                {[
-                  { value: "3", label: "Serviços especializados" },
-                  { value: "100%", label: "Satisfação dos clientes" },
-                  { value: "1:1", label: "Atendimento individual" },
-                ].map((s) => (
+                {stats.map((s) => (
                   <div key={s.label}>
                     <div
                       className="text-3xl font-light leading-none mb-1"
@@ -119,7 +118,7 @@ export default function Hero() {
                   </div>
                 ))}
               </div>
-            </AnimateIn>
+            </AnimateIn>}
           </div>
 
           {/* ── Visual column ── */}
@@ -130,8 +129,8 @@ export default function Hero() {
                 className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden shadow-[0_32px_80px_rgba(154,111,30,0.22)]"
               >
                 <Image
-                  src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80"
-                  alt="Tratamento estético na Clínica Débora Silva"
+                  src={c.image}
+                  alt={`Tratamento estético na ${brandName}`}
                   fill
                   priority
                   className="object-cover"
@@ -148,7 +147,7 @@ export default function Hero() {
               </div>
 
               {/* Floating review card */}
-              <div
+              {c.rating_value && <div
                 className="absolute bottom-8 left-1/2 -translate-x-1/2 w-[240px] bg-white/92 backdrop-blur-md rounded-xl px-5 py-3 shadow-lg"
                 style={{ border: "1px solid #EEDFBF" }}
               >
@@ -164,7 +163,7 @@ export default function Hero() {
                       className="text-[10px] font-light tracking-wide uppercase"
                       style={{ fontFamily: "var(--font-lato), sans-serif", color: "#8F8070" }}
                     >
-                      Avaliação dos Clientes
+                      {c.rating_label}
                     </div>
                     <div
                       className="font-semibold"
@@ -172,16 +171,17 @@ export default function Hero() {
                     >
                       ★★★★★{" "}
                       <span style={{ fontSize: "13px", color: "#8F8070", fontWeight: 300 }}>
-                        5.0
+                        {c.rating_value}
                       </span>
                     </div>
                   </div>
                 </div>
-              </div>
+              </div>}
 
               {/* Promo card top-left */}
-              <div
-                className="absolute -left-6 top-12 bg-white rounded-xl shadow-[0_8px_40px_rgba(201,151,58,0.18)] p-4 w-44"
+              {promo && <a
+                href="#servicos"
+                className="absolute -left-6 top-12 bg-white rounded-xl shadow-[0_8px_40px_rgba(201,151,58,0.18)] p-4 w-44 hover:-translate-y-0.5 transition-transform"
                 style={{ border: "1px solid #EEDFBF" }}
               >
                 <div className="gold-line mb-3" />
@@ -189,23 +189,23 @@ export default function Hero() {
                   className="font-light leading-tight mb-1"
                   style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "16px", color: "#C9973A" }}
                 >
-                  Inauguração
+                  {promo.label}
                 </div>
                 <div
                   className="uppercase tracking-widest mb-2"
                   style={{ fontFamily: "var(--font-lato), sans-serif", fontSize: "8px", color: "#8F8070" }}
                 >
-                  Limpeza + Massagem
+                  {promo.title}
                 </div>
-                <div
+                {promo.price !== null && <div
                   style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "22px", color: "#9A6F1E", fontWeight: 400 }}
                 >
-                  R$ 300,00
-                </div>
-              </div>
+                  {brl(promo.price)}
+                </div>}
+              </a>}
 
               {/* Next appointment card bottom-right */}
-              <div
+              {c.card_title && <div
                 className="absolute -right-4 bottom-20 bg-white rounded-xl shadow-[0_8px_40px_rgba(154,111,30,0.18)] p-4 w-44"
                 style={{ border: "1px solid #EEDFBF" }}
               >
@@ -213,19 +213,19 @@ export default function Hero() {
                   className="uppercase tracking-widest mb-2"
                   style={{ fontFamily: "var(--font-lato), sans-serif", fontSize: "9px", color: "#8F8070" }}
                 >
-                  Próximo horário
+                  {c.card_label}
                 </div>
                 <div
                   style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "20px", color: "#6B4A10", fontWeight: 300 }}
                 >
-                  Hoje 14:30
+                  {c.card_title}
                 </div>
                 <div
                   style={{ fontFamily: "var(--font-lato), sans-serif", fontSize: "11px", color: "#8F8070", marginTop: "4px" }}
                 >
-                  Massagem Relaxante
+                  {c.card_text}
                 </div>
-              </div>
+              </div>}
 
               {/* Decorative accent rings */}
               <div

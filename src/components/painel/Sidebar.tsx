@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, CalendarDays, Users, Wallet, Repeat, KanbanSquare, Sparkles, LogOut, Menu, X, ExternalLink,
-  Package, Boxes, BarChart3, Settings, Search,
+  Package, Boxes, BarChart3, Settings, Search, Globe,
 } from "lucide-react";
 import { logout } from "@/app/painel/auth-actions";
 import { initials } from "@/lib/format";
@@ -39,6 +39,7 @@ const GROUPS = [
     label: "Ajustes",
     items: [
       { href: "/painel/servicos", label: "Serviços", icon: Sparkles },
+      { href: "/painel/site", label: "Site", icon: Globe },
       { href: "/painel/configuracoes", label: "Configurações", icon: Settings },
     ],
   },

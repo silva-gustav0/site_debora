@@ -1,34 +1,11 @@
 import Image from "next/image";
 import AnimateIn from "./AnimateIn";
-import { blogPosts } from "@/lib/data";
+import { categoryColor, type BlogPost, type SiteContent } from "@/lib/site-content";
 import { ArrowRight, Clock } from "lucide-react";
 import Link from "next/link";
 
-const catColors: Record<string, string> = {
-  "Cuidados com a Pele": "#9A6F1E",
-  "Tratamentos Corporais": "#C9973A",
-  "Dicas de Beleza": "#6B8F71",
-  "Bem-Estar": "#7D6B58",
-  "SPA & Relaxamento": "#6B4A10",
-};
-
-const postImages: Record<string, string> = {
-  "beneficios-limpeza-pele":
-    "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=700&q=80",
-  "drenagem-linfatica-saude":
-    "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=700&q=80",
-  "skincare-em-casa":
-    "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=700&q=80",
-  "poder-da-massagem":
-    "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=700&q=80",
-  "peeling-renove-pele":
-    "https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&w=700&q=80",
-  "rituais-de-spa":
-    "https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=700&q=80",
-};
-
-export default function BlogSection() {
-  const [featured, ...rest] = blogPosts;
+export default function BlogSection({ content: c, posts }: { content: SiteContent["blog"]; posts: BlogPost[] }) {
+  const [featured, ...rest] = posts;
 
   return (
     <section
@@ -41,16 +18,16 @@ export default function BlogSection() {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-14">
           <div>
             <AnimateIn animation="fade">
-              <span className="section-label">Conteúdo & Dicas</span>
+              <span className="section-label">{c.eyebrow}</span>
             </AnimateIn>
             <AnimateIn animation="up" delay={100}>
               <h2
                 className="text-4xl sm:text-5xl font-light mt-4 mb-5"
                 style={{ fontFamily: "var(--font-cormorant), serif", color: "#3B2A12" }}
               >
-                Nosso{" "}
+                {c.title}{" "}
                 <em className="italic font-normal" style={{ color: "#9A6F1E" }}>
-                  Blog
+                  {c.title_highlight}
                 </em>
               </h2>
             </AnimateIn>
@@ -80,7 +57,7 @@ export default function BlogSection() {
               {/* Image */}
               <div className="relative h-64 overflow-hidden">
                 <Image
-                  src={postImages[featured.slug]}
+                  src={featured.image}
                   alt={featured.title}
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -98,7 +75,7 @@ export default function BlogSection() {
                     className="inline-block text-[10px] tracking-widest uppercase px-3 py-1 rounded-full text-white"
                     style={{
                       fontFamily: "var(--font-lato), sans-serif",
-                      background: catColors[featured.category] || "#9A6F1E",
+                      background: categoryColor(featured.category),
                     }}
                   >
                     {featured.category}
@@ -166,7 +143,7 @@ export default function BlogSection() {
                   {/* Thumbnail */}
                   <div className="relative w-20 h-20 rounded-xl flex-shrink-0 overflow-hidden">
                     <Image
-                      src={postImages[post.slug]}
+                      src={post.image}
                       alt={post.title}
                       fill
                       className="object-cover transition-transform duration-400 group-hover:scale-110"
@@ -178,7 +155,7 @@ export default function BlogSection() {
                       className="text-[9.5px] tracking-widest uppercase mb-1 block"
                       style={{
                         fontFamily: "var(--font-lato), sans-serif",
-                        color: catColors[post.category] || "#9A6F1E",
+                        color: categoryColor(post.category),
                       }}
                     >
                       {post.category}

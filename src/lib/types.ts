@@ -1,3 +1,5 @@
+import type { ServiceIcon } from "./site-content";
+
 export type ServiceRow = {
   id: string;
   name: string;
@@ -8,6 +10,8 @@ export type ServiceRow = {
   return_days: number | null;
   active: boolean;
   sort_order: number;
+  show_on_home: boolean;
+  icon: ServiceIcon;
 };
 
 export type ClientStage = "lead" | "em_contato" | "cliente" | "vip" | "inativa";

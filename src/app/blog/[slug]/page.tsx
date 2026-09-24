@@ -3,88 +3,20 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { blogPosts } from "@/lib/data";
+import { getPublicConfig } from "@/app/actions/public";
+import { DEFAULT_HOURS, hoursSummary } from "@/lib/hours";
+import { getBlogPost, getBlogPosts, getHomeServices, getSiteContent } from "@/lib/site";
+import { categoryColor } from "@/lib/site-content";
 import { ArrowLeft, Clock, Calendar, ArrowRight } from "lucide-react";
 
-const postImages: Record<string, string> = {
-  "beneficios-limpeza-pele":
-    "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=1200&q=85",
-  "drenagem-linfatica-saude":
-    "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1200&q=85",
-  "skincare-em-casa":
-    "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=1200&q=85",
-  "poder-da-massagem":
-    "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=1200&q=85",
-  "peeling-renove-pele":
-    "https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&w=1200&q=85",
-  "rituais-de-spa":
-    "https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=1200&q=85",
-};
+// Artigos novos ou editados no painel aparecem sem novo deploy.
+export const revalidate = 300;
 
-const catColors: Record<string, string> = {
-  "Cuidados com a Pele": "#9A6F1E",
-  "Tratamentos Corporais": "#C9973A",
-  "Dicas de Beleza": "#6B8F71",
-  "Bem-Estar": "#7D6B58",
-  "SPA & Relaxamento": "#6B4A10",
-};
+export function generateStaticParams() {
+  return [];
+}
 
-const postContent: Record<string, string> = {
-  "beneficios-limpeza-pele": `A limpeza de pele profissional é um dos pilares mais importantes da rotina de cuidados estéticos. Diferente da limpeza domiciliar, o tratamento realizado em clínica especializada oferece uma remoção profunda de impurezas que o dia a dia não consegue eliminar.
-
-**Por que fazer regularmente?**
-
-Ao longo dos dias, nossa pele acumula oleosidade, resíduos de maquiagem, poluição e células mortas que bloqueiam os poros. Se não removidos adequadamente, esses resíduos formam comedões (cravos) e podem levar ao surgimento de acne e outros problemas cutâneos.
-
-A limpeza profissional realizada mensalmente ou bimestralmente, dependendo do tipo de pele, oferece:
-
-- Remoção profunda de impurezas e cravos
-- Renovação celular acelerada
-- Melhor absorção dos ativos cosméticos
-- Pele mais luminosa e uniforme
-- Redução de poros dilatados
-- Prevenção de envelhecimento precoce
-
-**O que esperar do tratamento?**
-
-Na Clínica Débora Silva, o protocolo de limpeza de pele começa com uma análise individualizada da sua pele. Cada etapa é personalizada: higienização suave, esfoliação, vapor, extração de impurezas, mask hidratante e finalização com protetor solar.
-
-O resultado imediato é uma pele visivelmente mais limpa, suave e radiante. Com a continuidade do tratamento, a melhora é progressiva e duradoura.
-
-**Com que frequência?**
-
-- Pele oleosa ou acneica: mensalmente
-- Pele mista: a cada 45 dias
-- Pele seca ou normal: a cada 60 dias
-
-Agende uma avaliação gratuita com nossas especialistas e descubra o protocolo ideal para a sua pele.`,
-
-  "drenagem-linfatica-saude": `A drenagem linfática manual é uma técnica de massagem terapêutica que estimula o fluxo da linfa pelo sistema linfático, promovendo a eliminação de toxinas, redução de edemas e fortalecimento do sistema imunológico.
-
-**Muito além da estética**
-
-Embora seja amplamente conhecida pelos benefícios estéticos — como redução de medidas e combate à celulite — a drenagem linfática oferece um espectro muito maior de benefícios para a saúde:
-
-- Redução de edemas e inchaços
-- Alívio de dores musculares
-- Fortalecimento do sistema imunológico
-- Melhora da circulação sanguínea
-- Aceleração da recuperação pós-cirúrgica
-- Redução do estresse e ansiedade
-- Combate à celulite e gordura localizada
-
-**Como funciona o tratamento?**
-
-As manobras são suaves e rítmicas, aplicadas em direção aos linfonodos (gânglios). O movimento estimula a contração dos vasos linfáticos, acelerando o transporte da linfa e consequentemente a eliminação de líquidos retidos e toxinas.
-
-Na Clínica Débora Silva, cada sessão é conduzida por uma profissional certificada, com protocolo adaptado às necessidades específicas de cada cliente.
-
-**Indicações**
-
-A drenagem é especialmente recomendada para quem sofre de retenção hídrica, quem está se recuperando de cirurgias, gestantes (com autorização médica), atletas em recuperação e pessoas com estilo de vida sedentário.`,
-};
-
-const defaultContent = (title: string) => `${title} é um tema fascinante no mundo da estética e bem-estar.
+const defaultContent = (title: string, clinic: string) => `${title} é um tema fascinante no mundo da estética e bem-estar.
 
 Neste artigo, exploramos os principais aspectos deste tratamento, seus benefícios comprovados pela ciência e como ele pode transformar não apenas a aparência, mas também a qualidade de vida de quem o adota em sua rotina.
 
@@ -96,38 +28,37 @@ Ao longo deste conteúdo, compartilhamos conhecimentos técnicos de forma acess�
 
 Cuidar da aparência vai muito além da vaidade. É um ato de amor próprio que impacta diretamente na autoestima, na saúde mental e na forma como nos relacionamos com o mundo.
 
-Na Clínica Débora Silva, acreditamos que cada pessoa merece se sentir bem consigo mesma. Por isso, nossos tratamentos são pensados de forma integrada, considerando não apenas o aspecto físico, mas o bem-estar emocional de cada cliente.
+Na ${clinic}, acreditamos que cada pessoa merece se sentir bem consigo mesma. Por isso, nossos tratamentos são pensados de forma integrada, considerando não apenas o aspecto físico, mas o bem-estar emocional de cada cliente.
 
 **Próximos passos**
 
-Quer saber mais sobre este e outros tratamentos? Agende uma consulta de avaliação gratuita com a Débora. Em parceria, vamos construir um protocolo personalizado para que você alcance os melhores resultados.`;
-
-export async function generateStaticParams() {
-  return blogPosts.map((p) => ({ slug: p.slug }));
-}
+Quer saber mais sobre este e outros tratamentos? Agende uma consulta de avaliação. Em parceria, vamos construir um protocolo personalizado para que você alcance os melhores resultados.`;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const post = blogPosts.find((p) => p.slug === slug);
+  const [post, { brand }] = await Promise.all([getBlogPost(slug), getSiteContent()]);
   if (!post) return { title: "Artigo não encontrado" };
   return {
-    title: `${post.title} | Blog Clínica Débora Silva`,
+    title: `${post.title} | Blog ${brand.full_name}`,
     description: post.excerpt,
   };
 }
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const post = blogPosts.find((p) => p.slug === slug);
+  const [post, posts, content, services, config] = await Promise.all([
+    getBlogPost(slug), getBlogPosts(), getSiteContent(), getHomeServices(), getPublicConfig(),
+  ]);
   if (!post) notFound();
 
-  const content = postContent[slug] || defaultContent(post.title);
-  const related = blogPosts.filter((p) => p.slug !== slug).slice(0, 3);
-  const color = catColors[post.category] || "#9A6F1E";
+  const { brand } = content;
+  const body = post.content.trim() || defaultContent(post.title, brand.full_name);
+  const related = posts.filter((p) => p.slug !== slug).slice(0, 3);
+  const color = categoryColor(post.category);
 
   return (
     <>
-      <Navbar />
+      <Navbar logo={brand.logo} name={brand.full_name} />
       <main>
         {/* Hero */}
         <section
@@ -192,7 +123,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             {/* Banner image */}
             <div className="w-full h-64 sm:h-80 rounded-2xl mb-12 relative overflow-hidden shadow-[0_16px_50px_rgba(154,111,30,0.15)]">
               <Image
-                src={postImages[slug] || postImages["beneficios-limpeza-pele"]}
+                src={post.image}
                 alt={post.title}
                 fill
                 priority
@@ -208,14 +139,16 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             </div>
 
             {/* Lead */}
-            <p
-              className="text-xl font-light italic leading-8 text-text-secondary mb-8 pb-8 border-b border-bronze-100"
-              style={{ fontFamily: "var(--font-cormorant), serif" }}
-            >
-              {post.excerpt}
-            </p>
+            {post.excerpt && (
+              <p
+                className="text-xl font-light italic leading-8 text-text-secondary mb-8 pb-8 border-b border-bronze-100"
+                style={{ fontFamily: "var(--font-cormorant), serif" }}
+              >
+                {post.excerpt}
+              </p>
+            )}
 
-            {/* Content */}
+            {/* Content: parágrafos separados por linha em branco, **Título** e listas com "- " */}
             <div
               className="prose-custom"
               style={{
@@ -223,26 +156,27 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 color: "#6B5A4B",
               }}
             >
-              {content.split("\n\n").map((block, i) => {
-                if (block.startsWith("**") && block.endsWith("**")) {
+              {body.split(/\n\s*\n/).map((block, i) => {
+                const trimmed = block.trim();
+                if (trimmed.startsWith("**") && trimmed.endsWith("**") && !trimmed.includes("\n")) {
                   return (
                     <h2
                       key={i}
                       className="text-2xl font-light text-bronze-800 mt-10 mb-4"
                       style={{ fontFamily: "var(--font-cormorant), serif" }}
                     >
-                      {block.replace(/\*\*/g, "")}
+                      {trimmed.replace(/\*\*/g, "")}
                     </h2>
                   );
                 }
-                if (block.includes("\n-")) {
-                  const parts = block.split("\n");
-                  const intro = parts[0];
-                  const items = parts.slice(1).filter((l) => l.startsWith("-"));
+                const lines = trimmed.split("\n");
+                const items = lines.filter((l) => /^\s*-\s/.test(l));
+                if (items.length) {
+                  const intro = lines.filter((l) => !/^\s*-\s/.test(l)).join(" ");
                   return (
                     <div key={i} className="mb-6">
                       {intro && (
-                        <p className="text-base font-light leading-8 mb-3">{intro}</p>
+                        <p className="text-base font-light leading-8 mb-3">{intro.replace(/\*\*/g, "")}</p>
                       )}
                       <ul className="flex flex-col gap-2">
                         {items.map((item, j) => (
@@ -252,7 +186,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                               style={{ background: color }}
                             />
                             <span className="text-sm font-light leading-7">
-                              {item.replace(/^-\s*/, "")}
+                              {item.replace(/^\s*-\s*/, "").replace(/\*\*/g, "")}
                             </span>
                           </li>
                         ))}
@@ -261,8 +195,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                   );
                 }
                 return (
-                  <p key={i} className="text-base font-light leading-8 mb-6">
-                    {block.replace(/\*\*/g, "")}
+                  <p key={i} className="text-base font-light leading-8 mb-6 whitespace-pre-line">
+                    {trimmed.replace(/\*\*/g, "")}
                   </p>
                 );
               })}
@@ -296,55 +230,60 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         </section>
 
         {/* Related */}
-        <section className="py-16" style={{ background: "#F7F2EC" }}>
-          <div className="max-w-7xl mx-auto px-6 lg:px-10">
-            <h3
-              className="text-3xl font-light text-bronze-800 mb-8 text-center"
-              style={{ fontFamily: "var(--font-cormorant), serif" }}
-            >
-              Artigos Relacionados
-            </h3>
-            <div className="grid sm:grid-cols-3 gap-6">
-              {related.map((p) => (
-                <Link
-                  key={p.slug}
-                  href={`/blog/${p.slug}`}
-                  className="group block rounded-xl overflow-hidden hover-lift"
-                  style={{ background: "white", border: "1px solid #EEDFBF" }}
-                >
-                  <div className="relative h-36 overflow-hidden">
-                    <Image
-                      src={postImages[p.slug] || postImages["beneficios-limpeza-pele"]}
-                      alt={p.title}
-                      fill
-                      className="object-cover transition-transform duration-400 group-hover:scale-105"
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                    />
-                  </div>
-                  <div className="p-5">
-                    <span
-                      className="text-[9.5px] tracking-widest uppercase block mb-2"
-                      style={{
-                        fontFamily: "var(--font-lato), sans-serif",
-                        color: catColors[p.category] || "#9A6F1E",
-                      }}
-                    >
-                      {p.category}
-                    </span>
-                    <h4
-                      className="text-lg font-light text-bronze-800 leading-snug group-hover:text-bronze-600 transition-colors"
-                      style={{ fontFamily: "var(--font-cormorant), serif" }}
-                    >
-                      {p.title}
-                    </h4>
-                  </div>
-                </Link>
-              ))}
+        {related.length > 0 && (
+          <section className="py-16" style={{ background: "#F7F2EC" }}>
+            <div className="max-w-7xl mx-auto px-6 lg:px-10">
+              <h3
+                className="text-3xl font-light text-bronze-800 mb-8 text-center"
+                style={{ fontFamily: "var(--font-cormorant), serif" }}
+              >
+                Artigos Relacionados
+              </h3>
+              <div className="grid sm:grid-cols-3 gap-6">
+                {related.map((p) => (
+                  <Link
+                    key={p.slug}
+                    href={`/blog/${p.slug}`}
+                    className="group block rounded-xl overflow-hidden hover-lift"
+                    style={{ background: "white", border: "1px solid #EEDFBF" }}
+                  >
+                    <div className="relative h-36 overflow-hidden">
+                      <Image
+                        src={p.image}
+                        alt={p.title}
+                        fill
+                        className="object-cover transition-transform duration-400 group-hover:scale-105"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                      />
+                    </div>
+                    <div className="p-5">
+                      <span
+                        className="text-[9.5px] tracking-widest uppercase block mb-2"
+                        style={{
+                          fontFamily: "var(--font-lato), sans-serif",
+                          color: categoryColor(p.category),
+                        }}
+                      >
+                        {p.category}
+                      </span>
+                      <h4
+                        className="text-lg font-light text-bronze-800 leading-snug group-hover:text-bronze-600 transition-colors"
+                        style={{ fontFamily: "var(--font-cormorant), serif" }}
+                      >
+                        {p.title}
+                      </h4>
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
       </main>
-      <Footer />
+      <Footer
+        brand={brand} contact={content.contact} footer={content.footer} services={services}
+        hours={hoursSummary(config?.hours ?? DEFAULT_HOURS)}
+      />
     </>
   );
 }

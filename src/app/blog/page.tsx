@@ -2,41 +2,31 @@ import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { blogPosts } from "@/lib/data";
+import { getBlogPosts, getHomeServices, getSiteContent } from "@/lib/site";
+import { categoryColor } from "@/lib/site-content";
+import { getPublicConfig } from "@/app/actions/public";
+import { DEFAULT_HOURS, hoursSummary } from "@/lib/hours";
 import { ArrowRight, Clock, ArrowLeft } from "lucide-react";
 
-const postImages: Record<string, string> = {
-  "beneficios-limpeza-pele":
-    "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=700&q=80",
-  "drenagem-linfatica-saude":
-    "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=700&q=80",
-  "skincare-em-casa":
-    "https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=700&q=80",
-  "poder-da-massagem":
-    "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=700&q=80",
-  "peeling-renove-pele":
-    "https://images.unsplash.com/photo-1512290923902-8a9f81dc236c?auto=format&fit=crop&w=700&q=80",
-  "rituais-de-spa":
-    "https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=700&q=80",
-};
+export const revalidate = 300;
 
-const catColors: Record<string, string> = {
-  "Cuidados com a Pele": "#9A6F1E",
-  "Tratamentos Corporais": "#C9973A",
-  "Dicas de Beleza": "#6B8F71",
-  "Bem-Estar": "#7D6B58",
-  "SPA & Relaxamento": "#6B4A10",
-};
+export async function generateMetadata() {
+  const { brand } = await getSiteContent();
+  return {
+    title: `Blog | ${brand.full_name}`,
+    description: `Dicas de beleza, cuidados com a pele e bem-estar do blog da ${brand.full_name}.`,
+  };
+}
 
-export const metadata = {
-  title: "Blog | Clínica Débora Silva",
-  description: "Dicas de beleza, cuidados com a pele e bem-estar do blog da Clínica Débora Silva.",
-};
+export default async function BlogPage() {
+  const [content, posts, services, config] = await Promise.all([
+    getSiteContent(), getBlogPosts(), getHomeServices(), getPublicConfig(),
+  ]);
+  const { brand, blog } = content;
 
-export default function BlogPage() {
   return (
     <>
-      <Navbar />
+      <Navbar logo={brand.logo} name={brand.full_name} />
       <main>
         {/* Header */}
         <section
@@ -48,7 +38,7 @@ export default function BlogPage() {
             className="text-5xl sm:text-6xl font-light text-bronze-900 mt-4 mb-5"
             style={{ fontFamily: "var(--font-cormorant), serif" }}
           >
-            Nosso <em className="italic font-normal" style={{ color: "#9A6F1E" }}>Blog</em>
+            {blog.title} <em className="italic font-normal" style={{ color: "#9A6F1E" }}>{blog.title_highlight}</em>
           </h1>
           <div
             className="gold-line mx-auto mb-6"
@@ -57,15 +47,14 @@ export default function BlogPage() {
             className="text-base font-light text-text-secondary max-w-md mx-auto leading-7"
             style={{ fontFamily: "var(--font-lato), sans-serif" }}
           >
-            Dicas de beleza, cuidados com a pele e tudo sobre bem-estar para você incorporar
-            no seu dia a dia.
+            {blog.page_subtitle}
           </p>
         </section>
 
         <section className="py-20 bg-[#FDFAF7]">
           <div className="max-w-7xl mx-auto px-6 lg:px-10">
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-7">
-              {blogPosts.map((post) => (
+              {posts.map((post) => (
                 <Link
                   key={post.slug}
                   href={`/blog/${post.slug}`}
@@ -79,7 +68,7 @@ export default function BlogPage() {
                   {/* Image */}
                   <div className="relative h-48 overflow-hidden">
                     <Image
-                      src={postImages[post.slug]}
+                      src={post.image}
                       alt={post.title}
                       fill
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -107,7 +96,7 @@ export default function BlogPage() {
                       className="text-[9.5px] tracking-widest uppercase block mb-3"
                       style={{
                         fontFamily: "var(--font-lato), sans-serif",
-                        color: catColors[post.category] || "#9A6F1E",
+                        color: categoryColor(post.category),
                       }}
                     >
                       {post.category}
@@ -157,7 +146,10 @@ export default function BlogPage() {
           </div>
         </section>
       </main>
-      <Footer />
+      <Footer
+        brand={brand} contact={content.contact} footer={content.footer} services={services}
+        hours={hoursSummary(config?.hours ?? DEFAULT_HOURS)}
+      />
     </>
   );
 }

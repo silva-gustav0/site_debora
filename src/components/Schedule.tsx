@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import {
   ChevronLeft, ChevronRight, CalendarDays, Clock, CheckCircle2, Loader2, MessageCircle, AlertCircle,
 } from "lucide-react";
@@ -10,6 +10,7 @@ import { addDays, brl, fmtDate, fmtWeekday, maskPhone, todaySP, whatsappLink } f
 import { candidateSlots, dayHours, DEFAULT_HOURS, hoursSummary } from "@/lib/hours";
 import { createBooking, getAvailability, type PublicConfig } from "@/app/actions/public";
 import type { ServiceRow } from "@/lib/types";
+import type { SiteContent } from "@/lib/site-content";
 
 const MONTHS = [
   "Janeiro","Fevereiro","Março","Abril","Maio","Junho",
@@ -26,10 +27,10 @@ type Step = 1 | 2 | 3;
 /** Serviços sem banco configurado: agendamento vira mensagem de WhatsApp. */
 const FALLBACK: ServiceRow[] = staticServices.map((s, i) => ({
   id: s.id, name: s.title, category: s.category, description: s.description,
-  duration_min: 60, price: 0, return_days: null, active: true, sort_order: i,
+  duration_min: 60, price: 0, return_days: null, active: true, sort_order: i, show_on_home: true, icon: "sparkles",
 }));
 
-export default function Schedule({ config }: { config: PublicConfig | null }) {
+export default function Schedule({ config, content: c }: { config: PublicConfig | null; content: SiteContent["schedule"] }) {
   const online = config !== null && config.services.length > 0;
   const list = online ? config.services : FALLBACK;
   const hours = config?.hours ?? DEFAULT_HOURS;
@@ -53,6 +54,17 @@ export default function Schedule({ config }: { config: PublicConfig | null }) {
   const [pending, startTransition] = useTransition();
 
   const service = list.find((s) => s.id === serviceId);
+
+  // Botões "Agendar" dos serviços e promoções já escolhem o serviço aqui.
+  useEffect(() => {
+    const onSelect = (e: Event) => {
+      const id = (e as CustomEvent<string>).detail;
+      if (!list.some((s) => s.id === id)) return;
+      setServiceId(id); setTime(null); setStep(1); setDone(null); setError(null);
+    };
+    window.addEventListener("select-service", onSelect);
+    return () => window.removeEventListener("select-service", onSelect);
+  }, [list]);
 
   /** Busca os horários livres do dia e vai para o passo 2. */
   const loadSlots = (d: string, svc: ServiceRow) => {
@@ -123,12 +135,12 @@ export default function Schedule({ config }: { config: PublicConfig | null }) {
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="flex flex-col items-center text-center mb-14">
           <AnimateIn animation="fade">
-            <span className="section-label">Agende sua Visita</span>
+            <span className="section-label">{c.eyebrow}</span>
           </AnimateIn>
           <AnimateIn animation="up" delay={100}>
             <h2 className="text-4xl sm:text-5xl font-light text-bronze-900 mt-4 mb-5">
-              Faça seu{" "}
-              <em className="italic font-normal" style={{ color: "#9A6F1E" }}>Agendamento</em>
+              {c.title}{" "}
+              <em className="italic font-normal" style={{ color: "#9A6F1E" }}>{c.title_highlight}</em>
             </h2>
           </AnimateIn>
           <AnimateIn animation="scale" delay={200}>

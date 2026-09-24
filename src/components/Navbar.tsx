@@ -14,7 +14,8 @@ const NAV_LINKS = [
   { label: "Contato",   hash: "contato"     },
 ];
 
-export default function Navbar() {
+export default function Navbar({ logo, name, showBlog = true }: { logo: string; name: string; showBlog?: boolean }) {
+  const links = NAV_LINKS.filter((l) => showBlog || l.hash !== "blog");
   const [open, setOpen]       = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname              = usePathname();
@@ -44,8 +45,8 @@ export default function Navbar() {
             {/* Logo */}
             <a href={href("inicio")} className="flex items-center group">
               <Image
-                src="/images/clinica/logo.png"
-                alt="Clínica Débora Silva"
+                src={logo}
+                alt={name}
                 width={1052}
                 height={577}
                 priority
@@ -55,7 +56,7 @@ export default function Navbar() {
 
             {/* Desktop nav */}
             <nav className="hidden md:flex items-center gap-8">
-              {NAV_LINKS.map((l) => (
+              {links.map((l) => (
                 <a
                   key={l.hash}
                   href={href(l.hash)}
@@ -103,8 +104,8 @@ export default function Navbar() {
             style={{ borderColor: "#F6EEDB" }}
           >
             <Image
-              src="/images/clinica/logo.png"
-              alt="Clínica Débora Silva"
+              src={logo}
+              alt={name}
               width={1052}
               height={577}
               className="h-12 w-auto"
@@ -120,7 +121,7 @@ export default function Navbar() {
           </div>
 
           <nav className="flex flex-col gap-1 px-6 pt-8 flex-1">
-            {NAV_LINKS.map((l) => (
+            {links.map((l) => (
               <a
                 key={l.hash}
                 href={href(l.hash)}

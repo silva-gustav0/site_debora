@@ -5,41 +5,17 @@ import AnimateIn from "./AnimateIn";
 import { MapPin, Phone, Mail, Clock, AtSign, Send, CheckCircle2, AlertCircle } from "lucide-react";
 import { sendContactMessage } from "@/app/actions/public";
 import { maskPhone } from "@/lib/format";
+import { instagramUrl, telHref, type SiteContent } from "@/lib/site-content";
 
-const contactInfo = [
-  {
-    icon: MapPin,
-    label: "Endereço",
-    value: "Av. Paulista, 1337 - Bela Vista\nSão Paulo — SP",
-    link: "https://maps.google.com/?q=Av.+Paulista+1337+Bela+Vista+São+Paulo",
-  },
-  {
-    icon: Phone,
-    label: "Telefone",
-    value: "(11) 6578-2211",
-    link: "tel:+551165782211",
-  },
-  {
-    icon: Mail,
-    label: "E-mail",
-    value: "contato@talissaestetica.com.br",
-    link: "mailto:contato@talissaestetica.com.br",
-  },
-  {
-    icon: Clock,
-    label: "Horário de Atendimento",
-    value: "Seg–Sex: 9h às 20h\nSáb: 9h às 16h\nDom: Fechado",
-    link: null,
-  },
-  {
-    icon: AtSign,
-    label: "Instagram",
-    value: "@talissaesteticaebemestar",
-    link: "https://instagram.com/talissaesteticaebemestar",
-  },
-];
+export default function Contact({ content: c, hours }: { content: SiteContent["contact"]; hours: string }) {
+  const contactInfo = [
+    { icon: MapPin, label: "Endereço", value: c.address, link: c.maps_url || null },
+    { icon: Phone, label: "Telefone", value: c.phone, link: telHref(c.phone) },
+    { icon: Mail, label: "E-mail", value: c.email, link: `mailto:${c.email}` },
+    { icon: Clock, label: "Horário de Atendimento", value: hours.split(" · ").join("\n"), link: null },
+    { icon: AtSign, label: "Instagram", value: c.instagram, link: c.instagram ? instagramUrl(c.instagram) : null },
+  ].filter((i) => i.value.trim());
 
-export default function Contact() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "", website: "" });
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,16 +37,16 @@ export default function Contact() {
         {/* Header */}
         <div className="flex flex-col items-center text-center mb-16">
           <AnimateIn animation="fade">
-            <span className="section-label">Fale Conosco</span>
+            <span className="section-label">{c.eyebrow}</span>
           </AnimateIn>
           <AnimateIn animation="up" delay={100}>
             <h2
               className="text-4xl sm:text-5xl font-light text-bronze-900 mt-4 mb-5"
               style={{ fontFamily: "var(--font-cormorant), serif" }}
             >
-              Entre em{" "}
+              {c.title}{" "}
               <em className="italic font-normal" style={{ color: "#9A6F1E" }}>
-                Contato
+                {c.title_highlight}
               </em>
             </h2>
           </AnimateIn>
@@ -87,9 +63,7 @@ export default function Contact() {
                 className="text-base font-light leading-8 text-text-secondary mb-8"
                 style={{ fontFamily: "var(--font-lato), sans-serif" }}
               >
-                Estamos à disposição para atender você com todo o cuidado e atenção
-                que você merece. Entre em contato pelos canais abaixo ou envie
-                uma mensagem.
+                {c.intro}
               </p>
 
               <div className="flex flex-col gap-6">
@@ -116,7 +90,7 @@ export default function Contact() {
                           href={item.link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-sm font-light text-bronze-700 hover:text-bronze-500 transition-colors"
+                          className="text-sm font-light text-bronze-700 hover:text-bronze-500 transition-colors whitespace-pre-line"
                           style={{ fontFamily: "var(--font-lato), sans-serif" }}
                         >
                           {item.value}
@@ -135,7 +109,7 @@ export default function Contact() {
               </div>
 
               {/* Map placeholder */}
-              <div
+              {c.address && <div
                 className="mt-8 h-48 rounded-2xl flex items-center justify-center overflow-hidden"
                 style={{
                   background: "linear-gradient(135deg,#F6EEDB,#FFF0C4)",
@@ -145,22 +119,22 @@ export default function Contact() {
                 <div className="text-center">
                   <MapPin size={28} className="text-bronze-400 mx-auto mb-2" />
                   <p
-                    className="text-sm font-light text-bronze-700"
+                    className="text-sm font-light text-bronze-700 whitespace-pre-line"
                     style={{ fontFamily: "var(--font-cormorant), serif" }}
                   >
-                    Av. Paulista, 1337<br />Bela Vista — São Paulo, SP
+                    {c.address}
                   </p>
-                  <a
-                    href="https://maps.google.com/?q=Av.+Paulista+1337+Bela+Vista+São+Paulo"
+                  {c.maps_url && <a
+                    href={c.maps_url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[10px] tracking-widest uppercase hover:opacity-70 mt-1 block"
                     style={{ fontFamily: "var(--font-lato), sans-serif", color: "#C9973A" }}
                   >
                     Ver no Google Maps →
-                  </a>
+                  </a>}
                 </div>
-              </div>
+              </div>}
             </div>
           </AnimateIn>
 
@@ -187,7 +161,7 @@ export default function Contact() {
                   className="text-sm font-light text-text-secondary max-w-xs leading-7"
                   style={{ fontFamily: "var(--font-lato), sans-serif" }}
                 >
-                  Obrigada pelo seu contato. Retornaremos em até 24 horas.
+                  {c.success_text}
                 </p>
                 <button
                   onClick={() => { setSent(false); setForm({ name:"", email:"", phone:"", message:"", website:"" }); }}

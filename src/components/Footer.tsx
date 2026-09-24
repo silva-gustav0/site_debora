@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { AtSign, Phone, Mail, MapPin, Heart } from "lucide-react";
+import { instagramUrl, telHref, type HomeService, type SiteContent } from "@/lib/site-content";
 
 const navLinks = [
   { label: "Início", href: "#inicio" },
@@ -10,13 +12,22 @@ const navLinks = [
   { label: "Contato", href: "#contato" },
 ];
 
-const servicesList = [
-  "Limpeza de Pele",
-  "Drenagem Linfática",
-  "Massagem Relaxante",
-];
+type FooterProps = {
+  brand: SiteContent["brand"];
+  contact: SiteContent["contact"];
+  footer: SiteContent["footer"];
+  services: HomeService[];
+  hours: string;
+  showBlog?: boolean;
+};
 
-export default function Footer() {
+export default function Footer({ brand, contact, footer, services, hours, showBlog = true }: FooterProps) {
+  const links = navLinks.filter((l) => showBlog || l.href !== "#blog");
+  const social = [
+    { icon: AtSign, href: contact.instagram ? instagramUrl(contact.instagram) : null, label: "Instagram" },
+    { icon: Phone, href: telHref(contact.phone), label: "Telefone" },
+    { icon: Mail, href: contact.email ? `mailto:${contact.email}` : null, label: "Email" },
+  ].filter((s): s is typeof s & { href: string } => Boolean(s.href));
   return (
     <footer
       className="relative overflow-hidden"
@@ -37,13 +48,13 @@ export default function Footer() {
                 className="text-2xl font-light tracking-wide text-bronze-200 mb-0.5"
                 style={{ fontFamily: "var(--font-cormorant), serif" }}
               >
-                Débora Silva
+                {brand.name}
               </div>
               <div
                 className="text-[9px] tracking-[0.3em] uppercase"
                 style={{ fontFamily: "var(--font-lato), sans-serif", color: "#C9973A" }}
               >
-                Estética &amp; Bem-Estar
+                {brand.tagline}
               </div>
             </div>
             <div
@@ -54,16 +65,11 @@ export default function Footer() {
               className="text-sm font-light leading-7 text-bronze-200/60 mb-6"
               style={{ fontFamily: "var(--font-lato), sans-serif" }}
             >
-              Cuidamos da sua beleza com técnica, dedicação e o carinho que você
-              merece. Cada atendimento é uma experiência única.
+              {footer.text}
             </p>
             {/* Social */}
             <div className="flex gap-3">
-              {[
-                { icon: AtSign, href: "https://instagram.com/talissaesteticaebemestar", label: "Instagram" },
-                { icon: Phone, href: "tel:+551165782211", label: "Telefone" },
-                { icon: Mail, href: "mailto:contato@talissaestetica.com.br", label: "Email" },
-              ].map((s) => (
+              {social.map((s) => (
                 <a
                   key={s.label}
                   href={s.href}
@@ -100,15 +106,15 @@ export default function Footer() {
               Navegação
             </h4>
             <ul className="flex flex-col gap-2.5">
-              {navLinks.map((l) => (
+              {links.map((l) => (
                 <li key={l.href}>
-                  <a
-                    href={l.href}
+                  <Link
+                    href={`/${l.href}`}
                     className="text-sm font-light text-bronze-200/60 hover:text-bronze-200 transition-colors duration-200"
                     style={{ fontFamily: "var(--font-lato), sans-serif" }}
                   >
                     {l.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -123,15 +129,15 @@ export default function Footer() {
               Serviços
             </h4>
             <ul className="flex flex-col gap-2.5">
-              {servicesList.map((s) => (
-                <li key={s}>
-                  <a
-                    href="#servicos"
+              {services.map((s) => (
+                <li key={s.id}>
+                  <Link
+                    href="/#servicos"
                     className="text-sm font-light text-bronze-200/60 hover:text-bronze-200 transition-colors duration-200"
                     style={{ fontFamily: "var(--font-lato), sans-serif" }}
                   >
-                    {s}
-                  </a>
+                    {s.name}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -147,10 +153,10 @@ export default function Footer() {
             </h4>
             <div className="flex flex-col gap-4">
               {[
-                { icon: MapPin, text: "Av. Paulista, 1337 - Bela Vista\nSão Paulo — SP" },
-                { icon: Phone, text: "(11) 6578-2211\nSeg–Sex 9h–20h | Sáb 9h–16h" },
-                { icon: Mail, text: "contato@talissaestetica.com.br" },
-              ].map((item, i) => (
+                { icon: MapPin, text: contact.address },
+                { icon: Phone, text: [contact.phone, hours].filter(Boolean).join("\n") },
+                { icon: Mail, text: contact.email },
+              ].filter((item) => item.text.trim()).map((item, i) => (
                 <div key={i} className="flex gap-3 items-start">
                   <item.icon
                     size={14}
@@ -178,13 +184,13 @@ export default function Footer() {
             className="text-[11px] font-light text-bronze-200/40"
             style={{ fontFamily: "var(--font-lato), sans-serif" }}
           >
-            © {new Date().getFullYear()} Clínica Débora Silva. Todos os direitos reservados.
+            © {new Date().getFullYear()} {brand.full_name}. Todos os direitos reservados.
           </p>
           <p
             className="flex items-center gap-1.5 text-[11px] font-light text-bronze-200/40"
             style={{ fontFamily: "var(--font-lato), sans-serif" }}
           >
-            Feito com <Heart size={10} className="text-bronze-500 fill-bronze-500" /> em São Paulo
+            Feito com <Heart size={10} className="text-bronze-500 fill-bronze-500" /> em {footer.made_in}
             <span aria-hidden="true" className="mx-1">·</span>
             <a href="/painel" className="hover:text-bronze-200 transition-colors">Área da equipe</a>
           </p>

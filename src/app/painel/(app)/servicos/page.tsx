@@ -6,6 +6,7 @@ import SubmitButton from "@/components/painel/SubmitButton";
 import { Badge, PageHeader } from "@/components/painel/ui";
 import { saveService } from "../../actions";
 import type { ServiceRow } from "@/lib/types";
+import { SERVICE_ICONS } from "@/lib/site-content";
 
 export const metadata = { title: "Serviços" };
 
@@ -42,9 +43,19 @@ function ServiceForm({ service }: { service?: ServiceRow }) {
         <input type="checkbox" name="active" defaultChecked={s?.active ?? true} className="accent-[#82590F]" />
         Disponível no site
       </label>
-      <label className="sm:col-span-2 lg:col-span-10">
-        <span className="p-label">Descrição (aparece no agendamento do site)</span>
+      <label className="sm:col-span-2 lg:col-span-6">
+        <span className="p-label">Descrição (aparece no site)</span>
         <input name="description" defaultValue={s?.description ?? ""} className="p-input" />
+      </label>
+      <label className="lg:col-span-2">
+        <span className="p-label">Ícone</span>
+        <select name="icon" defaultValue={s?.icon ?? "sparkles"} className="p-input">
+          {Object.entries(SERVICE_ICONS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+        </select>
+      </label>
+      <label className="lg:col-span-2 flex items-center gap-2 text-sm text-text-secondary pb-2">
+        <input type="checkbox" name="show_on_home" defaultChecked={s?.show_on_home ?? false} className="accent-[#82590F]" />
+        Cartão na página inicial
       </label>
       <div className="lg:col-span-2">
         <SubmitButton className="p-btn w-full">{s ? "Salvar" : "Criar serviço"}</SubmitButton>

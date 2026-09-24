@@ -8,6 +8,7 @@ import { bool, fail, int, isDate, isTime, isUuid, list, money, opt, str } from "
 import { toTimestamp } from "@/lib/hours";
 import { cardFee, getSettings } from "@/lib/settings";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { SERVICE_ICONS } from "@/lib/site-content";
 import type { ActionState, Anamnesis } from "@/lib/types";
 
 // ─── helpers ───────────────────────────────────────────────────────────
@@ -634,12 +635,14 @@ export async function saveService(_prev: ActionState, fd: FormData): Promise<Act
     category: ["facial", "corporal", "terapias", "combo"].includes(category) ? category : "facial",
     description: opt(fd, "description", 500),
     active: bool(fd, "active"),
+    show_on_home: bool(fd, "show_on_home"),
+    icon: str(fd, "icon") in SERVICE_ICONS ? str(fd, "icon") : "sparkles",
   };
   const { error } = isNew
     ? await supabase.from("services").insert({ ...row, sort_order: 99 })
     : await supabase.from("services").update(row).eq("id", id);
   if (error) return fail(error.code === "23505" ? "Já existe um serviço com esse nome." : "Não foi possível salvar o serviço.");
-  revalidatePath("/", "page");
+  revalidatePath("/", "layout");
   return done(isNew ? "Serviço criado." : "Serviço atualizado.");
 }
 

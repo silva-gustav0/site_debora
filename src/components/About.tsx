@@ -1,51 +1,51 @@
 import Image from "next/image";
 import AnimateIn from "./AnimateIn";
 import { Heart, Eye, Diamond } from "lucide-react";
+import type { SiteContent } from "@/lib/site-content";
 
-const pillars = [
+const pillarStyles = [
   {
     icon: Heart,
-    title: "Missão",
-    text: "Promover bem-estar, autoestima e qualidade de vida a mulheres e homens por meio de serviços de estética e relaxamento realizados com profissionalismo, segurança e atendimento humanizado.",
     gradient: "linear-gradient(135deg,#9A6F1E,#6B4A10)",
     bg: "linear-gradient(135deg,#FBF7EE,#FDFAF7)",
     border: "#EEDFBF",
   },
   {
     icon: Eye,
-    title: "Visão",
-    text: "Ser referência local em estética e bem-estar, reconhecida pela excelência no atendimento, ambiente acolhedor e fidelização dos clientes.",
     gradient: "linear-gradient(135deg,#C9973A,#A87B25)",
     bg: "linear-gradient(135deg,#FFF8E7,#FDFAF7)",
     border: "#E8C882",
   },
   {
     icon: Diamond,
-    title: "Valores",
-    text: "Ética, empatia e atendimento humanizado em cada sessão. Compromisso com a excelência, respeito à individualidade e dedicação ao bem-estar de cada cliente.",
     gradient: "linear-gradient(135deg,#9A6F1E,#C9973A)",
     bg: "linear-gradient(135deg,#FBF7EE,#FFF8E7)",
     border: "#DEC58E",
   },
 ];
 
-export default function About() {
+export default function About({ content: c }: { content: SiteContent["about"] }) {
+  const pillars = c.pillars
+    .map((p, i) => ({ ...pillarStyles[i % pillarStyles.length], ...p }))
+    .filter((p) => p.title.trim() || p.text.trim());
+  const paragraphs = c.text.split(/\n\s*\n/).map((t) => t.trim()).filter(Boolean);
+
   return (
     <section id="sobre" className="py-28 bg-[#FDFAF7] overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         {/* Header */}
         <div className="flex flex-col items-center text-center mb-20">
           <AnimateIn animation="fade">
-            <span className="section-label">Quem Somos</span>
+            <span className="section-label">{c.eyebrow}</span>
           </AnimateIn>
           <AnimateIn animation="up" delay={100}>
             <h2
               className="text-4xl sm:text-5xl font-light mt-4 mb-5 max-w-xl"
               style={{ fontFamily: "var(--font-cormorant), serif", color: "#3B2A12" }}
             >
-              Sobre a{" "}
+              {c.title}{" "}
               <em className="italic font-normal" style={{ color: "#9A6F1E" }}>
-                Clínica Débora Silva
+                {c.title_highlight}
               </em>
             </h2>
           </AnimateIn>
@@ -61,8 +61,8 @@ export default function About() {
             <div className="relative">
               <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-[0_24px_70px_rgba(154,111,30,0.18)]">
                 <Image
-                  src="/images/clinica/img4.png"
-                  alt="Espaço da Clínica Débora Silva"
+                  src={c.image}
+                  alt={`Espaço da ${c.quote_author || c.title_highlight}`}
                   fill
                   className="object-contain"
                   style={{ background: "#FDFAF7" }}
@@ -78,7 +78,7 @@ export default function About() {
               </div>
 
               {/* Quote card below image */}
-              <div
+              {c.quote && <div
                 className="mt-4 mx-1 bg-white/92 backdrop-blur-md rounded-xl p-5 shadow-lg"
                 style={{ border: "1px solid #EEDFBF" }}
               >
@@ -87,15 +87,15 @@ export default function About() {
                   className="italic font-light leading-6"
                   style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "17px", color: "#6B4A10" }}
                 >
-                  “Cada pessoa merece um espaço de cuidado, acolhimento e bem-estar verdadeiros.”
+                  “{c.quote}”
                 </p>
                 <p
                   className="mt-2 uppercase tracking-widest"
                   style={{ fontFamily: "var(--font-lato), sans-serif", fontSize: "9px", color: "#C9973A" }}
                 >
-                  Clínica Débora Silva
+                  {c.quote_author}
                 </p>
-              </div>
+              </div>}
 
               {/* Decorative rings */}
               <div
@@ -112,32 +112,18 @@ export default function About() {
           {/* Text */}
           <AnimateIn animation="right" delay={200}>
             <div>
-              <p
-                className="text-base font-light leading-8 mb-6"
-                style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B5A4B" }}
-              >
-                A Clínica Débora Silva oferece serviços estéticos
-                para mulheres e homens.
-                Nosso espaço foi pensado para oferecer conforto, acolhimento,
-                segurança e experiências únicas de autocuidado em São Paulo.
-              </p>
-              <p
-                className="text-base font-light leading-8 mb-8"
-                style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B5A4B" }}
-              >
-                Aqui, o atendimento é feito pessoalmente pela Débora, com
-                compromisso com a excelência. O trabalho é pautado por
-                ética, empatia e atendimento humanizado, proporcionando
-                experiências únicas de cuidado, autoestima e bem-estar.
-              </p>
+              {paragraphs.map((t, i) => (
+                <p
+                  key={i}
+                  className={`text-base font-light leading-8 ${i === paragraphs.length - 1 ? "mb-8" : "mb-6"}`}
+                  style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B5A4B" }}
+                >
+                  {t}
+                </p>
+              ))}
 
               <div className="flex flex-col gap-4">
-                {[
-                  "Atendimento para mulheres e homens",
-                  "Profissional certificada e em constante atualização",
-                  "Protocolos de higiene e segurança rigorosos",
-                  "Ambiente moderno, sofisticado e acolhedor",
-                ].map((item, i) => (
+                {c.bullets.map((item, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <div
                       className="w-1.5 h-1.5 rounded-full mt-2.5 flex-shrink-0"
@@ -157,9 +143,9 @@ export default function About() {
         </div>
 
         {/* Mission / Vision / Values */}
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className={`grid gap-6 ${pillars.length >= 3 ? "md:grid-cols-3" : pillars.length === 2 ? "md:grid-cols-2" : ""}`}>
           {pillars.map((p, i) => (
-            <AnimateIn key={p.title} animation="up" delay={i * 150}>
+            <AnimateIn key={i} animation="up" delay={i * 150}>
               <div
                 className="hover-lift p-8 rounded-2xl relative overflow-hidden group"
                 style={{ background: p.bg, border: `1px solid ${p.border}` }}
