@@ -131,7 +131,7 @@ export default function Hero() {
               >
                 <Image
                   src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80"
-                  alt="Tratamento estético na Talissa Estética e Bem Estar"
+                  alt="Tratamento estético na Clínica Debora Silva"
                   fill
                   priority
                   className="object-cover"

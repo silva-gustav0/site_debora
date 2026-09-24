@@ -38,13 +38,13 @@ export default function Footer() {
                 className="text-2xl font-light tracking-wide text-rose-200 mb-0.5"
                 style={{ fontFamily: "var(--font-cormorant), serif" }}
               >
-                Talissa
+                Debora Silva
               </div>
               <div
                 className="text-[9px] tracking-[0.3em] uppercase"
                 style={{ fontFamily: "var(--font-lato), sans-serif", color: "#C9973A" }}
               >
-                Estética &amp; Bem Estar
+                Clínica de Estética
               </div>
             </div>
             <div
@@ -179,7 +179,7 @@ export default function Footer() {
             className="text-[11px] font-light text-rose-200/40"
             style={{ fontFamily: "var(--font-lato), sans-serif" }}
           >
-            © {new Date().getFullYear()} Talissa Estética e Bem Estar. Todos os direitos reservados.
+            © {new Date().getFullYear()} Clínica Debora Silva. Todos os direitos reservados.
           </p>
           <p
             className="flex items-center gap-1.5 text-[11px] font-light text-rose-200/40"

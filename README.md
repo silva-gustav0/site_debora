@@ -1,4 +1,4 @@
-# Talissa Estética e Bem Estar
+# Clínica Debora Silva
 
 Site da clínica + painel de gestão da esteticista (Next.js 16 + Supabase).
 

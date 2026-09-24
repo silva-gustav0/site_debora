@@ -8,7 +8,7 @@ import { brl, fmtDate, fmtTime, fmtWeekday, dateSP, whatsappLink } from "@/lib/f
 import CancelBooking from "./CancelBooking";
 
 export const metadata: Metadata = {
-  title: "Meu agendamento · Talissa Estética",
+  title: "Meu agendamento · Clínica Debora Silva",
   robots: { index: false, follow: false },
 };
 
@@ -37,7 +37,7 @@ export default async function MyBookingPage({ params }: PageProps<"/meu-agendame
     >
       <div className="max-w-lg mx-auto">
         <Link href="/" className="flex justify-center mb-8">
-          <Image src="/images/talissa/logo.png" alt={b.clinicName} width={974} height={414} priority className="h-14 w-auto" />
+          <Image src="/images/clinica/logo.png" alt={b.clinicName} width={974} height={414} priority className="h-14 w-auto" />
         </Link>
 
         <article className="rounded-3xl bg-white overflow-hidden shadow-[0_20px_70px_rgba(139,58,66,0.12)] border border-[#F9C7CE]">

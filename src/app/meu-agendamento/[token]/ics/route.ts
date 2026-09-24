@@ -12,10 +12,10 @@ export async function GET(_req: Request, ctx: RouteContext<"/meu-agendamento/[to
   const body = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Talissa Estetica//Agenda//PT-BR",
+    "PRODID:-//Clinica Debora Silva//Agenda//PT-BR",
     "METHOD:PUBLISH",
     "BEGIN:VEVENT",
-    `UID:${b.token}@talissa`,
+    `UID:${b.token}@clinica-debora-silva`,
     `DTSTAMP:${icsDate(new Date().toISOString())}`,
     `DTSTART:${icsDate(b.startsAt)}`,
     `DTEND:${icsDate(b.endsAt)}`,
@@ -34,7 +34,7 @@ export async function GET(_req: Request, ctx: RouteContext<"/meu-agendamento/[to
   return new Response(body, {
     headers: {
       "Content-Type": "text/calendar; charset=utf-8",
-      "Content-Disposition": `attachment; filename="talissa-agendamento.ics"`,
+      "Content-Disposition": `attachment; filename="agendamento-clinica-debora-silva.ics"`,
       "Cache-Control": "no-store",
     },
   });

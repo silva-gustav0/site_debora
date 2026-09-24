@@ -46,8 +46,8 @@ export default function Team() {
           <AnimateIn animation="left" delay={100}>
             <div className="relative rounded-2xl overflow-hidden shadow-[0_24px_70px_rgba(200,115,122,0.18)]">
               <Image
-                src="/images/talissa/img5.jpg"
-                alt="Equipe Talissa Estética e Bem Estar"
+                src="/images/clinica/img5.jpg"
+                alt="Equipe da Clínica Debora Silva"
                 width={800}
                 height={600}
                 className="w-full h-auto"
@@ -77,7 +77,7 @@ export default function Team() {
                 className="text-base font-light leading-8 mb-8"
                 style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B4C52" }}
               >
-                Na Talissa Estética e Bem Estar, acreditamos que a qualificação contínua é
+                Na Clínica Debora Silva, acreditamos que a qualificação contínua é
                 essencial para oferecer os melhores resultados. Nossa equipe está sempre
                 atualizada com as mais recentes técnicas e tecnologias do mercado.
               </p>

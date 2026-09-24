@@ -45,7 +45,7 @@ export default function About() {
             >
               Sobre a{" "}
               <em className="italic font-normal" style={{ color: "#C8737A" }}>
-                Talissa
+                Clínica Debora Silva
               </em>
             </h2>
           </AnimateIn>
@@ -61,8 +61,8 @@ export default function About() {
             <div className="relative">
               <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-[0_24px_70px_rgba(200,115,122,0.18)]">
                 <Image
-                  src="/images/talissa/img4.png"
-                  alt="Espaço da Talissa Estética e Bem Estar"
+                  src="/images/clinica/img4.png"
+                  alt="Espaço da Clínica Debora Silva"
                   fill
                   className="object-contain"
                   style={{ background: "#FDFAF7" }}
@@ -93,7 +93,7 @@ export default function About() {
                   className="mt-2 uppercase tracking-widest"
                   style={{ fontFamily: "var(--font-lato), sans-serif", fontSize: "9px", color: "#C9973A" }}
                 >
-                  Talissa — Estética &amp; Bem Estar
+                  Clínica Debora Silva
                 </p>
               </div>
 
@@ -116,8 +116,8 @@ export default function About() {
                 className="text-base font-light leading-8 mb-6"
                 style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B4C52" }}
               >
-                A Talissa Estética e Bem Estar é uma clínica de prestação de
-                serviços estéticos dedicada exclusivamente ao público feminino.
+                A Clínica Debora Silva oferece serviços estéticos
+                dedicados exclusivamente ao público feminino.
                 Nosso espaço foi pensado para oferecer conforto, acolhimento,
                 segurança e experiências únicas de autocuidado em São Paulo.
               </p>

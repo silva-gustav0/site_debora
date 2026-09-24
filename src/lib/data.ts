@@ -128,8 +128,8 @@ export const timeSlots = [
 ];
 
 export const clinicInfo = {
-  name:         "Talissa Estética e Bem Estar",
-  shortName:    "Talissa",
+  name:         "Clínica Debora Silva",
+  shortName:    "Debora Silva",
   address:      "Av. Paulista, 1337 - Bela Vista",
   neighborhood: "Bela Vista",
   city:         "São Paulo — SP",

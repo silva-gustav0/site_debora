@@ -4,7 +4,7 @@ import { DEFAULT_HOURS } from "./hours";
 import type { Settings } from "./types";
 
 export const DEFAULT_SETTINGS: Settings = {
-  clinic_name: "Talissa Estética e Bem Estar",
+  clinic_name: "Clínica Debora Silva",
   whatsapp: "551165782211",
   address: "Av. Paulista, 1337 - Bela Vista, São Paulo — SP",
   business_hours: DEFAULT_HOURS,

@@ -62,10 +62,10 @@ export default function Sidebar({ name, badges }: { name: string; badges: Sideba
           style={{ background: "linear-gradient(135deg,#F3DDA6,#C9973A)" }}
           aria-hidden="true"
         >
-          T
+          D
         </span>
         <span>
-          <span className="block p-display text-[1.35rem] leading-none text-white">Talissa</span>
+          <span className="block p-display text-[1.35rem] leading-none text-white">Debora Silva</span>
           <span className="block text-[9.5px] tracking-[0.3em] uppercase text-[#E8C882]/80 mt-1">Gestão da clínica</span>
         </span>
       </Link>
@@ -137,7 +137,7 @@ export default function Sidebar({ name, badges }: { name: string; badges: Sideba
       <aside className="panel-sidebar no-print hidden lg:flex fixed inset-y-0 left-0 w-64 flex-col px-3 py-6 z-30">{content}</aside>
 
       <header className="panel-sidebar no-print lg:hidden sticky top-0 z-40 flex items-center justify-between px-4 h-14">
-        <Link href="/painel" className="p-display text-xl text-white">Talissa</Link>
+        <Link href="/painel" className="p-display text-xl text-white">Debora Silva</Link>
         <button onClick={() => setOpen(true)} aria-label="Abrir menu" className="p-2 text-white relative">
           <Menu size={22} />
           {totalAlerts > 0 && <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#E8C882]" />}

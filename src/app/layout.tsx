@@ -18,12 +18,12 @@ const lato = Lato({
 });
 
 export const metadata: Metadata = {
-  title: "Talissa Estética e Bem Estar",
+  title: "Clínica Debora Silva",
   description:
     "Clínica de estética exclusiva ao público feminino em São Paulo. Limpeza de pele, drenagem linfática, massagem relaxante. Promoção de inauguração. Agende sua consulta.",
   keywords: "estética feminina, limpeza de pele, drenagem linfática, massagem relaxante, bem-estar, Av. Paulista",
   openGraph: {
-    title: "Talissa Estética e Bem Estar",
+    title: "Clínica Debora Silva",
     description: "Sua beleza, nossa arte. Estética exclusiva ao público feminino.",
     type: "website",
   },

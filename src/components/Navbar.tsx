@@ -45,8 +45,8 @@ export default function Navbar() {
             {/* Logo */}
             <a href={href("inicio")} className="flex items-center group">
               <Image
-                src="/images/talissa/logo.png"
-                alt="Talissa Estética e Bem Estar"
+                src="/images/clinica/logo.png"
+                alt="Clínica Debora Silva"
                 width={974}
                 height={414}
                 priority
@@ -104,8 +104,8 @@ export default function Navbar() {
             style={{ borderColor: "#FFE8ED" }}
           >
             <Image
-              src="/images/talissa/logo.png"
-              alt="Talissa Estética e Bem Estar"
+              src="/images/clinica/logo.png"
+              alt="Clínica Debora Silva"
               width={974}
               height={414}
               className="h-10 w-auto"

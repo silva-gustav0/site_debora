@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { logout } from "../auth-actions";
 
 export const metadata: Metadata = {
-  title: "Sem acesso · Painel Talissa",
+  title: "Sem acesso · Painel Debora Silva",
   robots: { index: false, follow: false },
 };
 

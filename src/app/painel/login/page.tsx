@@ -4,7 +4,7 @@ import Link from "next/link";
 import LoginForm from "./LoginForm";
 
 export const metadata: Metadata = {
-  title: "Entrar · Painel Talissa",
+  title: "Entrar · Painel Debora Silva",
   robots: { index: false, follow: false },
 };
 
@@ -17,8 +17,8 @@ export default function LoginPage() {
           style={{ background: "radial-gradient(circle, rgba(232,200,130,.35), transparent 65%)" }}
         />
         <div className="flex items-center gap-3 relative">
-          <span className="w-11 h-11 rounded-full flex items-center justify-center p-display text-2xl text-[#2A171B]" style={{ background: "linear-gradient(135deg,#F3DDA6,#C9973A)" }}>T</span>
-          <span className="p-display text-2xl text-white">Talissa</span>
+          <span className="w-11 h-11 rounded-full flex items-center justify-center p-display text-2xl text-[#2A171B]" style={{ background: "linear-gradient(135deg,#F3DDA6,#C9973A)" }}>D</span>
+          <span className="p-display text-2xl text-white">Debora Silva</span>
         </div>
         <div className="relative">
           <p className="p-eyebrow text-[#E8C882] mb-4">Gestão da clínica</p>
@@ -37,7 +37,7 @@ export default function LoginPage() {
       <section className="flex items-center justify-center px-5 py-12">
         <div className="w-full max-w-sm p-rise">
           <div className="flex justify-center mb-8 lg:hidden">
-            <Image src="/images/talissa/logo.png" alt="Talissa Estética e Bem Estar" width={974} height={414} priority className="h-14 w-auto" />
+            <Image src="/images/clinica/logo.png" alt="Clínica Debora Silva" width={974} height={414} priority className="h-14 w-auto" />
           </div>
           <p className="p-eyebrow mb-2">Bem-vinda de volta</p>
           <h2 className="p-display text-5xl font-light text-[#2C1A1E] mb-2">Entrar</h2>
