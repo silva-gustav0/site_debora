@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { Menu, X } from "lucide-react";
+import Link from "next/link";
+import { LogIn, Menu, X } from "lucide-react";
 
 const NAV_LINKS = [
   { label: "Início",    hash: "inicio"      },
@@ -68,10 +69,19 @@ export default function Navbar() {
               ))}
             </nav>
 
-            {/* CTA */}
-            <a href={href("agendamento")} className="hidden md:block btn-primary">
-              Agendar
-            </a>
+            {/* Área da equipe + CTA */}
+            <div className="hidden md:flex items-center gap-5">
+              <Link
+                href="/painel"
+                className="flex items-center gap-1.5 text-[12px] font-light tracking-[0.15em] uppercase hover:text-rose-500 transition-colors duration-200"
+                style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B4C52" }}
+              >
+                <LogIn size={14} /> Área da equipe
+              </Link>
+              <a href={href("agendamento")} className="btn-primary">
+                Agendar
+              </a>
+            </div>
 
             {/* Hamburger */}
             <button
@@ -128,7 +138,15 @@ export default function Navbar() {
             ))}
           </nav>
 
-          <div className="px-6 pb-12">
+          <div className="px-6 pb-12 flex flex-col gap-4">
+            <Link
+              href="/painel"
+              onClick={() => setOpen(false)}
+              className="flex items-center justify-center gap-2 py-3 text-[13px] tracking-[0.1em] uppercase"
+              style={{ fontFamily: "var(--font-lato), sans-serif", color: "#8B3A42" }}
+            >
+              <LogIn size={16} /> Área da equipe
+            </Link>
             <a
               href={href("agendamento")}
               onClick={() => setOpen(false)}
