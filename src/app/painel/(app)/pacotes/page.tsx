@@ -28,8 +28,8 @@ function PackageForm({ pkg, services }: { pkg?: PackageRow; services: ServiceRow
         <label><span className="p-label">Preço (R$)</span><input name="price" required inputMode="decimal" defaultValue={pkg ? String(pkg.price).replace(".", ",") : ""} className="p-input p-num" /></label>
         <label><span className="p-label">Validade (dias)</span><input name="validity_days" type="number" min={1} defaultValue={pkg?.validity_days ?? 180} className="p-input p-num" /></label>
       </div>
-      <label className="flex items-center gap-2 text-sm text-[#6B4C52]">
-        <input type="checkbox" name="active" defaultChecked={pkg?.active ?? true} className="accent-[#A85B63]" /> Disponível para venda
+      <label className="flex items-center gap-2 text-sm text-[#6B5A4B]">
+        <input type="checkbox" name="active" defaultChecked={pkg?.active ?? true} className="accent-[#82590F]" /> Disponível para venda
       </label>
       <div><SubmitButton>{pkg ? "Salvar" : "Criar pacote"}</SubmitButton></div>
     </ActionForm>
@@ -76,14 +76,14 @@ export default async function PackagesPage({ searchParams }: PageProps<"/painel/
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
         <StatTile label="Pacotes ativos" value={active.length} icon={Package} />
-        <StatTile label="Sessões a realizar" value={pendingSessions} hint="saldo das clientes" />
+        <StatTile label="Sessões a realizar" value={pendingSessions} hint="saldo dos clientes" />
         <StatTile label="Receita a executar" value={brl(deferred)} hint="já recebida, sessões pendentes" />
         <StatTile label="Vendidos no mês" value={soldMonth.length} hint={brl(soldMonth.reduce((s, p) => s + Number(p.price), 0))} />
       </div>
 
       <div className="grid xl:grid-cols-[1fr_360px] gap-5">
         <Card bodyClassName="p-0">
-          <div className="px-5 py-3 border-b border-[#F6ECE9]">
+          <div className="px-5 py-3 border-b border-[#F5EEE3]">
             <Chips
               current={filter}
               items={[
@@ -94,7 +94,7 @@ export default async function PackagesPage({ searchParams }: PageProps<"/painel/
             />
           </div>
           {list.length === 0 ? <EmptyState icon={Package}>Nenhum pacote nesta lista.</EmptyState> : (
-            <ul className="divide-y divide-[#F6ECE9]">
+            <ul className="divide-y divide-[#F5EEE3]">
               {list.map((p) => {
                 const daysLeft = p.expires_on ? diffDays(today, p.expires_on) : null;
                 return (
@@ -102,16 +102,16 @@ export default async function PackagesPage({ searchParams }: PageProps<"/painel/
                     <Link href={`/painel/clientes/${p.client_id}?tab=pacotes`} className="flex items-center gap-3 sm:w-60 min-w-0">
                       <Avatar name={p.clients?.name ?? "?"} size={36} />
                       <span className="min-w-0">
-                        <span className="block text-sm font-bold text-[#2C1A1E] truncate">{p.clients?.name}</span>
-                        <span className="block text-xs text-[#8F7479] truncate">{p.name}</span>
+                        <span className="block text-sm font-bold text-[#2B221B] truncate">{p.clients?.name}</span>
+                        <span className="block text-xs text-[#857566] truncate">{p.name}</span>
                       </span>
                     </Link>
                     <div className="flex-1">
-                      <div className="flex justify-between text-xs text-[#8F7479] mb-1.5">
+                      <div className="flex justify-between text-xs text-[#857566] mb-1.5">
                         <span>{p.sessions_used} de {p.sessions_total} sessões · {p.sessions_scheduled} agendadas</span>
                         <span className="p-num">{brl(p.price)}</span>
                       </div>
-                      <Progress value={Number(p.sessions_used)} max={p.sessions_total} color={Number(p.sessions_remaining) <= 1 ? "#C9973A" : "#C8737A"} />
+                      <Progress value={Number(p.sessions_used)} max={p.sessions_total} color={Number(p.sessions_remaining) <= 1 ? "#C9973A" : "#9A6F1E"} />
                     </div>
                     <div className="flex items-center gap-2 sm:w-44 justify-end">
                       {p.status !== "ativo" ? <Badge tone="gray">{p.status}</Badge>
@@ -136,12 +136,12 @@ export default async function PackagesPage({ searchParams }: PageProps<"/painel/
                 const discount = full > 0 ? Math.round((1 - Number(p.price) / full) * 100) : null;
                 return (
                   <li key={p.id}>
-                    <Link href={`/painel/pacotes?editar=${p.id}`} scroll={false} className={`block rounded-xl border border-[#F1E5E2] px-4 py-3 hover:border-[#E3C4C8] ${p.active ? "" : "opacity-60"}`}>
+                    <Link href={`/painel/pacotes?editar=${p.id}`} scroll={false} className={`block rounded-xl border border-[#F0E8DB] px-4 py-3 hover:border-[#E6D8BC] ${p.active ? "" : "opacity-60"}`}>
                       <div className="flex justify-between gap-2">
-                        <p className="text-sm font-bold text-[#2C1A1E]">{p.name}</p>
+                        <p className="text-sm font-bold text-[#2B221B]">{p.name}</p>
                         <p className="p-num text-sm">{brl(p.price)}</p>
                       </div>
-                      <p className="text-xs text-[#8F7479] mt-0.5">
+                      <p className="text-xs text-[#857566] mt-0.5">
                         {p.sessions} sessões · {brl(Number(p.price) / p.sessions)}/sessão
                         {discount !== null && discount > 0 && <> · <span className="text-[#1F6B3A] font-bold">{discount}% off</span></>}
                         {p.validity_days && ` · ${p.validity_days} dias`}

@@ -65,11 +65,11 @@ export default function Contact() {
           </AnimateIn>
           <AnimateIn animation="up" delay={100}>
             <h2
-              className="text-4xl sm:text-5xl font-light text-rose-900 mt-4 mb-5"
+              className="text-4xl sm:text-5xl font-light text-bronze-900 mt-4 mb-5"
               style={{ fontFamily: "var(--font-cormorant), serif" }}
             >
               Entre em{" "}
-              <em className="italic font-normal" style={{ color: "#C8737A" }}>
+              <em className="italic font-normal" style={{ color: "#9A6F1E" }}>
                 Contato
               </em>
             </h2>
@@ -87,7 +87,7 @@ export default function Contact() {
                 className="text-base font-light leading-8 text-text-secondary mb-8"
                 style={{ fontFamily: "var(--font-lato), sans-serif" }}
               >
-                Estamos prontas para atender você com todo o cuidado e atenção
+                Estamos à disposição para atender você com todo o cuidado e atenção
                 que você merece. Entre em contato pelos canais abaixo ou envie
                 uma mensagem.
               </p>
@@ -98,11 +98,11 @@ export default function Contact() {
                     <div
                       className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
                       style={{
-                        background: "linear-gradient(135deg,#FFF5F7,#FFE8ED)",
-                        border: "1px solid #F9C7CE",
+                        background: "linear-gradient(135deg,#FBF7EE,#F6EEDB)",
+                        border: "1px solid #EEDFBF",
                       }}
                     >
-                      <item.icon size={16} className="text-rose-500" />
+                      <item.icon size={16} className="text-bronze-500" />
                     </div>
                     <div>
                       <p
@@ -116,7 +116,7 @@ export default function Contact() {
                           href={item.link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-sm font-light text-rose-700 hover:text-rose-500 transition-colors"
+                          className="text-sm font-light text-bronze-700 hover:text-bronze-500 transition-colors"
                           style={{ fontFamily: "var(--font-lato), sans-serif" }}
                         >
                           {item.value}
@@ -138,14 +138,14 @@ export default function Contact() {
               <div
                 className="mt-8 h-48 rounded-2xl flex items-center justify-center overflow-hidden"
                 style={{
-                  background: "linear-gradient(135deg,#FFE8ED,#FFF0C4)",
-                  border: "1px solid #F9C7CE",
+                  background: "linear-gradient(135deg,#F6EEDB,#FFF0C4)",
+                  border: "1px solid #EEDFBF",
                 }}
               >
                 <div className="text-center">
-                  <MapPin size={28} className="text-rose-400 mx-auto mb-2" />
+                  <MapPin size={28} className="text-bronze-400 mx-auto mb-2" />
                   <p
-                    className="text-sm font-light text-rose-700"
+                    className="text-sm font-light text-bronze-700"
                     style={{ fontFamily: "var(--font-cormorant), serif" }}
                   >
                     Av. Paulista, 1337<br />Bela Vista — São Paulo, SP
@@ -169,16 +169,16 @@ export default function Contact() {
             {sent ? (
               <div
                 className="h-full flex flex-col items-center justify-center text-center py-16 rounded-2xl"
-                style={{ background: "#FFF5F7", border: "1px solid #F9C7CE" }}
+                style={{ background: "#FBF7EE", border: "1px solid #EEDFBF" }}
               >
                 <div
                   className="w-16 h-16 rounded-full flex items-center justify-center mb-5"
-                  style={{ background: "linear-gradient(135deg,#C8737A,#8B3A42)" }}
+                  style={{ background: "linear-gradient(135deg,#9A6F1E,#6B4A10)" }}
                 >
                   <CheckCircle2 size={28} className="text-white" />
                 </div>
                 <h3
-                  className="text-2xl font-light text-rose-800 mb-3"
+                  className="text-2xl font-light text-bronze-800 mb-3"
                   style={{ fontFamily: "var(--font-cormorant), serif" }}
                 >
                   Mensagem Enviada!
@@ -202,8 +202,8 @@ export default function Contact() {
                 className="rounded-2xl p-8 sm:p-10"
                 style={{
                   background: "white",
-                  border: "1px solid #F9C7CE",
-                  boxShadow: "0 4px 40px rgba(200,115,122,0.08)",
+                  border: "1px solid #EEDFBF",
+                  boxShadow: "0 4px 40px rgba(154,111,30,0.08)",
                 }}
               >
                 <div className="grid sm:grid-cols-2 gap-5 mb-5">
@@ -267,7 +267,7 @@ export default function Contact() {
                   <textarea
                     rows={5}
                     required
-                    placeholder="Como podemos ajudá-la? Dúvidas sobre tratamentos, preços ou agendamentos…"
+                    placeholder="Como podemos ajudar? Dúvidas sobre tratamentos, preços ou agendamentos…"
                     className="form-input resize-none"
                     value={form.message}
                     onChange={(e) => setForm({ ...form, message: e.target.value })}
@@ -281,7 +281,7 @@ export default function Contact() {
                 />
 
                 {error && (
-                  <p className="mb-5 flex items-start gap-2 rounded-lg px-4 py-3 text-sm" style={{ background: "#FFF1F1", color: "#8B3A42", border: "1px solid #F4C2C2" }} role="alert">
+                  <p className="mb-5 flex items-start gap-2 rounded-lg px-4 py-3 text-sm" style={{ background: "#FFF1F1", color: "#9B2C2C", border: "1px solid #F4C2C2" }} role="alert">
                     <AlertCircle size={16} className="mt-0.5 shrink-0" /> {error}
                   </p>
                 )}

@@ -79,7 +79,7 @@ export default async function DashboardPage() {
     <>
       <PageHeader
         eyebrow={`${fmtWeekday(today, "long")} · ${fmtDate(today, { month: "long", year: undefined })}`}
-        title={<>{greeting}, <em className="italic text-[#A85B63]">{firstName(staff.name)}</em></>}
+        title={<>{greeting}, <em className="italic text-[#82590F]">{firstName(staff.name)}</em></>}
         subtitle={
           activeToday.length
             ? `Você tem ${activeToday.length} atendimento${activeToday.length > 1 ? "s" : ""} hoje${pending.length ? ` e ${pending.length} pedido${pending.length > 1 ? "s" : ""} para confirmar` : ""}.`
@@ -100,7 +100,7 @@ export default async function DashboardPage() {
         <StatTile label="Hoje" value={activeToday.length} hint={`${activeToday.filter((a) => a.status === "concluido").length} concluídos`} icon={CalendarCheck} href="/painel/agenda?view=dia" />
         <StatTile label="A confirmar" value={pending.length} tone={pending.length ? "warn" : "default"} hint="pedidos do site" icon={Clock} href="/painel/agenda" />
         <StatTile label="Ticket médio" value={brl(ticket)} hint={`${doneMonth.length} atendimentos no mês`} icon={Receipt} href="/painel/relatorios" />
-        <StatTile label="Novas clientes" value={newClientsRes.count ?? 0} hint="neste mês" icon={Users} href="/painel/crm" />
+        <StatTile label="Novos clientes" value={newClientsRes.count ?? 0} hint="neste mês" icon={Users} href="/painel/crm" />
       </div>
 
       <div className="grid xl:grid-cols-3 gap-5 mb-5">
@@ -113,7 +113,7 @@ export default async function DashboardPage() {
           <Card
             title="Agenda de hoje"
             eyebrow={fmtDate(today, { year: undefined })}
-            action={<Link href="/painel/agenda?view=dia" className="text-xs text-[#A85B63] hover:underline flex items-center gap-1">Abrir agenda <ArrowRight size={12} /></Link>}
+            action={<Link href="/painel/agenda?view=dia" className="text-xs text-[#82590F] hover:underline flex items-center gap-1">Abrir agenda <ArrowRight size={12} /></Link>}
             bodyClassName="p-3"
           >
             {todayAppts.length === 0 ? (
@@ -122,7 +122,7 @@ export default async function DashboardPage() {
               <div className="flex flex-col gap-2">{todayAppts.map((a) => <AppointmentItem key={a.id} appt={a} />)}</div>
             )}
           </Card>
-          <Card title="Receitas e despesas" eyebrow="Últimos 6 meses" action={<Link href="/painel/financeiro" className="text-xs text-[#A85B63] hover:underline">Financeiro</Link>}>
+          <Card title="Receitas e despesas" eyebrow="Últimos 6 meses" action={<Link href="/painel/financeiro" className="text-xs text-[#82590F] hover:underline">Financeiro</Link>}>
             <MonthlyChart months={months} />
           </Card>
         </div>
@@ -179,19 +179,19 @@ export default async function DashboardPage() {
             )}
           </Card>
 
-          <Card title="Tarefas de hoje" eyebrow="CRM" action={<Link href="/painel/crm" className="text-xs text-[#A85B63] hover:underline">Ver todas</Link>} bodyClassName="p-3">
+          <Card title="Tarefas de hoje" eyebrow="CRM" action={<Link href="/painel/crm" className="text-xs text-[#82590F] hover:underline">Ver todas</Link>} bodyClassName="p-3">
             {followUps.length === 0 ? (
               <EmptyState icon={AlertTriangle}>Nenhuma tarefa pendente.</EmptyState>
             ) : (
-              <ul className="flex flex-col divide-y divide-[#F6ECE9]">
+              <ul className="flex flex-col divide-y divide-[#F5EEE3]">
                 {followUps.map((f) => (
                   <li key={f.id} className="py-2.5 px-1 flex gap-3 items-start">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm">
-                        <Link href={`/painel/clientes/${f.clients?.id}?tab=relacionamento`} className="text-[#2C1A1E] hover:underline">{f.clients?.name}</Link>
+                        <Link href={`/painel/clientes/${f.clients?.id}?tab=relacionamento`} className="text-[#2B221B] hover:underline">{f.clients?.name}</Link>
                         {f.due_on! < today && <span className="ml-2"><Badge tone="red">Atrasada</Badge></span>}
                       </p>
-                      <p className="text-xs text-[#8F7479] line-clamp-2"><strong>{INTERACTION_LABEL[f.kind]}:</strong> {f.content}</p>
+                      <p className="text-xs text-[#857566] line-clamp-2"><strong>{INTERACTION_LABEL[f.kind]}:</strong> {f.content}</p>
                     </div>
                     <form action={completeInteraction}>
                       <input type="hidden" name="id" value={f.id} />
@@ -203,7 +203,7 @@ export default async function DashboardPage() {
             )}
           </Card>
 
-          <Card title="Chamar de volta" eyebrow="Recorrência" action={<Link href="/painel/recorrencia" className="text-xs text-[#A85B63] hover:underline flex items-center gap-1"><Repeat size={12} /> Ver</Link>} bodyClassName="p-3">
+          <Card title="Chamar de volta" eyebrow="Recorrência" action={<Link href="/painel/recorrencia" className="text-xs text-[#82590F] hover:underline flex items-center gap-1"><Repeat size={12} /> Ver</Link>} bodyClassName="p-3">
             {returns.length === 0 ? (
               <EmptyState icon={Repeat}>Nenhum retorno pendente.</EmptyState>
             ) : (
@@ -211,11 +211,11 @@ export default async function DashboardPage() {
                 {returns.map((c) => {
                   const wa = whatsappLink(c.phone, fillTemplate(settings.templates.retorno, { nome: firstName(c.name), servico: "tratamento", clinica: settings.clinic_name }));
                   return (
-                    <li key={c.id} className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-[#FFF8F6]">
+                    <li key={c.id} className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-[#FDFAF5]">
                       <Avatar name={c.name} size={30} />
                       <div className="flex-1 min-w-0">
-                        <Link href={`/painel/clientes/${c.id}`} className="text-sm text-[#2C1A1E] hover:underline truncate block">{c.name}</Link>
-                        <p className="text-[11px] text-[#8F7479]">{RECURRENCE_META[c.recurrence.status].label} · {c.recurrence.daysSinceLast} dias</p>
+                        <Link href={`/painel/clientes/${c.id}`} className="text-sm text-[#2B221B] hover:underline truncate block">{c.name}</Link>
+                        <p className="text-[11px] text-[#857566]">{RECURRENCE_META[c.recurrence.status].label} · {c.recurrence.daysSinceLast} dias</p>
                       </div>
                       {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="p-btn-ghost p-btn-sm" aria-label={`WhatsApp de ${c.name}`}><MessageCircle size={13} /></a>}
                     </li>

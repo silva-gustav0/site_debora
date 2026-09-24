@@ -15,7 +15,7 @@ const TEMPLATE_INFO: Record<TemplateKey, { title: string; when: string }> = {
   lembrete: { title: "Lembrete (véspera)", when: "Enviada no dia anterior ao atendimento." },
   pos_atendimento: { title: "Pós-atendimento", when: "Enviada após concluir o atendimento." },
   retorno: { title: "Retorno", when: "Quando chega a hora da próxima sessão." },
-  reativacao: { title: "Reativação", when: "Para clientes inativas há muito tempo." },
+  reativacao: { title: "Reativação", when: "Para clientes inativos há muito tempo." },
   aniversario: { title: "Aniversário", when: "No dia do aniversário da cliente." },
 };
 
@@ -76,7 +76,7 @@ export default async function SettingsPage({ searchParams }: PageProps<"/painel/
                   return (
                     <tr key={d}>
                       <td className="font-bold">{WEEKDAY_NAMES[d]}</td>
-                      <td><input type="checkbox" name={`open_day_${d}`} defaultChecked={Boolean(h)} className="accent-[#A85B63] w-4 h-4" aria-label={`${WEEKDAY_NAMES[d]} aberto`} /></td>
+                      <td><input type="checkbox" name={`open_day_${d}`} defaultChecked={Boolean(h)} className="accent-[#82590F] w-4 h-4" aria-label={`${WEEKDAY_NAMES[d]} aberto`} /></td>
                       <td><input type="time" name={`open_${d}`} defaultValue={h?.open ?? "09:00"} className="p-input w-28" aria-label="Abre" /></td>
                       <td><input type="time" name={`close_${d}`} defaultValue={h?.close ?? "18:00"} className="p-input w-28" aria-label="Fecha" /></td>
                       <td><input type="time" name={`break_start_${d}`} defaultValue={h?.break_start ?? ""} className="p-input w-28" aria-label="Início do intervalo" /></td>
@@ -86,7 +86,7 @@ export default async function SettingsPage({ searchParams }: PageProps<"/painel/
                 })}
               </tbody>
             </table>
-            <p className="text-xs text-[#8F7479] mt-3">Os horários valem para o site e para a grade da agenda. Para folgas pontuais, use “Bloquear” na agenda.</p>
+            <p className="text-xs text-[#857566] mt-3">Os horários valem para o site e para a grade da agenda. Para folgas pontuais, use “Bloquear” na agenda.</p>
           </Card>
           <div className="xl:col-span-2"><SubmitButton pendingText="Salvando…">Salvar configurações</SubmitButton></div>
         </ActionForm>
@@ -94,7 +94,7 @@ export default async function SettingsPage({ searchParams }: PageProps<"/painel/
 
       {tab === "mensagens" && (
         <ActionForm action={saveTemplates} className="flex flex-col gap-5">
-          <p className="text-sm text-[#6B4C52]">
+          <p className="text-sm text-[#6B5A4B]">
             Variáveis: <code className="bg-white px-1 rounded">{"{nome}"}</code> <code className="bg-white px-1 rounded">{"{servico}"}</code> <code className="bg-white px-1 rounded">{"{data}"}</code>{" "}
             <code className="bg-white px-1 rounded">{"{hora}"}</code> <code className="bg-white px-1 rounded">{"{clinica}"}</code> <code className="bg-white px-1 rounded">{"{link}"}</code> (link do agendamento da cliente).
           </p>
@@ -114,10 +114,10 @@ export default async function SettingsPage({ searchParams }: PageProps<"/painel/
           <Card title="Pessoas com acesso">
             <ul className="flex flex-col gap-2">
               {(staffRes.data ?? []).map((s) => (
-                <li key={s.user_id} className="flex items-center gap-3 rounded-xl border border-[#F1E5E2] px-3 py-2.5">
+                <li key={s.user_id} className="flex items-center gap-3 rounded-xl border border-[#F0E8DB] px-3 py-2.5">
                   <Avatar name={s.name} size={34} />
                   <span className="flex-1">{s.name}</span>
-                  <span className="text-xs text-[#8F7479]">desde {fmtDate(s.created_at)}</span>
+                  <span className="text-xs text-[#857566]">desde {fmtDate(s.created_at)}</span>
                 </li>
               ))}
             </ul>

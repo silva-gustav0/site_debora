@@ -4,7 +4,7 @@ import { requireStaff } from "@/lib/dal";
 import { todaySP } from "@/lib/format";
 
 export const metadata: Metadata = {
-  title: { default: "Painel · Debora Silva", template: "%s · Painel Debora Silva" },
+  title: { default: "Painel · Débora Silva", template: "%s · Painel Débora Silva" },
   robots: { index: false, follow: false },
 };
 

@@ -25,7 +25,7 @@ export default function LoginForm() {
         <input id="password" name="password" type="password" required autoComplete="current-password" className="p-input" />
       </div>
       {state && !state.ok && !pending && (
-        <p role="alert" className="text-sm rounded-lg px-3 py-2" style={{ background: "#FFF1F1", color: "#8B3A42" }}>
+        <p role="alert" className="text-sm rounded-lg px-3 py-2" style={{ background: "#FFF1F1", color: "#9B2C2C" }}>
           {state.message}
         </p>
       )}

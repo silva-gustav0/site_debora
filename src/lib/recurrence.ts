@@ -7,8 +7,8 @@ export type RecurrenceStatus = "agendada" | "atrasada" | "proxima" | "em_dia" | 
 export const RECURRENCE_META: Record<RecurrenceStatus, { label: string; tone: Tone; order: number }> = {
   atrasada:   { label: "Retorno atrasado", tone: "red",   order: 0 },
   proxima:    { label: "Retorno próximo",  tone: "gold",  order: 1 },
-  inativa:    { label: "Inativa",          tone: "gray",  order: 2 },
-  agendada:   { label: "Já agendada",      tone: "blue",  order: 3 },
+  inativa:    { label: "Inativo",          tone: "gray",  order: 2 },
+  agendada:   { label: "Já agendado",      tone: "blue",  order: 3 },
   em_dia:     { label: "Em dia",           tone: "green", order: 4 },
   sem_visita: { label: "Sem atendimentos", tone: "gray",  order: 5 },
 };
@@ -20,7 +20,7 @@ export type Recurrence = {
   status: RecurrenceStatus;
   /** Intervalo esperado entre visitas (dias). */
   interval: number;
-  /** Se o intervalo vem do histórico real da cliente. */
+  /** Se o intervalo vem do histórico real do cliente. */
   learned: boolean;
   lastVisit: string | null;
   dueDate: string | null;

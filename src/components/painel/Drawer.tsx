@@ -10,10 +10,10 @@ export default function Drawer({
     <>
       <Link href={closeHref} scroll={false} className="p-drawer-backdrop no-print" aria-label="Fechar painel" />
       <aside className="p-drawer" role="dialog" aria-modal="true" aria-label={typeof title === "string" ? title : undefined}>
-        <header className="sticky top-0 z-10 flex items-start justify-between gap-3 px-6 pt-5 pb-4 bg-[#FFFCFB]/95 backdrop-blur border-b border-[#F3E7E4]">
+        <header className="sticky top-0 z-10 flex items-start justify-between gap-3 px-6 pt-5 pb-4 bg-[#FFFCFB]/95 backdrop-blur border-b border-[#F3ECE0]">
           <div>
             {eyebrow && <p className="p-eyebrow mb-1">{eyebrow}</p>}
-            <h2 className="p-display text-[1.8rem] leading-tight text-[#2C1A1E]">{title}</h2>
+            <h2 className="p-display text-[1.8rem] leading-tight text-[#2B221B]">{title}</h2>
           </div>
           <Link href={closeHref} scroll={false} className="p-btn-ghost p-btn-sm mt-1" aria-label="Fechar">
             <X size={16} />

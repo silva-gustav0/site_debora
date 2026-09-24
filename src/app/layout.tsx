@@ -18,13 +18,13 @@ const lato = Lato({
 });
 
 export const metadata: Metadata = {
-  title: "Clínica Debora Silva",
+  title: "Clínica Débora Silva",
   description:
-    "Clínica de estética exclusiva ao público feminino em São Paulo. Limpeza de pele, drenagem linfática, massagem relaxante. Promoção de inauguração. Agende sua consulta.",
-  keywords: "estética feminina, limpeza de pele, drenagem linfática, massagem relaxante, bem-estar, Av. Paulista",
+    "Clínica de estética em São Paulo para mulheres e homens. Limpeza de pele, drenagem linfática, massagem relaxante. Promoção de inauguração. Agende sua consulta.",
+  keywords: "clínica de estética, limpeza de pele, drenagem linfática, massagem relaxante, bem-estar, Av. Paulista",
   openGraph: {
-    title: "Clínica Debora Silva",
-    description: "Sua beleza, nossa arte. Estética exclusiva ao público feminino.",
+    title: "Clínica Débora Silva",
+    description: "Sua beleza, nossa arte. Estética e bem-estar para mulheres e homens.",
     type: "website",
   },
 };

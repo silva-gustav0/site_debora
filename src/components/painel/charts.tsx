@@ -1,27 +1,27 @@
 import { brl } from "@/lib/format";
 
-const ROSE = "#C8737A";
+const BRONZE = "#9A6F1E";
 const GOLD = "#C9973A";
 const compact = new Intl.NumberFormat("pt-BR", { notation: "compact", maximumFractionDigits: 1 });
 
 /** Barras horizontais ordenadas (magnitude, uma cor). Rótulos e valores em texto. */
 export function BarList({
-  rows, empty = "Sem dados no período.", format = brl, color = ROSE,
+  rows, empty = "Sem dados no período.", format = brl, color = BRONZE,
 }: { rows: { label: string; value: number; hint?: string }[]; empty?: string; format?: (n: number) => string; color?: string }) {
   const max = Math.max(...rows.map((r) => r.value), 0);
   const total = rows.reduce((s, r) => s + r.value, 0);
-  if (!rows.length || max === 0) return <p className="text-sm text-[#8F7479] py-6 text-center">{empty}</p>;
+  if (!rows.length || max === 0) return <p className="text-sm text-[#857566] py-6 text-center">{empty}</p>;
   return (
     <ul className="flex flex-col gap-3">
       {rows.map((r) => (
         <li key={r.label} title={`${r.label}: ${format(r.value)} (${Math.round((r.value / total) * 100)}%)`}>
           <div className="flex justify-between gap-3 text-sm mb-1.5">
-            <span className="text-[#2C1A1E] truncate">{r.label}{r.hint && <span className="text-[#8F7479] text-xs"> · {r.hint}</span>}</span>
-            <span className="p-num text-[#6B4C52] whitespace-nowrap">
-              {format(r.value)} <span className="text-[#A88D92] text-xs">{Math.round((r.value / total) * 100)}%</span>
+            <span className="text-[#2B221B] truncate">{r.label}{r.hint && <span className="text-[#857566] text-xs"> · {r.hint}</span>}</span>
+            <span className="p-num text-[#6B5A4B] whitespace-nowrap">
+              {format(r.value)} <span className="text-[#A69885] text-xs">{Math.round((r.value / total) * 100)}%</span>
             </span>
           </div>
-          <div className="h-2 rounded-full bg-[#F6ECE9]">
+          <div className="h-2 rounded-full bg-[#F5EEE3]">
             <div className="h-2 rounded-full" style={{ width: `${Math.max((r.value / max) * 100, 2)}%`, background: color }} />
           </div>
         </li>
@@ -36,20 +36,20 @@ export function DailyBars({ days, highlight }: { days: { day: number; value: num
   const best = days.reduce((a, b) => (b.value > a.value ? b : a), days[0]);
   return (
     <figure>
-      <div className="flex items-end gap-[3px] h-40 border-b border-[#EBDDD9]" role="img" aria-label="Receita por dia do mês">
+      <div className="flex items-end gap-[3px] h-40 border-b border-[#EAE0D0]" role="img" aria-label="Receita por dia do mês">
         {days.map((d) => (
           <div key={d.day} className="group relative flex-1 h-full flex items-end" title={`Dia ${d.day}: ${brl(d.value)}`}>
             <div
               className="w-full rounded-t-[4px] transition-opacity group-hover:opacity-80"
-              style={{ height: max ? `${(d.value / max) * 100}%` : 0, minHeight: d.value > 0 ? 3 : 0, background: d.day === highlight ? "#8B3A42" : ROSE }}
+              style={{ height: max ? `${(d.value / max) * 100}%` : 0, minHeight: d.value > 0 ? 3 : 0, background: d.day === highlight ? "#6B4A10" : BRONZE }}
             />
-            <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block whitespace-nowrap rounded-md bg-[#2C1A1E] px-2 py-1 text-[11px] text-white z-10">
+            <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block whitespace-nowrap rounded-md bg-[#2B221B] px-2 py-1 text-[11px] text-white z-10">
               Dia {d.day} · {brl(d.value)}
             </span>
           </div>
         ))}
       </div>
-      <figcaption className="flex justify-between text-[11px] text-[#8F7479] mt-1.5 p-num">
+      <figcaption className="flex justify-between text-[11px] text-[#857566] mt-1.5 p-num">
         <span>1</span>
         {best && best.value > 0 && <span>Melhor dia: {best.day} ({brl(best.value)})</span>}
         <span>{days.length}</span>
@@ -73,16 +73,16 @@ export function MonthlyChart({ months }: { months: { label: string; income: numb
 
   return (
     <figure>
-      <div className="flex gap-4 text-xs text-[#6B4C52] mb-2">
-        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm" style={{ background: ROSE }} /> Receitas</span>
+      <div className="flex gap-4 text-xs text-[#6B5A4B] mb-2">
+        <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm" style={{ background: BRONZE }} /> Receitas</span>
         <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm" style={{ background: "#E3D3C4" }} /> Despesas</span>
         <span className="flex items-center gap-1.5"><span className="w-4 h-0.5" style={{ background: GOLD }} /> Resultado</span>
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img" aria-label="Receitas e despesas por mês">
         {ticks.map((t) => (
           <g key={t}>
-            <line x1={PAD_L} x2={W - 8} y1={yv(t)} y2={yv(t)} stroke="#F1E4E1" />
-            <text x={PAD_L - 6} y={yv(t) + 4} textAnchor="end" fontSize="10" fill="#A88D92">{compact.format(t)}</text>
+            <line x1={PAD_L} x2={W - 8} y1={yv(t)} y2={yv(t)} stroke="#F0E7DA" />
+            <text x={PAD_L - 6} y={yv(t) + 4} textAnchor="end" fontSize="10" fill="#A69885">{compact.format(t)}</text>
           </g>
         ))}
         {months.map((m, i) => {
@@ -91,9 +91,9 @@ export function MonthlyChart({ months }: { months: { label: string; income: numb
             <g key={m.label}>
               <title>{`${m.label}: receitas ${brl(m.income)} · despesas ${brl(m.expense)} · resultado ${brl(m.income - m.expense)}`}</title>
               <rect x={cx - slot / 2} y={PAD_T} width={slot} height={innerH} fill="transparent" />
-              <rect x={cx - bw - 1} y={yv(m.income)} width={bw} height={Math.max(innerH + PAD_T - yv(m.income), 0)} rx="3" fill={ROSE} />
+              <rect x={cx - bw - 1} y={yv(m.income)} width={bw} height={Math.max(innerH + PAD_T - yv(m.income), 0)} rx="3" fill={BRONZE} />
               <rect x={cx + 1} y={yv(m.expense)} width={bw} height={Math.max(innerH + PAD_T - yv(m.expense), 0)} rx="3" fill="#E3D3C4" />
-              <text x={cx} y={H - 8} textAnchor="middle" fontSize="10.5" fill="#8F7479">{m.label}</text>
+              <text x={cx} y={H - 8} textAnchor="middle" fontSize="10.5" fill="#857566">{m.label}</text>
             </g>
           );
         })}
@@ -107,7 +107,7 @@ export function MonthlyChart({ months }: { months: { label: string; income: numb
 }
 
 /** Mini gráfico de linha para tendências em cards. */
-export function Sparkline({ values, color = ROSE }: { values: number[]; color?: string }) {
+export function Sparkline({ values, color = BRONZE }: { values: number[]; color?: string }) {
   if (values.length < 2) return null;
   const W = 120, H = 32;
   const max = Math.max(...values, 1), min = Math.min(...values, 0);

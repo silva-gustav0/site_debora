@@ -2,7 +2,6 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
 import Services from "@/components/Services";
-import Team from "@/components/Team";
 import Schedule from "@/components/Schedule";
 import BlogSection from "@/components/BlogSection";
 import Contact from "@/components/Contact";
@@ -22,7 +21,6 @@ export default async function Home() {
         <Hero />
         <About />
         <Services />
-        <Team />
         <Schedule config={config} />
         <BlogSection />
         <Contact />

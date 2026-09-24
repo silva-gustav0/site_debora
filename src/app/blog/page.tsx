@@ -21,16 +21,16 @@ const postImages: Record<string, string> = {
 };
 
 const catColors: Record<string, string> = {
-  "Cuidados com a Pele": "#C8737A",
+  "Cuidados com a Pele": "#9A6F1E",
   "Tratamentos Corporais": "#C9973A",
-  "Dicas de Beleza": "#4A9B6F",
-  "Bem-Estar": "#6A7BC9",
-  "SPA & Relaxamento": "#9B4AC8",
+  "Dicas de Beleza": "#6B8F71",
+  "Bem-Estar": "#7D6B58",
+  "SPA & Relaxamento": "#6B4A10",
 };
 
 export const metadata = {
-  title: "Blog | Clínica Debora Silva",
-  description: "Dicas de beleza, cuidados com a pele e bem-estar do blog da Clínica Debora Silva.",
+  title: "Blog | Clínica Débora Silva",
+  description: "Dicas de beleza, cuidados com a pele e bem-estar do blog da Clínica Débora Silva.",
 };
 
 export default function BlogPage() {
@@ -41,14 +41,14 @@ export default function BlogPage() {
         {/* Header */}
         <section
           className="pt-36 pb-20 text-center"
-          style={{ background: "linear-gradient(135deg,#FFF5F7 0%,#FDFAF7 50%,#FFF8E7 100%)" }}
+          style={{ background: "linear-gradient(135deg,#FBF7EE 0%,#FDFAF7 50%,#FFF8E7 100%)" }}
         >
           <span className="section-label">Conteúdo & Inspiração</span>
           <h1
-            className="text-5xl sm:text-6xl font-light text-rose-900 mt-4 mb-5"
+            className="text-5xl sm:text-6xl font-light text-bronze-900 mt-4 mb-5"
             style={{ fontFamily: "var(--font-cormorant), serif" }}
           >
-            Nosso <em className="italic font-normal" style={{ color: "#C8737A" }}>Blog</em>
+            Nosso <em className="italic font-normal" style={{ color: "#9A6F1E" }}>Blog</em>
           </h1>
           <div
             className="gold-line mx-auto mb-6"
@@ -72,8 +72,8 @@ export default function BlogPage() {
                   className="group block rounded-2xl overflow-hidden hover-lift"
                   style={{
                     background: "white",
-                    border: "1px solid #F9C7CE",
-                    boxShadow: "0 2px 20px rgba(200,115,122,0.07)",
+                    border: "1px solid #EEDFBF",
+                    boxShadow: "0 2px 20px rgba(154,111,30,0.07)",
                   }}
                 >
                   {/* Image */}
@@ -87,7 +87,7 @@ export default function BlogPage() {
                     />
                     <div
                       className="absolute inset-0"
-                      style={{ background: "linear-gradient(to top, rgba(44,26,30,0.2) 0%, transparent 60%)" }}
+                      style={{ background: "linear-gradient(to top, rgba(43,34,27,0.2) 0%, transparent 60%)" }}
                     />
                     {post.featured && (
                       <div
@@ -107,13 +107,13 @@ export default function BlogPage() {
                       className="text-[9.5px] tracking-widest uppercase block mb-3"
                       style={{
                         fontFamily: "var(--font-lato), sans-serif",
-                        color: catColors[post.category] || "#C8737A",
+                        color: catColors[post.category] || "#9A6F1E",
                       }}
                     >
                       {post.category}
                     </span>
                     <h2
-                      className="text-xl font-light text-rose-800 mb-3 leading-snug group-hover:text-rose-600 transition-colors"
+                      className="text-xl font-light text-bronze-800 mb-3 leading-snug group-hover:text-bronze-600 transition-colors"
                       style={{ fontFamily: "var(--font-cormorant), serif" }}
                     >
                       {post.title}
@@ -131,7 +131,7 @@ export default function BlogPage() {
                       >
                         <Clock size={11} /> {post.readTime}
                       </div>
-                      <div className="flex items-center gap-1.5 text-rose-500">
+                      <div className="flex items-center gap-1.5 text-bronze-500">
                         <span
                           className="text-[10.5px] tracking-widest uppercase"
                           style={{ fontFamily: "var(--font-lato), sans-serif" }}

@@ -6,15 +6,15 @@ const pillars = [
   {
     icon: Heart,
     title: "Missão",
-    text: "Promover bem-estar, autoestima e qualidade de vida às mulheres por meio de serviços de estética e relaxamento realizados com profissionalismo, segurança e atendimento humanizado.",
-    gradient: "linear-gradient(135deg,#C8737A,#8B3A42)",
-    bg: "linear-gradient(135deg,#FFF5F7,#FDFAF7)",
-    border: "#F9C7CE",
+    text: "Promover bem-estar, autoestima e qualidade de vida a mulheres e homens por meio de serviços de estética e relaxamento realizados com profissionalismo, segurança e atendimento humanizado.",
+    gradient: "linear-gradient(135deg,#9A6F1E,#6B4A10)",
+    bg: "linear-gradient(135deg,#FBF7EE,#FDFAF7)",
+    border: "#EEDFBF",
   },
   {
     icon: Eye,
     title: "Visão",
-    text: "Ser referência local em estética e bem-estar feminino, reconhecida pela excelência no atendimento, ambiente acolhedor e fidelização das clientes.",
+    text: "Ser referência local em estética e bem-estar, reconhecida pela excelência no atendimento, ambiente acolhedor e fidelização dos clientes.",
     gradient: "linear-gradient(135deg,#C9973A,#A87B25)",
     bg: "linear-gradient(135deg,#FFF8E7,#FDFAF7)",
     border: "#E8C882",
@@ -22,10 +22,10 @@ const pillars = [
   {
     icon: Diamond,
     title: "Valores",
-    text: "Ética, empatia e atendimento humanizado em cada sessão. Compromisso com a excelência, respeito à individualidade e dedicação ao bem-estar feminino.",
-    gradient: "linear-gradient(135deg,#C8737A,#C9973A)",
-    bg: "linear-gradient(135deg,#FFF5F7,#FFF8E7)",
-    border: "#F4A6B0",
+    text: "Ética, empatia e atendimento humanizado em cada sessão. Compromisso com a excelência, respeito à individualidade e dedicação ao bem-estar de cada cliente.",
+    gradient: "linear-gradient(135deg,#9A6F1E,#C9973A)",
+    bg: "linear-gradient(135deg,#FBF7EE,#FFF8E7)",
+    border: "#DEC58E",
   },
 ];
 
@@ -41,11 +41,11 @@ export default function About() {
           <AnimateIn animation="up" delay={100}>
             <h2
               className="text-4xl sm:text-5xl font-light mt-4 mb-5 max-w-xl"
-              style={{ fontFamily: "var(--font-cormorant), serif", color: "#4A1820" }}
+              style={{ fontFamily: "var(--font-cormorant), serif", color: "#3B2A12" }}
             >
               Sobre a{" "}
-              <em className="italic font-normal" style={{ color: "#C8737A" }}>
-                Clínica Debora Silva
+              <em className="italic font-normal" style={{ color: "#9A6F1E" }}>
+                Clínica Débora Silva
               </em>
             </h2>
           </AnimateIn>
@@ -59,10 +59,10 @@ export default function About() {
           {/* Photo */}
           <AnimateIn animation="left" delay={100}>
             <div className="relative">
-              <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-[0_24px_70px_rgba(200,115,122,0.18)]">
+              <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-[0_24px_70px_rgba(154,111,30,0.18)]">
                 <Image
                   src="/images/clinica/img4.png"
-                  alt="Espaço da Clínica Debora Silva"
+                  alt="Espaço da Clínica Débora Silva"
                   fill
                   className="object-contain"
                   style={{ background: "#FDFAF7" }}
@@ -72,7 +72,7 @@ export default function About() {
                   className="absolute inset-0"
                   style={{
                     background:
-                      "linear-gradient(160deg, rgba(200,115,122,0.06) 0%, rgba(201,151,58,0.04) 100%)",
+                      "linear-gradient(160deg, rgba(154,111,30,0.06) 0%, rgba(201,151,58,0.04) 100%)",
                   }}
                 />
               </div>
@@ -80,20 +80,20 @@ export default function About() {
               {/* Quote card below image */}
               <div
                 className="mt-4 mx-1 bg-white/92 backdrop-blur-md rounded-xl p-5 shadow-lg"
-                style={{ border: "1px solid #F9C7CE" }}
+                style={{ border: "1px solid #EEDFBF" }}
               >
                 <div className="gold-line mb-3" />
                 <p
                   className="italic font-light leading-6"
-                  style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "17px", color: "#8B3A42" }}
+                  style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "17px", color: "#6B4A10" }}
                 >
-                  “Cada mulher merece um espaço de cuidado, acolhimento e bem-estar verdadeiros.”
+                  “Cada pessoa merece um espaço de cuidado, acolhimento e bem-estar verdadeiros.”
                 </p>
                 <p
                   className="mt-2 uppercase tracking-widest"
                   style={{ fontFamily: "var(--font-lato), sans-serif", fontSize: "9px", color: "#C9973A" }}
                 >
-                  Clínica Debora Silva
+                  Clínica Débora Silva
                 </p>
               </div>
 
@@ -104,7 +104,7 @@ export default function About() {
               />
               <div
                 className="absolute -top-4 -left-4 w-16 h-16 rounded-full"
-                style={{ border: "1px solid rgba(200,115,122,0.25)" }}
+                style={{ border: "1px solid rgba(154,111,30,0.25)" }}
               />
             </div>
           </AnimateIn>
@@ -114,27 +114,27 @@ export default function About() {
             <div>
               <p
                 className="text-base font-light leading-8 mb-6"
-                style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B4C52" }}
+                style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B5A4B" }}
               >
-                A Clínica Debora Silva oferece serviços estéticos
-                dedicados exclusivamente ao público feminino.
+                A Clínica Débora Silva oferece serviços estéticos
+                para mulheres e homens.
                 Nosso espaço foi pensado para oferecer conforto, acolhimento,
                 segurança e experiências únicas de autocuidado em São Paulo.
               </p>
               <p
                 className="text-base font-light leading-8 mb-8"
-                style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B4C52" }}
+                style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B5A4B" }}
               >
-                Nossa equipe de profissionais dedicadas e capacitadas está
-                comprometida com a excelência no atendimento. Trabalhamos com
+                Aqui, o atendimento é feito pessoalmente pela Débora, com
+                compromisso com a excelência. O trabalho é pautado por
                 ética, empatia e atendimento humanizado, proporcionando
                 experiências únicas de cuidado, autoestima e bem-estar.
               </p>
 
               <div className="flex flex-col gap-4">
                 {[
-                  "Atendimento exclusivo ao público feminino",
-                  "Profissionais certificadas e em constante atualização",
+                  "Atendimento para mulheres e homens",
+                  "Profissional certificada e em constante atualização",
                   "Protocolos de higiene e segurança rigorosos",
                   "Ambiente moderno, sofisticado e acolhedor",
                 ].map((item, i) => (
@@ -145,7 +145,7 @@ export default function About() {
                     />
                     <span
                       className="text-sm font-light leading-relaxed"
-                      style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B4C52" }}
+                      style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B5A4B" }}
                     >
                       {item}
                     </span>
@@ -166,7 +166,7 @@ export default function About() {
               >
                 <div
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                  style={{ background: "linear-gradient(135deg,rgba(200,115,122,0.04),rgba(201,151,58,0.04))" }}
+                  style={{ background: "linear-gradient(135deg,rgba(154,111,30,0.04),rgba(201,151,58,0.04))" }}
                 />
                 <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center mb-5"
@@ -176,13 +176,13 @@ export default function About() {
                 </div>
                 <h3
                   className="text-2xl font-light mb-3"
-                  style={{ fontFamily: "var(--font-cormorant), serif", color: "#4A1820" }}
+                  style={{ fontFamily: "var(--font-cormorant), serif", color: "#3B2A12" }}
                 >
                   {p.title}
                 </h3>
                 <p
                   className="text-sm font-light leading-7"
-                  style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B4C52" }}
+                  style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B5A4B" }}
                 >
                   {p.text}
                 </p>

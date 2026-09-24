@@ -97,7 +97,7 @@ export const STAGE_LABEL: Record<ClientStage, string> = {
   em_contato: "Em contato",
   cliente: "Cliente",
   vip: "VIP",
-  inativa: "Inativa",
+  inativa: "Inativo",
 };
 
 export const SOURCE_LABEL: Record<ClientSource, string> = {

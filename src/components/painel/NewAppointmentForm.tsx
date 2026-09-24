@@ -41,7 +41,7 @@ export default function NewAppointmentForm({
           className="p-input"
         >
           <option value="" disabled>Selecione…</option>
-          <option value="__novo">+ Nova cliente</option>
+          <option value="__novo">+ Novo cliente</option>
           {clients.map((c) => (
             <option key={c.id} value={c.id}>{c.name}{c.phone ? ` · ${formatPhone(c.phone)}` : ""}</option>
           ))}
@@ -49,7 +49,7 @@ export default function NewAppointmentForm({
       </label>
 
       {clientId === "__novo" && (
-        <div className="grid grid-cols-2 gap-3 rounded-xl bg-[#FFF8F6] border border-[#F3E2DE] p-3">
+        <div className="grid grid-cols-2 gap-3 rounded-xl bg-[#FDFAF5] border border-[#F0E6D6] p-3">
           <label>
             <span className="p-label">Nome</span>
             <input name="new_name" required minLength={2} className="p-input" autoComplete="off" />
@@ -66,7 +66,7 @@ export default function NewAppointmentForm({
           <legend className="p-label px-1">Usar sessão de pacote?</legend>
           <div className="flex flex-col gap-1.5">
             <label className="flex items-center gap-2 text-sm">
-              <input type="radio" name="pkg_choice" checked={!packageId} onChange={() => setPackageId("")} className="accent-[#A85B63]" />
+              <input type="radio" name="pkg_choice" checked={!packageId} onChange={() => setPackageId("")} className="accent-[#82590F]" />
               Não, cobrar avulso
             </label>
             {clientPackages.map((p) => (
@@ -76,7 +76,7 @@ export default function NewAppointmentForm({
                   name="pkg_choice"
                   checked={packageId === p.id}
                   onChange={() => { setPackageId(p.id); setServiceId(p.service_id); }}
-                  className="accent-[#A85B63]"
+                  className="accent-[#82590F]"
                 />
                 {p.name} · restam {Number(p.sessions_remaining) - Number(p.sessions_scheduled)} de {p.sessions_total}
               </label>
@@ -122,7 +122,7 @@ export default function NewAppointmentForm({
             inputMode="decimal"
             disabled={Boolean(packageId)}
             defaultValue={packageId ? "Pacote" : service ? String(service.price).replace(".", ",") : ""}
-            className="p-input p-num disabled:bg-[#F7F1EF]"
+            className="p-input p-num disabled:bg-[#F7F2EA]"
           />
         </label>
       </div>

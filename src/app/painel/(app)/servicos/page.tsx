@@ -39,7 +39,7 @@ function ServiceForm({ service }: { service?: ServiceRow }) {
         <input name="return_days" type="number" min={1} max={365} defaultValue={s?.return_days ?? ""} placeholder="dias" className="p-input p-num" />
       </label>
       <label className="lg:col-span-2 flex items-center gap-2 text-sm text-text-secondary pb-2">
-        <input type="checkbox" name="active" defaultChecked={s?.active ?? true} className="accent-[#A85B63]" />
+        <input type="checkbox" name="active" defaultChecked={s?.active ?? true} className="accent-[#82590F]" />
         Disponível no site
       </label>
       <label className="sm:col-span-2 lg:col-span-10">
@@ -76,7 +76,7 @@ export default async function ServicesPage() {
         {services.map((s) => (
           <section key={s.id} className="p-card p-5">
             <div className="flex items-center gap-2 mb-3">
-              <h2 className="text-xl text-rose-900">{s.name}</h2>
+              <h2 className="text-xl text-bronze-900">{s.name}</h2>
               {!s.active && <Badge>Inativo</Badge>}
             </div>
             <ServiceForm service={s} />
@@ -84,7 +84,7 @@ export default async function ServicesPage() {
         ))}
 
         <details className="p-card">
-          <summary className="flex items-center gap-2 px-5 py-3.5 text-rose-900">
+          <summary className="flex items-center gap-2 px-5 py-3.5 text-bronze-900">
             <Plus size={16} /> <span className="text-lg" style={{ fontFamily: "var(--font-cormorant), serif" }}>Novo serviço</span>
           </summary>
           <div className="px-5 pb-5"><ServiceForm /></div>

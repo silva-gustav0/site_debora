@@ -6,7 +6,6 @@ const navLinks = [
   { label: "Início", href: "#inicio" },
   { label: "Sobre Nós", href: "#sobre" },
   { label: "Serviços", href: "#servicos" },
-  { label: "Equipe", href: "#equipe" },
   { label: "Blog", href: "#blog" },
   { label: "Contato", href: "#contato" },
 ];
@@ -21,7 +20,7 @@ export default function Footer() {
   return (
     <footer
       className="relative overflow-hidden"
-      style={{ background: "linear-gradient(160deg, #2C1A1E 0%, #1A0E10 100%)" }}
+      style={{ background: "linear-gradient(160deg, #2B221B 0%, #17110C 100%)" }}
     >
       {/* Decorative top border */}
       <div
@@ -35,16 +34,16 @@ export default function Footer() {
           <div className="sm:col-span-2 lg:col-span-1">
             <div className="mb-5">
               <div
-                className="text-2xl font-light tracking-wide text-rose-200 mb-0.5"
+                className="text-2xl font-light tracking-wide text-bronze-200 mb-0.5"
                 style={{ fontFamily: "var(--font-cormorant), serif" }}
               >
-                Debora Silva
+                Débora Silva
               </div>
               <div
                 className="text-[9px] tracking-[0.3em] uppercase"
                 style={{ fontFamily: "var(--font-lato), sans-serif", color: "#C9973A" }}
               >
-                Clínica de Estética
+                Estética &amp; Bem-Estar
               </div>
             </div>
             <div
@@ -52,7 +51,7 @@ export default function Footer() {
               style={{ background: "linear-gradient(90deg,#C9973A,transparent)" }}
             />
             <p
-              className="text-sm font-light leading-7 text-rose-200/60 mb-6"
+              className="text-sm font-light leading-7 text-bronze-200/60 mb-6"
               style={{ fontFamily: "var(--font-lato), sans-serif" }}
             >
               Cuidamos da sua beleza com técnica, dedicação e o carinho que você
@@ -78,8 +77,8 @@ export default function Footer() {
                     color: "#C9973A",
                   }}
                   onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.background = "rgba(200,115,122,0.2)";
-                    (e.currentTarget as HTMLElement).style.borderColor = "#C8737A";
+                    (e.currentTarget as HTMLElement).style.background = "rgba(154,111,30,0.2)";
+                    (e.currentTarget as HTMLElement).style.borderColor = "#9A6F1E";
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)";
@@ -105,7 +104,7 @@ export default function Footer() {
                 <li key={l.href}>
                   <a
                     href={l.href}
-                    className="text-sm font-light text-rose-200/60 hover:text-rose-200 transition-colors duration-200"
+                    className="text-sm font-light text-bronze-200/60 hover:text-bronze-200 transition-colors duration-200"
                     style={{ fontFamily: "var(--font-lato), sans-serif" }}
                   >
                     {l.label}
@@ -128,7 +127,7 @@ export default function Footer() {
                 <li key={s}>
                   <a
                     href="#servicos"
-                    className="text-sm font-light text-rose-200/60 hover:text-rose-200 transition-colors duration-200"
+                    className="text-sm font-light text-bronze-200/60 hover:text-bronze-200 transition-colors duration-200"
                     style={{ fontFamily: "var(--font-lato), sans-serif" }}
                   >
                     {s}
@@ -159,7 +158,7 @@ export default function Footer() {
                     style={{ color: "#C9973A" }}
                   />
                   <p
-                    className="text-sm font-light text-rose-200/60 whitespace-pre-line leading-6"
+                    className="text-sm font-light text-bronze-200/60 whitespace-pre-line leading-6"
                     style={{ fontFamily: "var(--font-lato), sans-serif" }}
                   >
                     {item.text}
@@ -176,18 +175,18 @@ export default function Footer() {
           style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
         >
           <p
-            className="text-[11px] font-light text-rose-200/40"
+            className="text-[11px] font-light text-bronze-200/40"
             style={{ fontFamily: "var(--font-lato), sans-serif" }}
           >
-            © {new Date().getFullYear()} Clínica Debora Silva. Todos os direitos reservados.
+            © {new Date().getFullYear()} Clínica Débora Silva. Todos os direitos reservados.
           </p>
           <p
-            className="flex items-center gap-1.5 text-[11px] font-light text-rose-200/40"
+            className="flex items-center gap-1.5 text-[11px] font-light text-bronze-200/40"
             style={{ fontFamily: "var(--font-lato), sans-serif" }}
           >
-            Feito com <Heart size={10} className="text-rose-500 fill-rose-500" /> em São Paulo
+            Feito com <Heart size={10} className="text-bronze-500 fill-bronze-500" /> em São Paulo
             <span aria-hidden="true" className="mx-1">·</span>
-            <a href="/painel" className="hover:text-rose-200 transition-colors">Área da equipe</a>
+            <a href="/painel" className="hover:text-bronze-200 transition-colors">Área da equipe</a>
           </p>
         </div>
       </div>

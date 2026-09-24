@@ -22,11 +22,11 @@ const postImages: Record<string, string> = {
 };
 
 const catColors: Record<string, string> = {
-  "Cuidados com a Pele": "#C8737A",
+  "Cuidados com a Pele": "#9A6F1E",
   "Tratamentos Corporais": "#C9973A",
-  "Dicas de Beleza": "#4A9B6F",
-  "Bem-Estar": "#6A7BC9",
-  "SPA & Relaxamento": "#9B4AC8",
+  "Dicas de Beleza": "#6B8F71",
+  "Bem-Estar": "#7D6B58",
+  "SPA & Relaxamento": "#6B4A10",
 };
 
 const postContent: Record<string, string> = {
@@ -47,7 +47,7 @@ A limpeza profissional realizada mensalmente ou bimestralmente, dependendo do ti
 
 **O que esperar do tratamento?**
 
-Na Clínica Debora Silva, o protocolo de limpeza de pele começa com uma análise individualizada da sua pele. Cada etapa é personalizada: higienização suave, esfoliação, vapor, extração de impurezas, mask hidratante e finalização com protetor solar.
+Na Clínica Débora Silva, o protocolo de limpeza de pele começa com uma análise individualizada da sua pele. Cada etapa é personalizada: higienização suave, esfoliação, vapor, extração de impurezas, mask hidratante e finalização com protetor solar.
 
 O resultado imediato é uma pele visivelmente mais limpa, suave e radiante. Com a continuidade do tratamento, a melhora é progressiva e duradoura.
 
@@ -77,7 +77,7 @@ Embora seja amplamente conhecida pelos benefícios estéticos — como redução
 
 As manobras são suaves e rítmicas, aplicadas em direção aos linfonodos (gânglios). O movimento estimula a contração dos vasos linfáticos, acelerando o transporte da linfa e consequentemente a eliminação de líquidos retidos e toxinas.
 
-Na Clínica Debora Silva, cada sessão é conduzida por profissionais certificadas, com protocolo adaptado às necessidades específicas de cada cliente.
+Na Clínica Débora Silva, cada sessão é conduzida por uma profissional certificada, com protocolo adaptado às necessidades específicas de cada cliente.
 
 **Indicações**
 
@@ -96,11 +96,11 @@ Ao longo deste conteúdo, compartilhamos conhecimentos técnicos de forma acess�
 
 Cuidar da aparência vai muito além da vaidade. É um ato de amor próprio que impacta diretamente na autoestima, na saúde mental e na forma como nos relacionamos com o mundo.
 
-Na Clínica Debora Silva, acreditamos que cada pessoa merece se sentir bem consigo mesma. Por isso, nossos tratamentos são pensados de forma integrada, considerando não apenas o aspecto físico, mas o bem-estar emocional de cada cliente.
+Na Clínica Débora Silva, acreditamos que cada pessoa merece se sentir bem consigo mesma. Por isso, nossos tratamentos são pensados de forma integrada, considerando não apenas o aspecto físico, mas o bem-estar emocional de cada cliente.
 
 **Próximos passos**
 
-Quer saber mais sobre este e outros tratamentos? Agende uma consulta de avaliação gratuita com nossa equipe. Juntas, vamos construir um protocolo personalizado para que você alcance os melhores resultados.`;
+Quer saber mais sobre este e outros tratamentos? Agende uma consulta de avaliação gratuita com a Débora. Em parceria, vamos construir um protocolo personalizado para que você alcance os melhores resultados.`;
 
 export async function generateStaticParams() {
   return blogPosts.map((p) => ({ slug: p.slug }));
@@ -111,7 +111,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const post = blogPosts.find((p) => p.slug === slug);
   if (!post) return { title: "Artigo não encontrado" };
   return {
-    title: `${post.title} | Blog Clínica Debora Silva`,
+    title: `${post.title} | Blog Clínica Débora Silva`,
     description: post.excerpt,
   };
 }
@@ -123,7 +123,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   const content = postContent[slug] || defaultContent(post.title);
   const related = blogPosts.filter((p) => p.slug !== slug).slice(0, 3);
-  const color = catColors[post.category] || "#C8737A";
+  const color = catColors[post.category] || "#9A6F1E";
 
   return (
     <>
@@ -158,7 +158,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             </span>
 
             <h1
-              className="text-4xl sm:text-5xl font-light text-rose-900 mb-5 leading-snug"
+              className="text-4xl sm:text-5xl font-light text-bronze-900 mb-5 leading-snug"
               style={{ fontFamily: "var(--font-cormorant), serif" }}
             >
               {post.title}
@@ -175,7 +175,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
               >
                 <Calendar size={12} /> {post.date}
               </span>
-              <span className="w-1 h-1 rounded-full bg-rose-200" />
+              <span className="w-1 h-1 rounded-full bg-bronze-200" />
               <span
                 className="flex items-center gap-1.5 text-[12px]"
                 style={{ fontFamily: "var(--font-lato), sans-serif" }}
@@ -190,7 +190,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         <section className="py-16 bg-[#FDFAF7]">
           <div className="max-w-3xl mx-auto px-6 lg:px-10">
             {/* Banner image */}
-            <div className="w-full h-64 sm:h-80 rounded-2xl mb-12 relative overflow-hidden shadow-[0_16px_50px_rgba(200,115,122,0.15)]">
+            <div className="w-full h-64 sm:h-80 rounded-2xl mb-12 relative overflow-hidden shadow-[0_16px_50px_rgba(154,111,30,0.15)]">
               <Image
                 src={postImages[slug] || postImages["beneficios-limpeza-pele"]}
                 alt={post.title}
@@ -209,7 +209,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
             {/* Lead */}
             <p
-              className="text-xl font-light italic leading-8 text-text-secondary mb-8 pb-8 border-b border-rose-100"
+              className="text-xl font-light italic leading-8 text-text-secondary mb-8 pb-8 border-b border-bronze-100"
               style={{ fontFamily: "var(--font-cormorant), serif" }}
             >
               {post.excerpt}
@@ -220,7 +220,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
               className="prose-custom"
               style={{
                 fontFamily: "var(--font-lato), sans-serif",
-                color: "#6B4C52",
+                color: "#6B5A4B",
               }}
             >
               {content.split("\n\n").map((block, i) => {
@@ -228,7 +228,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                   return (
                     <h2
                       key={i}
-                      className="text-2xl font-light text-rose-800 mt-10 mb-4"
+                      className="text-2xl font-light text-bronze-800 mt-10 mb-4"
                       style={{ fontFamily: "var(--font-cormorant), serif" }}
                     >
                       {block.replace(/\*\*/g, "")}
@@ -277,10 +277,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
               }}
             >
               <h3
-                className="text-2xl font-light text-rose-800 mb-3"
+                className="text-2xl font-light text-bronze-800 mb-3"
                 style={{ fontFamily: "var(--font-cormorant), serif" }}
               >
-                Pronta para experimentar?
+                Quer experimentar?
               </h3>
               <p
                 className="text-sm font-light text-text-secondary mb-6"
@@ -299,7 +299,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         <section className="py-16" style={{ background: "#F7F2EC" }}>
           <div className="max-w-7xl mx-auto px-6 lg:px-10">
             <h3
-              className="text-3xl font-light text-rose-800 mb-8 text-center"
+              className="text-3xl font-light text-bronze-800 mb-8 text-center"
               style={{ fontFamily: "var(--font-cormorant), serif" }}
             >
               Artigos Relacionados
@@ -310,7 +310,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                   key={p.slug}
                   href={`/blog/${p.slug}`}
                   className="group block rounded-xl overflow-hidden hover-lift"
-                  style={{ background: "white", border: "1px solid #F9C7CE" }}
+                  style={{ background: "white", border: "1px solid #EEDFBF" }}
                 >
                   <div className="relative h-36 overflow-hidden">
                     <Image
@@ -326,13 +326,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                       className="text-[9.5px] tracking-widest uppercase block mb-2"
                       style={{
                         fontFamily: "var(--font-lato), sans-serif",
-                        color: catColors[p.category] || "#C8737A",
+                        color: catColors[p.category] || "#9A6F1E",
                       }}
                     >
                       {p.category}
                     </span>
                     <h4
-                      className="text-lg font-light text-rose-800 leading-snug group-hover:text-rose-600 transition-colors"
+                      className="text-lg font-light text-bronze-800 leading-snug group-hover:text-bronze-600 transition-colors"
                       style={{ fontFamily: "var(--font-cormorant), serif" }}
                     >
                       {p.title}

@@ -9,13 +9,13 @@ export default function Hero() {
       className="relative min-h-screen flex items-center overflow-hidden"
       style={{
         background:
-          "linear-gradient(135deg, #FFF5F7 0%, #FDFAF7 40%, #FFF8E7 80%, #FDFAF7 100%)",
+          "linear-gradient(135deg, #FBF7EE 0%, #FDFAF7 40%, #FFF8E7 80%, #FDFAF7 100%)",
       }}
     >
       {/* Background radial glows */}
       <div
         className="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full pointer-events-none"
-        style={{ background: "radial-gradient(circle, rgba(200,115,122,0.07) 0%, transparent 70%)" }}
+        style={{ background: "radial-gradient(circle, rgba(154,111,30,0.07) 0%, transparent 70%)" }}
       />
       <div
         className="absolute -bottom-20 -left-20 w-[400px] h-[400px] rounded-full pointer-events-none"
@@ -26,7 +26,7 @@ export default function Hero() {
       <div
         className="animate-float absolute top-[20%] right-[8%] w-20 h-28 opacity-[0.12] pointer-events-none hidden lg:block"
         style={{
-          background: "linear-gradient(160deg, #C8737A, #F4C2C2)",
+          background: "linear-gradient(160deg, #9A6F1E, #EEDFBF)",
           borderRadius: "60% 40% 70% 30% / 50% 50% 50% 50%",
         }}
       />
@@ -46,22 +46,22 @@ export default function Hero() {
           <div>
             <AnimateIn animation="fade">
               <div
-                className="inline-flex items-center gap-2 mb-7 px-4 py-2 rounded-full border border-rose-200"
-                style={{ background: "rgba(255,245,247,0.8)" }}
+                className="inline-flex items-center gap-2 mb-7 px-4 py-2 rounded-full border border-bronze-200"
+                style={{ background: "rgba(251,247,238,0.8)" }}
               >
                 <Star size={11} className="text-gold-500 fill-gold-300" style={{ color: "#C9973A" }} />
-                <span className="section-label">Exclusivo ao Público Feminino</span>
+                <span className="section-label">Para Mulheres e Homens</span>
               </div>
             </AnimateIn>
 
             <AnimateIn animation="up" delay={100}>
               <h1
-                className="text-5xl sm:text-6xl lg:text-7xl font-light leading-[1.1] text-rose-900 mb-5"
-                style={{ fontFamily: "var(--font-cormorant), serif", color: "#4A1820" }}
+                className="text-5xl sm:text-6xl lg:text-7xl font-light leading-[1.1] text-bronze-900 mb-5"
+                style={{ fontFamily: "var(--font-cormorant), serif", color: "#3B2A12" }}
               >
                 Sua Beleza,
                 <br />
-                <em className="font-normal italic" style={{ color: "#C8737A" }}>
+                <em className="font-normal italic" style={{ color: "#9A6F1E" }}>
                   Nossa Arte
                 </em>
               </h1>
@@ -76,10 +76,10 @@ export default function Hero() {
                 className="text-base font-light leading-7 max-w-md mb-9"
                 style={{
                   fontFamily: "var(--font-lato), sans-serif",
-                  color: "#6B4C52",
+                  color: "#6B5A4B",
                 }}
               >
-                Um espaço criado especialmente para a mulher que se cuida. Da
+                Um espaço criado especialmente para quem se cuida. Da
                 limpeza de pele à massagem relaxante, cada atendimento é
                 personalizado com técnica, segurança e acolhimento genuíno.
               </p>
@@ -97,22 +97,22 @@ export default function Hero() {
             </AnimateIn>
 
             <AnimateIn animation="up" delay={500}>
-              <div className="flex gap-10 mt-12 pt-10 border-t border-rose-100">
+              <div className="flex gap-10 mt-12 pt-10 border-t border-bronze-100">
                 {[
                   { value: "3", label: "Serviços especializados" },
-                  { value: "100%", label: "Satisfação das clientes" },
-                  { value: "Excl.", label: "Público feminino" },
+                  { value: "100%", label: "Satisfação dos clientes" },
+                  { value: "1:1", label: "Atendimento individual" },
                 ].map((s) => (
                   <div key={s.label}>
                     <div
                       className="text-3xl font-light leading-none mb-1"
-                      style={{ fontFamily: "var(--font-cormorant), serif", color: "#8B3A42" }}
+                      style={{ fontFamily: "var(--font-cormorant), serif", color: "#6B4A10" }}
                     >
                       {s.value}
                     </div>
                     <div
                       className="text-[11px] tracking-[0.12em] uppercase"
-                      style={{ fontFamily: "var(--font-lato), sans-serif", color: "#9C7A80" }}
+                      style={{ fontFamily: "var(--font-lato), sans-serif", color: "#8F8070" }}
                     >
                       {s.label}
                     </div>
@@ -127,11 +127,11 @@ export default function Hero() {
             <div className="relative">
               {/* Main hero image */}
               <div
-                className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden shadow-[0_32px_80px_rgba(200,115,122,0.22)]"
+                className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden shadow-[0_32px_80px_rgba(154,111,30,0.22)]"
               >
                 <Image
                   src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80"
-                  alt="Tratamento estético na Clínica Debora Silva"
+                  alt="Tratamento estético na Clínica Débora Silva"
                   fill
                   priority
                   className="object-cover"
@@ -142,7 +142,7 @@ export default function Hero() {
                   className="absolute inset-0"
                   style={{
                     background:
-                      "linear-gradient(160deg, rgba(200,115,122,0.08) 0%, rgba(201,151,58,0.04) 100%)",
+                      "linear-gradient(160deg, rgba(154,111,30,0.08) 0%, rgba(201,151,58,0.04) 100%)",
                   }}
                 />
               </div>
@@ -150,28 +150,28 @@ export default function Hero() {
               {/* Floating review card */}
               <div
                 className="absolute bottom-8 left-1/2 -translate-x-1/2 w-[240px] bg-white/92 backdrop-blur-md rounded-xl px-5 py-3 shadow-lg"
-                style={{ border: "1px solid #F9C7CE" }}
+                style={{ border: "1px solid #EEDFBF" }}
               >
                 <div className="flex items-center gap-3">
                   <div
                     className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{ background: "linear-gradient(135deg,#C8737A,#8B3A42)" }}
+                    style={{ background: "linear-gradient(135deg,#9A6F1E,#6B4A10)" }}
                   >
                     <Star size={12} className="text-white fill-white" />
                   </div>
                   <div>
                     <div
                       className="text-[10px] font-light tracking-wide uppercase"
-                      style={{ fontFamily: "var(--font-lato), sans-serif", color: "#9C7A80" }}
+                      style={{ fontFamily: "var(--font-lato), sans-serif", color: "#8F8070" }}
                     >
-                      Avaliação das Clientes
+                      Avaliação dos Clientes
                     </div>
                     <div
                       className="font-semibold"
-                      style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "18px", color: "#8B3A42" }}
+                      style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "18px", color: "#6B4A10" }}
                     >
                       ★★★★★{" "}
-                      <span style={{ fontSize: "13px", color: "#9C7A80", fontWeight: 300 }}>
+                      <span style={{ fontSize: "13px", color: "#8F8070", fontWeight: 300 }}>
                         5.0
                       </span>
                     </div>
@@ -182,7 +182,7 @@ export default function Hero() {
               {/* Promo card top-left */}
               <div
                 className="absolute -left-6 top-12 bg-white rounded-xl shadow-[0_8px_40px_rgba(201,151,58,0.18)] p-4 w-44"
-                style={{ border: "1px solid #F9C7CE" }}
+                style={{ border: "1px solid #EEDFBF" }}
               >
                 <div className="gold-line mb-3" />
                 <div
@@ -193,12 +193,12 @@ export default function Hero() {
                 </div>
                 <div
                   className="uppercase tracking-widest mb-2"
-                  style={{ fontFamily: "var(--font-lato), sans-serif", fontSize: "8px", color: "#9C7A80" }}
+                  style={{ fontFamily: "var(--font-lato), sans-serif", fontSize: "8px", color: "#8F8070" }}
                 >
                   Limpeza + Massagem
                 </div>
                 <div
-                  style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "22px", color: "#C8737A", fontWeight: 400 }}
+                  style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "22px", color: "#9A6F1E", fontWeight: 400 }}
                 >
                   R$ 300,00
                 </div>
@@ -206,22 +206,22 @@ export default function Hero() {
 
               {/* Next appointment card bottom-right */}
               <div
-                className="absolute -right-4 bottom-20 bg-white rounded-xl shadow-[0_8px_40px_rgba(200,115,122,0.18)] p-4 w-44"
-                style={{ border: "1px solid #F9C7CE" }}
+                className="absolute -right-4 bottom-20 bg-white rounded-xl shadow-[0_8px_40px_rgba(154,111,30,0.18)] p-4 w-44"
+                style={{ border: "1px solid #EEDFBF" }}
               >
                 <div
                   className="uppercase tracking-widest mb-2"
-                  style={{ fontFamily: "var(--font-lato), sans-serif", fontSize: "9px", color: "#9C7A80" }}
+                  style={{ fontFamily: "var(--font-lato), sans-serif", fontSize: "9px", color: "#8F8070" }}
                 >
                   Próximo horário
                 </div>
                 <div
-                  style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "20px", color: "#8B3A42", fontWeight: 300 }}
+                  style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "20px", color: "#6B4A10", fontWeight: 300 }}
                 >
                   Hoje 14:30
                 </div>
                 <div
-                  style={{ fontFamily: "var(--font-lato), sans-serif", fontSize: "11px", color: "#9C7A80", marginTop: "4px" }}
+                  style={{ fontFamily: "var(--font-lato), sans-serif", fontSize: "11px", color: "#8F8070", marginTop: "4px" }}
                 >
                   Massagem Relaxante
                 </div>
@@ -234,7 +234,7 @@ export default function Hero() {
               />
               <div
                 className="absolute -top-3 -left-3 w-14 h-14 rounded-full"
-                style={{ border: "1px solid rgba(200,115,122,0.25)" }}
+                style={{ border: "1px solid rgba(154,111,30,0.25)" }}
               />
             </div>
           </AnimateIn>
@@ -244,7 +244,7 @@ export default function Hero() {
       {/* Scroll indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-40">
         <span className="section-label" style={{ fontSize: "9px" }}>Rolar</span>
-        <div className="animate-scroll w-px h-6" style={{ background: "#C8737A" }} />
+        <div className="animate-scroll w-px h-6" style={{ background: "#9A6F1E" }} />
       </div>
     </section>
   );

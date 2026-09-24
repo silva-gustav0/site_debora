@@ -127,7 +127,7 @@ export default async function AgendaPage({ searchParams }: PageProps<"/painel/ag
             step={settings.slot_step_min}
             hrefFor={hrefFor}
           />
-          <div className="flex flex-wrap gap-3 mt-3 text-xs text-[#8F7479]">
+          <div className="flex flex-wrap gap-3 mt-3 text-xs text-[#857566]">
             {(["solicitado", "confirmado", "concluido", "faltou", "cancelado"] as const).map((s) => (
               <span key={s} className="flex items-center gap-1.5">
                 <span className="w-3 h-3 rounded" style={{ background: STATUS_STYLE[s].bg, borderLeft: `3px solid ${STATUS_STYLE[s].bd}` }} />
@@ -141,7 +141,7 @@ export default async function AgendaPage({ searchParams }: PageProps<"/painel/ag
         <aside className="flex flex-col gap-5">
           <Card title="A confirmar" eyebrow="Pedidos" gold bodyClassName="p-3">
             {pending.length === 0 ? (
-              <p className="text-sm text-[#8F7479] text-center py-4">Nenhum pedido pendente neste período.</p>
+              <p className="text-sm text-[#857566] text-center py-4">Nenhum pedido pendente neste período.</p>
             ) : (
               <div className="flex flex-col gap-2">{pending.map((a) => <AppointmentItem key={a.id} appt={a} showDate />)}</div>
             )}
@@ -149,7 +149,7 @@ export default async function AgendaPage({ searchParams }: PageProps<"/painel/ag
 
           <Card title="Lembretes de amanhã" eyebrow={fmtDate(tomorrow, { year: undefined })} bodyClassName="p-3">
             {reminders.length === 0 ? (
-              <p className="text-sm text-[#8F7479] text-center py-4">Tudo avisado. ✨</p>
+              <p className="text-sm text-[#857566] text-center py-4">Tudo avisado. ✨</p>
             ) : (
               <ul className="flex flex-col gap-2">
                 {reminders.map((a) => {
@@ -158,10 +158,10 @@ export default async function AgendaPage({ searchParams }: PageProps<"/painel/ag
                     hora: fmtTime(a.starts_at), clinica: settings.clinic_name, link: `${SITE_URL}/meu-agendamento/${a.public_token}`,
                   }));
                   return (
-                    <li key={a.id} className="flex items-center gap-2 rounded-xl bg-[#FFFBFA] border border-[#F3E7E4] px-3 py-2">
+                    <li key={a.id} className="flex items-center gap-2 rounded-xl bg-[#FEFBF7] border border-[#F3ECE0] px-3 py-2">
                       <div className="flex-1 min-w-0">
                         <p className="text-sm truncate"><span className="p-num font-bold">{fmtTime(a.starts_at)}</span> {a.clients?.name}</p>
-                        <p className="text-xs text-[#8F7479] truncate">{a.services?.name}</p>
+                        <p className="text-xs text-[#857566] truncate">{a.services?.name}</p>
                       </div>
                       {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="p-btn-ghost p-btn-sm" aria-label="Enviar lembrete"><MessageCircle size={13} /></a>}
                       <form action={markReminderSent}>
@@ -209,10 +209,10 @@ export default async function AgendaPage({ searchParams }: PageProps<"/painel/ag
               <label><span className="p-label">Início</span><input type="time" name="start" defaultValue="09:00" className="p-input" /></label>
               <label><span className="p-label">Fim</span><input type="time" name="end" defaultValue="12:00" className="p-input" /></label>
             </div>
-            <label className="flex items-center gap-2 text-sm text-[#6B4C52]">
-              <input type="checkbox" name="all_day" className="accent-[#A85B63]" /> Dia inteiro
+            <label className="flex items-center gap-2 text-sm text-[#6B5A4B]">
+              <input type="checkbox" name="all_day" className="accent-[#82590F]" /> Dia inteiro
             </label>
-            <p className="text-xs text-[#8F7479]">O site deixa de oferecer esses horários para agendamento.</p>
+            <p className="text-xs text-[#857566]">O site deixa de oferecer esses horários para agendamento.</p>
             <div><SubmitButton>Bloquear</SubmitButton></div>
           </ActionForm>
         </Drawer>
@@ -220,7 +220,7 @@ export default async function AgendaPage({ searchParams }: PageProps<"/painel/ag
 
       {drawerBlock && (
         <Drawer title={drawerBlock.reason} eyebrow="Horário bloqueado" closeHref={baseHref}>
-          <p className="text-sm text-[#6B4C52] mb-4">
+          <p className="text-sm text-[#6B5A4B] mb-4">
             {fmtDate(drawerBlock.starts_at)} {fmtTime(drawerBlock.starts_at)} até {fmtDate(drawerBlock.ends_at)} {fmtTime(drawerBlock.ends_at)}
           </p>
           <form action={deleteBlock}>

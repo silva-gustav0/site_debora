@@ -34,8 +34,8 @@ function ProductForm({ p }: { p?: Product }) {
       <label><span className="p-label">Preço de venda (R$)</span><input name="sale_price" inputMode="decimal" defaultValue={p ? String(p.sale_price).replace(".", ",") : ""} className="p-input p-num" /></label>
       {!p && <label className="col-span-2"><span className="p-label">Quantidade inicial</span><input name="initial_qty" inputMode="decimal" className="p-input p-num" /></label>}
       {p && (
-        <label className="col-span-2 flex items-center gap-2 text-sm text-[#6B4C52]">
-          <input type="checkbox" name="active" defaultChecked={p.active} className="accent-[#A85B63]" /> Produto ativo
+        <label className="col-span-2 flex items-center gap-2 text-sm text-[#6B5A4B]">
+          <input type="checkbox" name="active" defaultChecked={p.active} className="accent-[#82590F]" /> Produto ativo
         </label>
       )}
       <div className="col-span-2"><SubmitButton>{p ? "Salvar produto" : "Cadastrar produto"}</SubmitButton></div>
@@ -84,7 +84,7 @@ export default async function StockPage({ searchParams }: PageProps<"/painel/est
 
       <div className="grid xl:grid-cols-[1fr_340px] gap-5">
         <Card bodyClassName="p-0 overflow-x-auto">
-          <div className="px-5 py-3 border-b border-[#F6ECE9]">
+          <div className="px-5 py-3 border-b border-[#F5EEE3]">
             <Chips
               current={filter}
               items={[
@@ -105,14 +105,14 @@ export default async function StockPage({ searchParams }: PageProps<"/painel/est
                   return (
                     <tr key={p.id} className={p.active ? "" : "opacity-50"}>
                       <td>
-                        <Link href={`/painel/estoque?p=${p.id}`} scroll={false} className="font-bold text-[#2C1A1E] hover:text-[#8B3A42]">{p.name}</Link>
-                        {p.brand && <span className="block text-xs text-[#8F7479]">{p.brand}</span>}
+                        <Link href={`/painel/estoque?p=${p.id}`} scroll={false} className="font-bold text-[#2B221B] hover:text-[#6B4A10]">{p.name}</Link>
+                        {p.brand && <span className="block text-xs text-[#857566]">{p.brand}</span>}
                       </td>
                       <td>{p.category === "home_care" ? <Badge tone="plum">home care</Badge> : <Badge tone="gray">cabine</Badge>}</td>
                       <td className={`text-right p-num font-bold ${isLow ? "text-[#9B2C2C]" : ""}`}>{qtyFmt(qty)} {p.unit}</td>
                       <td>
                         <Progress value={qty} max={Math.max(min * 3, qty, 1)} color={isLow ? "#C0504D" : "#3F9A5E"} />
-                        <span className="text-[10.5px] text-[#8F7479]">mín. {qtyFmt(min)}</span>
+                        <span className="text-[10.5px] text-[#857566]">mín. {qtyFmt(min)}</span>
                       </td>
                       <td className="text-right p-num">{brl(p.cost_price)}</td>
                       <td className="text-right p-num">{Number(p.sale_price) ? brl(p.sale_price) : "—"}</td>
@@ -127,11 +127,11 @@ export default async function StockPage({ searchParams }: PageProps<"/painel/est
 
         <Card title="Últimas movimentações" bodyClassName="p-3">
           {!productId && movements.length === 0 ? <EmptyState icon={ArrowDownToLine}>Sem movimentações.</EmptyState> : !productId && (
-            <ul className="flex flex-col divide-y divide-[#F6ECE9]">
+            <ul className="flex flex-col divide-y divide-[#F5EEE3]">
               {movements.map((m) => (
                 <li key={m.id} className="py-2 px-1 flex items-center gap-2 text-sm">
                   <span className={`p-num font-bold w-14 text-right ${Number(m.qty) > 0 ? "text-[#1F6B3A]" : "text-[#9B2C2C]"}`}>{Number(m.qty) > 0 ? "+" : ""}{qtyFmt(Number(m.qty))}</span>
-                  <span className="flex-1 min-w-0 truncate">{m.products?.name}<span className="block text-xs text-[#8F7479]">{MOV_LABEL[m.kind]} · {fmtDate(m.created_at, { year: undefined })}</span></span>
+                  <span className="flex-1 min-w-0 truncate">{m.products?.name}<span className="block text-xs text-[#857566]">{MOV_LABEL[m.kind]} · {fmtDate(m.created_at, { year: undefined })}</span></span>
                 </li>
               ))}
             </ul>
@@ -146,7 +146,7 @@ export default async function StockPage({ searchParams }: PageProps<"/painel/est
       {selected && (
         <Drawer title={selected.name} eyebrow={`Estoque atual: ${qtyFmt(Number(selected.stock_qty))} ${selected.unit}`} closeHref="/painel/estoque">
           <div className="flex flex-col gap-6">
-            <section className="rounded-2xl border border-[#EFE2DE] bg-white p-4">
+            <section className="rounded-2xl border border-[#EEE5D8] bg-white p-4">
               <p className="p-display text-xl mb-3">Movimentar</p>
               <ActionForm action={addStockMovement} resetOnSuccess className="grid grid-cols-2 gap-3">
                 <input type="hidden" name="product_id" value={selected.id} />
@@ -174,24 +174,24 @@ export default async function StockPage({ searchParams }: PageProps<"/painel/est
                   <select name="method" defaultValue="pix" className="p-input">{Object.entries(METHOD_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
                 </label>
                 <label className="col-span-2"><span className="p-label">Observação</span><input name="note" className="p-input" /></label>
-                <label className="col-span-2 flex items-center gap-2 text-sm text-[#6B4C52]">
-                  <input type="checkbox" name="register_expense" defaultChecked className="accent-[#A85B63]" /> Na entrada, lançar a compra como despesa
+                <label className="col-span-2 flex items-center gap-2 text-sm text-[#6B5A4B]">
+                  <input type="checkbox" name="register_expense" defaultChecked className="accent-[#82590F]" /> Na entrada, lançar a compra como despesa
                 </label>
-                <p className="col-span-2 text-[11px] text-[#8F7479]">Vendas geram receita automaticamente no financeiro. No ajuste, informe a quantidade contada.</p>
+                <p className="col-span-2 text-[11px] text-[#857566]">Vendas geram receita automaticamente no financeiro. No ajuste, informe a quantidade contada.</p>
                 <div className="col-span-2"><SubmitButton>Registrar</SubmitButton></div>
               </ActionForm>
             </section>
 
             <section>
               <p className="p-display text-xl mb-2">Histórico</p>
-              {movements.length === 0 ? <p className="text-sm text-[#8F7479]">Sem movimentações.</p> : (
-                <ul className="flex flex-col divide-y divide-[#F6ECE9]">
+              {movements.length === 0 ? <p className="text-sm text-[#857566]">Sem movimentações.</p> : (
+                <ul className="flex flex-col divide-y divide-[#F5EEE3]">
                   {movements.map((m) => (
                     <li key={m.id} className="py-2 flex items-center gap-3 text-sm">
                       <span className={`p-num font-bold w-16 text-right ${Number(m.qty) > 0 ? "text-[#1F6B3A]" : "text-[#9B2C2C]"}`}>{Number(m.qty) > 0 ? "+" : ""}{qtyFmt(Number(m.qty))}</span>
                       <span className="flex-1 min-w-0">
                         {MOV_LABEL[m.kind]}{m.clients && ` · ${m.clients.name}`}
-                        <span className="block text-xs text-[#8F7479]">{fmtDate(m.created_at)} {fmtTime(m.created_at)}{m.note && ` · ${m.note}`}</span>
+                        <span className="block text-xs text-[#857566]">{fmtDate(m.created_at)} {fmtTime(m.created_at)}{m.note && ` · ${m.note}`}</span>
                       </span>
                       <form action={deleteStockMovement}>
                         <input type="hidden" name="id" value={m.id} />
@@ -203,7 +203,7 @@ export default async function StockPage({ searchParams }: PageProps<"/painel/est
               )}
             </section>
 
-            <section className="rounded-2xl border border-[#EFE2DE] bg-white p-4">
+            <section className="rounded-2xl border border-[#EEE5D8] bg-white p-4">
               <p className="p-display text-xl mb-3">Dados do produto</p>
               <ProductForm p={selected} />
             </section>

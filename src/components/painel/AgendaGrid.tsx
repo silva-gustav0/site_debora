@@ -71,22 +71,22 @@ export default function AgendaGrid({
     <div className="p-card overflow-x-auto">
       <div style={{ minWidth: days.length > 1 ? 880 : undefined }}>
         {/* Cabeçalho dos dias */}
-        <div className="grid sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-[#F1E4E1]" style={{ gridTemplateColumns: `56px repeat(${days.length}, minmax(0, 1fr))` }}>
+        <div className="grid sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-[#F0E7DA]" style={{ gridTemplateColumns: `56px repeat(${days.length}, minmax(0, 1fr))` }}>
           <div />
           {days.map((d) => {
             const list = (byDay.get(d) ?? []).filter((a) => a.status !== "cancelado");
             const isToday = d === today;
             return (
-              <Link key={d} href={hrefFor({ view: "dia", d })} scroll={false} className="px-3 py-3 border-l border-[#F6ECE9] hover:bg-[#FFF8F6] transition-colors">
-                <p className={`text-[10.5px] uppercase tracking-[0.18em] font-bold ${isToday ? "text-[#C8737A]" : "text-[#9C7F84]"}`}>{fmtWeekday(d)}</p>
+              <Link key={d} href={hrefFor({ view: "dia", d })} scroll={false} className="px-3 py-3 border-l border-[#F5EEE3] hover:bg-[#FDFAF5] transition-colors">
+                <p className={`text-[10.5px] uppercase tracking-[0.18em] font-bold ${isToday ? "text-[#9A6F1E]" : "text-[#9A8B78]"}`}>{fmtWeekday(d)}</p>
                 <div className="flex items-baseline gap-2">
                   <span
-                    className={`p-display text-[1.7rem] leading-none ${isToday ? "text-white rounded-full w-9 h-9 inline-flex items-center justify-center" : "text-[#2C1A1E]"}`}
-                    style={isToday ? { background: "linear-gradient(135deg,#C8737A,#8B3A42)", fontSize: "1.25rem" } : undefined}
+                    className={`p-display text-[1.7rem] leading-none ${isToday ? "text-white rounded-full w-9 h-9 inline-flex items-center justify-center" : "text-[#2B221B]"}`}
+                    style={isToday ? { background: "linear-gradient(135deg,#9A6F1E,#6B4A10)", fontSize: "1.25rem" } : undefined}
                   >
                     {Number(d.slice(8))}
                   </span>
-                  <span className="text-[11px] text-[#8F7479]">{list.length ? `${list.length} atend.` : dayHours(d, hours) ? "livre" : "fechado"}</span>
+                  <span className="text-[11px] text-[#857566]">{list.length ? `${list.length} atend.` : dayHours(d, hours) ? "livre" : "fechado"}</span>
                 </div>
               </Link>
             );
@@ -97,7 +97,7 @@ export default function AgendaGrid({
         <div className="grid relative pt-3 pb-2" style={{ gridTemplateColumns: `56px repeat(${days.length}, minmax(0, 1fr))` }}>
           <div className="relative" style={{ height }}>
             {hoursList.map((m) => (
-              <span key={m} className="absolute right-2 -translate-y-1/2 text-[10.5px] text-[#A88D92] p-num" style={{ top: y(m) }}>
+              <span key={m} className="absolute right-2 -translate-y-1/2 text-[10.5px] text-[#A69885] p-num" style={{ top: y(m) }}>
                 {m < end ? toHHMM(m) : ""}
               </span>
             ))}
@@ -115,19 +115,19 @@ export default function AgendaGrid({
             if (open !== null && close !== null) for (let t = open; t < close; t += step) if (!(bs !== null && be !== null && t >= bs && t < be)) slots.push(t);
 
             return (
-              <div key={d} className="relative border-l border-[#F6ECE9]" style={{ height }}>
+              <div key={d} className="relative border-l border-[#F5EEE3]" style={{ height }}>
                 {hoursList.map((m) => <div key={m} className="cal-hour-line" style={{ top: y(m) }} />)}
                 {hoursList.slice(0, -1).map((m) => <div key={`h${m}`} className="cal-half-line" style={{ top: y(m + 30) }} />)}
 
                 {/* Fora do expediente */}
                 {open === null ? (
-                  <div className="cal-closed flex items-start justify-center pt-6 text-xs text-[#A88D92]" style={{ top: 0, height }}>Fechado</div>
+                  <div className="cal-closed flex items-start justify-center pt-6 text-xs text-[#A69885]" style={{ top: 0, height }}>Fechado</div>
                 ) : (
                   <>
                     <div className="cal-closed" style={{ top: 0, height: y(open) }} />
                     <div className="cal-closed" style={{ top: y(close!), height: height - y(close!) }} />
                     {bs !== null && be !== null && (
-                      <div className="cal-closed flex items-center justify-center text-[10.5px] text-[#A88D92]" style={{ top: y(bs), height: (be - bs) * PPM }}>Intervalo</div>
+                      <div className="cal-closed flex items-center justify-center text-[10.5px] text-[#A69885]" style={{ top: y(bs), height: (be - bs) * PPM }}>Intervalo</div>
                     )}
                   </>
                 )}
@@ -142,7 +142,7 @@ export default function AgendaGrid({
                     style={{ top: y(t), height: step * PPM }}
                     aria-label={`Agendar ${fmtDate(d, { year: undefined })} às ${toHHMM(t)}`}
                   >
-                    <span className="hidden group-hover:flex h-full mx-1 rounded-md items-center px-2 text-[11px] text-[#A85B63] bg-[#FFF1F3] border border-dashed border-[#E9B9C0]">
+                    <span className="hidden group-hover:flex h-full mx-1 rounded-md items-center px-2 text-[11px] text-[#82590F] bg-[#FAF3E6] border border-dashed border-[#E8D3A6]">
                       + {toHHMM(t)}
                     </span>
                   </Link>

@@ -5,11 +5,11 @@ import { ArrowRight, Clock } from "lucide-react";
 import Link from "next/link";
 
 const catColors: Record<string, string> = {
-  "Cuidados com a Pele": "#C8737A",
+  "Cuidados com a Pele": "#9A6F1E",
   "Tratamentos Corporais": "#C9973A",
-  "Dicas de Beleza": "#4A9B6F",
-  "Bem-Estar": "#6A7BC9",
-  "SPA & Relaxamento": "#9B4AC8",
+  "Dicas de Beleza": "#6B8F71",
+  "Bem-Estar": "#7D6B58",
+  "SPA & Relaxamento": "#6B4A10",
 };
 
 const postImages: Record<string, string> = {
@@ -46,10 +46,10 @@ export default function BlogSection() {
             <AnimateIn animation="up" delay={100}>
               <h2
                 className="text-4xl sm:text-5xl font-light mt-4 mb-5"
-                style={{ fontFamily: "var(--font-cormorant), serif", color: "#4A1820" }}
+                style={{ fontFamily: "var(--font-cormorant), serif", color: "#3B2A12" }}
               >
                 Nosso{" "}
-                <em className="italic font-normal" style={{ color: "#C8737A" }}>
+                <em className="italic font-normal" style={{ color: "#9A6F1E" }}>
                   Blog
                 </em>
               </h2>
@@ -73,8 +73,8 @@ export default function BlogSection() {
               className="group block rounded-2xl overflow-hidden hover-lift h-full"
               style={{
                 background: "white",
-                border: "1px solid #F9C7CE",
-                boxShadow: "0 2px 20px rgba(200,115,122,0.07)",
+                border: "1px solid #EEDFBF",
+                boxShadow: "0 2px 20px rgba(154,111,30,0.07)",
               }}
             >
               {/* Image */}
@@ -90,7 +90,7 @@ export default function BlogSection() {
                   className="absolute inset-0"
                   style={{
                     background:
-                      "linear-gradient(to top, rgba(44,26,30,0.35) 0%, transparent 60%)",
+                      "linear-gradient(to top, rgba(43,34,27,0.35) 0%, transparent 60%)",
                   }}
                 />
                 <div className="absolute bottom-4 left-5">
@@ -98,7 +98,7 @@ export default function BlogSection() {
                     className="inline-block text-[10px] tracking-widest uppercase px-3 py-1 rounded-full text-white"
                     style={{
                       fontFamily: "var(--font-lato), sans-serif",
-                      background: catColors[featured.category] || "#C8737A",
+                      background: catColors[featured.category] || "#9A6F1E",
                     }}
                   >
                     {featured.category}
@@ -110,31 +110,31 @@ export default function BlogSection() {
                 <div className="flex items-center gap-3 mb-3">
                   <span
                     className="text-[11px]"
-                    style={{ fontFamily: "var(--font-lato), sans-serif", color: "#9C7A80" }}
+                    style={{ fontFamily: "var(--font-lato), sans-serif", color: "#8F8070" }}
                   >
                     {featured.date}
                   </span>
-                  <span className="w-1 h-1 rounded-full bg-rose-200" />
+                  <span className="w-1 h-1 rounded-full bg-bronze-200" />
                   <span
                     className="flex items-center gap-1 text-[11px]"
-                    style={{ fontFamily: "var(--font-lato), sans-serif", color: "#9C7A80" }}
+                    style={{ fontFamily: "var(--font-lato), sans-serif", color: "#8F8070" }}
                   >
                     <Clock size={10} /> {featured.readTime} de leitura
                   </span>
                 </div>
                 <h3
-                  className="text-2xl font-light mb-3 leading-snug group-hover:text-rose-600 transition-colors"
-                  style={{ fontFamily: "var(--font-cormorant), serif", color: "#4A1820" }}
+                  className="text-2xl font-light mb-3 leading-snug group-hover:text-bronze-600 transition-colors"
+                  style={{ fontFamily: "var(--font-cormorant), serif", color: "#3B2A12" }}
                 >
                   {featured.title}
                 </h3>
                 <p
                   className="text-sm font-light leading-7 mb-5"
-                  style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B4C52" }}
+                  style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B5A4B" }}
                 >
                   {featured.excerpt}
                 </p>
-                <div className="flex items-center gap-2" style={{ color: "#C8737A" }}>
+                <div className="flex items-center gap-2" style={{ color: "#9A6F1E" }}>
                   <span
                     className="text-[11px] tracking-widest uppercase"
                     style={{ fontFamily: "var(--font-lato), sans-serif" }}
@@ -159,8 +159,8 @@ export default function BlogSection() {
                   className="group flex gap-4 rounded-xl overflow-hidden hover-lift p-4"
                   style={{
                     background: "white",
-                    border: "1px solid #F9C7CE",
-                    boxShadow: "0 1px 12px rgba(200,115,122,0.05)",
+                    border: "1px solid #EEDFBF",
+                    boxShadow: "0 1px 12px rgba(154,111,30,0.05)",
                   }}
                 >
                   {/* Thumbnail */}
@@ -178,20 +178,20 @@ export default function BlogSection() {
                       className="text-[9.5px] tracking-widest uppercase mb-1 block"
                       style={{
                         fontFamily: "var(--font-lato), sans-serif",
-                        color: catColors[post.category] || "#C8737A",
+                        color: catColors[post.category] || "#9A6F1E",
                       }}
                     >
                       {post.category}
                     </span>
                     <h4
-                      className="text-base font-light leading-snug group-hover:text-rose-600 transition-colors line-clamp-2"
-                      style={{ fontFamily: "var(--font-cormorant), serif", color: "#4A1820" }}
+                      className="text-base font-light leading-snug group-hover:text-bronze-600 transition-colors line-clamp-2"
+                      style={{ fontFamily: "var(--font-cormorant), serif", color: "#3B2A12" }}
                     >
                       {post.title}
                     </h4>
                     <p
                       className="text-[11px] mt-1"
-                      style={{ fontFamily: "var(--font-lato), sans-serif", color: "#9C7A80" }}
+                      style={{ fontFamily: "var(--font-lato), sans-serif", color: "#8F8070" }}
                     >
                       {post.date} · {post.readTime}
                     </p>

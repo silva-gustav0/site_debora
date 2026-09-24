@@ -118,7 +118,7 @@ export default function Schedule({ config }: { config: PublicConfig | null }) {
     <section
       id="agendamento"
       className="py-28 overflow-hidden"
-      style={{ background: "linear-gradient(180deg, #FFF5F7 0%, #FDFAF7 100%)" }}
+      style={{ background: "linear-gradient(180deg, #FBF7EE 0%, #FDFAF7 100%)" }}
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="flex flex-col items-center text-center mb-14">
@@ -126,9 +126,9 @@ export default function Schedule({ config }: { config: PublicConfig | null }) {
             <span className="section-label">Agende sua Visita</span>
           </AnimateIn>
           <AnimateIn animation="up" delay={100}>
-            <h2 className="text-4xl sm:text-5xl font-light text-rose-900 mt-4 mb-5">
+            <h2 className="text-4xl sm:text-5xl font-light text-bronze-900 mt-4 mb-5">
               Faça seu{" "}
-              <em className="italic font-normal" style={{ color: "#C8737A" }}>Agendamento</em>
+              <em className="italic font-normal" style={{ color: "#9A6F1E" }}>Agendamento</em>
             </h2>
           </AnimateIn>
           <AnimateIn animation="scale" delay={200}>
@@ -140,15 +140,15 @@ export default function Schedule({ config }: { config: PublicConfig | null }) {
           <div className="max-w-md mx-auto text-center py-16 px-8" role="status">
             <div
               className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
-              style={{ background: "linear-gradient(135deg,#C8737A,#8B3A42)" }}
+              style={{ background: "linear-gradient(135deg,#9A6F1E,#6B4A10)" }}
             >
               <CheckCircle2 size={36} className="text-white" />
             </div>
-            <h3 className="text-3xl font-light text-rose-800 mb-3">
+            <h3 className="text-3xl font-light text-bronze-800 mb-3">
               {online ? "Pedido Recebido!" : "Quase lá!"}
             </h3>
             <p className="text-sm font-light text-text-secondary leading-7 mb-2">
-              <strong className="font-normal text-rose-700">{done.serviceName}</strong>
+              <strong className="font-normal text-bronze-700">{done.serviceName}</strong>
               <br />
               {fmtWeekday(done.date, "long")}, {fmtDate(done.date)} às {done.time}
             </p>
@@ -177,13 +177,13 @@ export default function Schedule({ config }: { config: PublicConfig | null }) {
         ) : (
           <AnimateIn animation="up" delay={200}>
             <div
-              className="max-w-5xl mx-auto rounded-2xl overflow-hidden shadow-[0_8px_60px_rgba(200,115,122,0.12)]"
-              style={{ background: "white", border: "1px solid #F9C7CE" }}
+              className="max-w-5xl mx-auto rounded-2xl overflow-hidden shadow-[0_8px_60px_rgba(154,111,30,0.12)]"
+              style={{ background: "white", border: "1px solid #EEDFBF" }}
             >
               {/* Passos */}
               <ol
-                className="flex items-center justify-between px-5 sm:px-8 py-5 border-b border-rose-50"
-                style={{ background: "linear-gradient(135deg,#FFF5F7,#FFF8E7)" }}
+                className="flex items-center justify-between px-5 sm:px-8 py-5 border-b border-bronze-50"
+                style={{ background: "linear-gradient(135deg,#FBF7EE,#FFF8E7)" }}
               >
                 {[
                   { n: 1, label: "Serviço & Data" },
@@ -195,15 +195,15 @@ export default function Schedule({ config }: { config: PublicConfig | null }) {
                       <div
                         className="w-8 h-8 rounded-full flex items-center justify-center text-sm transition-all duration-300"
                         style={{
-                          background: step >= s.n ? "linear-gradient(135deg,#C8737A,#8B3A42)" : "#F9C7CE",
-                          color: step >= s.n ? "white" : "#6B4C52",
+                          background: step >= s.n ? "linear-gradient(135deg,#9A6F1E,#6B4A10)" : "#EEDFBF",
+                          color: step >= s.n ? "white" : "#6B5A4B",
                         }}
                       >
                         {s.n}
                       </div>
                       <span
                         className="hidden sm:block text-[11px] tracking-wide uppercase"
-                        style={{ color: step >= s.n ? "#A85B63" : "#9C7A80" }}
+                        style={{ color: step >= s.n ? "#82590F" : "#8F8070" }}
                       >
                         {s.label}
                       </span>
@@ -211,7 +211,7 @@ export default function Schedule({ config }: { config: PublicConfig | null }) {
                     {i < arr.length - 1 && (
                       <div
                         className="flex-1 h-px mx-4 transition-all duration-500"
-                        style={{ background: step > s.n ? "#C8737A" : "#F9C7CE" }}
+                        style={{ background: step > s.n ? "#9A6F1E" : "#EEDFBF" }}
                       />
                     )}
                   </li>
@@ -220,7 +220,7 @@ export default function Schedule({ config }: { config: PublicConfig | null }) {
 
               <div className="p-6 sm:p-10">
                 {error && (
-                  <p className="mb-6 flex items-start gap-2 rounded-lg px-4 py-3 text-sm" style={{ background: "#FFF1F1", color: "#8B3A42", border: "1px solid #F4C2C2" }} role="alert">
+                  <p className="mb-6 flex items-start gap-2 rounded-lg px-4 py-3 text-sm" style={{ background: "#FFF1F1", color: "#9B2C2C", border: "1px solid #F4C2C2" }} role="alert">
                     <AlertCircle size={16} className="mt-0.5 shrink-0" /> {error}
                   </p>
                 )}
@@ -239,9 +239,9 @@ export default function Schedule({ config }: { config: PublicConfig | null }) {
                               key={s.id}
                               className="flex items-start gap-3 rounded-xl p-4 cursor-pointer transition-all"
                               style={{
-                                border: `1px solid ${selected ? "#C8737A" : "#F9C7CE"}`,
-                                background: selected ? "#FFF5F7" : "white",
-                                boxShadow: selected ? "0 0 0 3px rgba(200,115,122,.12)" : "none",
+                                border: `1px solid ${selected ? "#9A6F1E" : "#EEDFBF"}`,
+                                background: selected ? "#FBF7EE" : "white",
+                                boxShadow: selected ? "0 0 0 3px rgba(154,111,30,.12)" : "none",
                               }}
                             >
                               <input
@@ -250,11 +250,11 @@ export default function Schedule({ config }: { config: PublicConfig | null }) {
                                 value={s.id}
                                 checked={selected}
                                 onChange={() => { setServiceId(s.id); setTime(null); }}
-                                className="mt-1 accent-[#C8737A]"
+                                className="mt-1 accent-[#9A6F1E]"
                               />
                               <span className="flex-1">
                                 <span className="flex items-baseline justify-between gap-3">
-                                  <span className="text-lg text-rose-800" style={{ fontFamily: "var(--font-cormorant), serif" }}>
+                                  <span className="text-lg text-bronze-800" style={{ fontFamily: "var(--font-cormorant), serif" }}>
                                     {s.name}
                                   </span>
                                   {s.price > 0 && (
@@ -278,18 +278,18 @@ export default function Schedule({ config }: { config: PublicConfig | null }) {
 
                     <div>
                       <p className="block text-[11px] tracking-widest uppercase text-text-muted mb-3">Escolha a Data</p>
-                      <div className="rounded-xl p-4" style={{ border: "1px solid #F9C7CE", background: "#FDFAF7" }}>
+                      <div className="rounded-xl p-4" style={{ border: "1px solid #EEDFBF", background: "#FDFAF7" }}>
                         <div className="flex items-center justify-between mb-4">
                           <button
                             type="button"
                             onClick={() => shiftMonth(-1)}
                             disabled={!canGoPrev}
                             aria-label="Mês anterior"
-                            className="p-1.5 rounded-full hover:bg-rose-50 disabled:opacity-30 disabled:hover:bg-transparent"
+                            className="p-1.5 rounded-full hover:bg-bronze-50 disabled:opacity-30 disabled:hover:bg-transparent"
                           >
                             <ChevronLeft size={16} className="text-text-secondary" />
                           </button>
-                          <span className="text-rose-800" style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "18px" }} aria-live="polite">
+                          <span className="text-bronze-800" style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "18px" }} aria-live="polite">
                             {MONTHS[month]} {year}
                           </span>
                           <button
@@ -297,7 +297,7 @@ export default function Schedule({ config }: { config: PublicConfig | null }) {
                             onClick={() => shiftMonth(1)}
                             disabled={!canGoNext}
                             aria-label="Próximo mês"
-                            className="p-1.5 rounded-full hover:bg-rose-50 disabled:opacity-30 disabled:hover:bg-transparent"
+                            className="p-1.5 rounded-full hover:bg-bronze-50 disabled:opacity-30 disabled:hover:bg-transparent"
                           >
                             <ChevronRight size={16} className="text-text-secondary" />
                           </button>
@@ -324,11 +324,11 @@ export default function Schedule({ config }: { config: PublicConfig | null }) {
                                 onClick={() => { setDate(day); setTime(null); }}
                                 aria-pressed={selected}
                                 aria-label={`${d} de ${MONTHS[month]}${disabled ? " (indisponível)" : ""}`}
-                                className="w-9 h-9 mx-auto rounded-full text-[13px] transition-all duration-200 flex items-center justify-center enabled:hover:bg-rose-100"
+                                className="w-9 h-9 mx-auto rounded-full text-[13px] transition-all duration-200 flex items-center justify-center enabled:hover:bg-bronze-100"
                                 style={{
-                                  background: selected ? "linear-gradient(135deg,#C8737A,#8B3A42)" : isToday ? "#FFF5F7" : "transparent",
-                                  color: selected ? "white" : disabled ? "#D4B8BC" : "#2C1A1E",
-                                  border: isToday && !selected ? "1px solid #C8737A" : "1px solid transparent",
+                                  background: selected ? "linear-gradient(135deg,#9A6F1E,#6B4A10)" : isToday ? "#FBF7EE" : "transparent",
+                                  color: selected ? "white" : disabled ? "#D9CDB8" : "#2B221B",
+                                  border: isToday && !selected ? "1px solid #9A6F1E" : "1px solid transparent",
                                   cursor: disabled ? "not-allowed" : "pointer",
                                   textDecoration: disabled && day >= today ? "line-through" : "none",
                                 }}
@@ -350,11 +350,11 @@ export default function Schedule({ config }: { config: PublicConfig | null }) {
                   <div>
                     <p className="text-sm font-light text-text-secondary mb-6 flex flex-wrap items-center gap-x-4 gap-y-1">
                       <span className="flex items-center gap-2">
-                        <CalendarDays size={14} className="text-rose-400" />
+                        <CalendarDays size={14} className="text-bronze-400" />
                         {fmtWeekday(date, "long")}, {fmtDate(date)}
                       </span>
                       <span className="flex items-center gap-2">
-                        <Clock size={14} className="text-rose-400" /> {service.name} · {service.duration_min} min
+                        <Clock size={14} className="text-bronze-400" /> {service.name} · {service.duration_min} min
                       </span>
                     </p>
                     <p className="block text-[11px] tracking-widest uppercase text-text-muted mb-4">Escolha o Horário</p>
@@ -364,7 +364,7 @@ export default function Schedule({ config }: { config: PublicConfig | null }) {
                         <Loader2 size={16} className="animate-spin" /> Buscando horários livres…
                       </p>
                     ) : slots.every((s) => !s.available) ? (
-                      <div className="rounded-xl p-6 text-center" style={{ background: "#FFF5F7", border: "1px solid #F9C7CE" }}>
+                      <div className="rounded-xl p-6 text-center" style={{ background: "#FBF7EE", border: "1px solid #EEDFBF" }}>
                         <p className="text-sm text-text-secondary mb-3">Não há horários livres nesse dia para este serviço.</p>
                         <button type="button" className="btn-outline" onClick={() => setStep(1)}>Escolher outra data</button>
                       </div>
@@ -379,11 +379,11 @@ export default function Schedule({ config }: { config: PublicConfig | null }) {
                               disabled={!s.available}
                               onClick={() => setTime(s.time)}
                               aria-pressed={selected}
-                              className="py-2.5 rounded-lg text-[13px] transition-all duration-200 disabled:cursor-not-allowed enabled:hover:border-rose-400"
+                              className="py-2.5 rounded-lg text-[13px] transition-all duration-200 disabled:cursor-not-allowed enabled:hover:border-bronze-400"
                               style={{
-                                background: selected ? "linear-gradient(135deg,#C8737A,#8B3A42)" : s.available ? "#FFF5F7" : "#F7F2EC",
-                                color: selected ? "white" : s.available ? "#6B4C52" : "#C9B5B8",
-                                border: selected ? "1px solid transparent" : "1px solid #F9C7CE",
+                                background: selected ? "linear-gradient(135deg,#9A6F1E,#6B4A10)" : s.available ? "#FBF7EE" : "#F7F2EC",
+                                color: selected ? "white" : s.available ? "#6B5A4B" : "#D0C6B4",
+                                border: selected ? "1px solid transparent" : "1px solid #EEDFBF",
                                 textDecoration: s.available ? "none" : "line-through",
                               }}
                             >
@@ -445,7 +445,7 @@ export default function Schedule({ config }: { config: PublicConfig | null }) {
                       />
                     </div>
 
-                    <div className="rounded-xl p-5 mb-6" style={{ background: "#FFF5F7", border: "1px solid #F9C7CE" }}>
+                    <div className="rounded-xl p-5 mb-6" style={{ background: "#FBF7EE", border: "1px solid #EEDFBF" }}>
                       <p className="section-label mb-3" style={{ fontSize: "9px" }}>Resumo do Agendamento</p>
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                         {[
@@ -456,7 +456,7 @@ export default function Schedule({ config }: { config: PublicConfig | null }) {
                         ].map((item) => (
                           <div key={item.label}>
                             <p className="text-[10px] uppercase tracking-widest text-text-muted mb-0.5">{item.label}</p>
-                            <p className="text-rose-700" style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "17px" }}>{item.value}</p>
+                            <p className="text-bronze-700" style={{ fontFamily: "var(--font-cormorant), serif", fontSize: "17px" }}>{item.value}</p>
                           </div>
                         ))}
                       </div>
@@ -468,7 +468,7 @@ export default function Schedule({ config }: { config: PublicConfig | null }) {
                   </form>
                 )}
 
-                <div className="flex justify-between mt-8 pt-6 border-t border-rose-50">
+                <div className="flex justify-between mt-8 pt-6 border-t border-bronze-50">
                   <button
                     type="button"
                     onClick={() => { setError(null); setStep((s) => Math.max(1, s - 1) as Step); }}

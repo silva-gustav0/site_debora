@@ -14,7 +14,7 @@ export default function CancelBooking({ token }: { token: string }) {
 
   if (!open) {
     return (
-      <button type="button" onClick={() => setOpen(true)} className="text-xs text-text-muted underline underline-offset-4 hover:text-rose-700">
+      <button type="button" onClick={() => setOpen(true)} className="text-xs text-text-muted underline underline-offset-4 hover:text-bronze-700">
         Preciso cancelar este horário
       </button>
     );

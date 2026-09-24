@@ -40,7 +40,7 @@ export default function ActionForm({
           <p
             role={state.ok ? "status" : "alert"}
             className="text-sm rounded-lg px-3 py-2 mt-3"
-            style={state.ok ? { background: "#EAF6EE", color: "#1F6B3A" } : { background: "#FFF1F1", color: "#8B3A42" }}
+            style={state.ok ? { background: "#EAF6EE", color: "#1F6B3A" } : { background: "#FFF1F1", color: "#9B2C2C" }}
           >
             {state.message}
           </p>

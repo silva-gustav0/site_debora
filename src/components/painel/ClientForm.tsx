@@ -62,8 +62,8 @@ export default function ClientForm({ client }: { client?: ClientRow }) {
         <span className="p-label">Observações</span>
         <textarea name="notes" rows={2} defaultValue={c?.notes ?? ""} placeholder="Preferências, como gosta de ser atendida…" className="p-input resize-y" />
       </label>
-      <label className="flex items-center gap-2 text-sm text-[#6B4C52] sm:col-span-2 lg:col-span-3">
-        <input type="checkbox" name="marketing_opt_in" defaultChecked={c?.marketing_opt_in ?? true} className="accent-[#A85B63]" />
+      <label className="flex items-center gap-2 text-sm text-[#6B5A4B] sm:col-span-2 lg:col-span-3">
+        <input type="checkbox" name="marketing_opt_in" defaultChecked={c?.marketing_opt_in ?? true} className="accent-[#82590F]" />
         Aceita receber lembretes e promoções pelo WhatsApp (LGPD)
       </label>
       <div className="sm:col-span-2 lg:col-span-3">

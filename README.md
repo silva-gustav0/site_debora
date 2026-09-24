@@ -1,4 +1,4 @@
-# Clínica Debora Silva
+# Clínica Débora Silva
 
 Site da clínica + painel de gestão da esteticista (Next.js 16 + Supabase).
 

@@ -58,14 +58,14 @@ export default function Sidebar({ name, badges }: { name: string; badges: Sideba
     <>
       <Link href="/painel" className="flex items-center gap-3 px-3 mb-6" onClick={() => setOpen(false)}>
         <span
-          className="w-10 h-10 rounded-full flex items-center justify-center p-display text-xl text-[#2A171B]"
+          className="w-10 h-10 rounded-full flex items-center justify-center p-display text-xl text-[#29201A]"
           style={{ background: "linear-gradient(135deg,#F3DDA6,#C9973A)" }}
           aria-hidden="true"
         >
           D
         </span>
         <span>
-          <span className="block p-display text-[1.35rem] leading-none text-white">Debora Silva</span>
+          <span className="block p-display text-[1.35rem] leading-none text-white">Débora Silva</span>
           <span className="block text-[9.5px] tracking-[0.3em] uppercase text-[#E8C882]/80 mt-1">Gestão da clínica</span>
         </span>
       </Link>
@@ -98,7 +98,7 @@ export default function Sidebar({ name, badges }: { name: string; badges: Sideba
                     <Icon size={16} strokeWidth={1.8} />
                     <span className="flex-1">{label}</span>
                     {count > 0 && (
-                      <span className="rounded-full px-1.5 min-w-5 text-center text-[10.5px] font-bold text-[#2A171B]" style={{ background: "#E8C882" }}>
+                      <span className="rounded-full px-1.5 min-w-5 text-center text-[10.5px] font-bold text-[#29201A]" style={{ background: "#E8C882" }}>
                         {count}
                       </span>
                     )}
@@ -112,7 +112,7 @@ export default function Sidebar({ name, badges }: { name: string; badges: Sideba
 
       <div className="border-t border-white/10 pt-4 mt-4">
         <div className="flex items-center gap-3 px-3 mb-3">
-          <span className="p-avatar w-9 h-9 text-xs" style={{ background: "linear-gradient(135deg,#C8737A,#8B3A42)" }}>{initials(name)}</span>
+          <span className="p-avatar w-9 h-9 text-xs" style={{ background: "linear-gradient(135deg,#9A6F1E,#6B4A10)" }}>{initials(name)}</span>
           <div className="min-w-0">
             <p className="text-sm text-white truncate">{name}</p>
             <p className="text-[11px] text-white/45">Equipe</p>
@@ -137,7 +137,7 @@ export default function Sidebar({ name, badges }: { name: string; badges: Sideba
       <aside className="panel-sidebar no-print hidden lg:flex fixed inset-y-0 left-0 w-64 flex-col px-3 py-6 z-30">{content}</aside>
 
       <header className="panel-sidebar no-print lg:hidden sticky top-0 z-40 flex items-center justify-between px-4 h-14">
-        <Link href="/painel" className="p-display text-xl text-white">Debora Silva</Link>
+        <Link href="/painel" className="p-display text-xl text-white">Débora Silva</Link>
         <button onClick={() => setOpen(true)} aria-label="Abrir menu" className="p-2 text-white relative">
           <Menu size={22} />
           {totalAlerts > 0 && <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#E8C882]" />}

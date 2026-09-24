@@ -13,8 +13,8 @@ const yes = (v?: boolean) => (v ? "Sim" : "Não");
 
 function Row({ label, value }: { label: string; value?: string | null }) {
   return (
-    <div className="border-b border-[#EDE3E0] py-1.5 grid grid-cols-[180px_1fr] gap-3 text-[13px]">
-      <span className="text-[#8F7479]">{label}</span>
+    <div className="border-b border-[#ECE4D8] py-1.5 grid grid-cols-[180px_1fr] gap-3 text-[13px]">
+      <span className="text-[#857566]">{label}</span>
       <span>{value || "—"}</span>
     </div>
   );
@@ -35,16 +35,16 @@ export default async function ConsentPage({ params }: PageProps<"/painel/cliente
   return (
     <>
       <div className="no-print flex items-center justify-between mb-5">
-        <Link href={`/painel/clientes/${c.id}?tab=anamnese`} className="inline-flex items-center gap-1 text-sm text-[#8F7479] hover:text-[#8B3A42]">
+        <Link href={`/painel/clientes/${c.id}?tab=anamnese`} className="inline-flex items-center gap-1 text-sm text-[#857566] hover:text-[#6B4A10]">
           <ArrowLeft size={14} /> Voltar à ficha
         </Link>
         <PrintButton />
       </div>
 
-      <article className="print-sheet p-card max-w-[800px] mx-auto p-10 bg-white text-[#2C1A1E]">
+      <article className="print-sheet p-card max-w-[800px] mx-auto p-10 bg-white text-[#2B221B]">
         <header className="text-center border-b-2 border-[#C9973A] pb-4 mb-6">
           <p className="p-display text-3xl">{settings.clinic_name}</p>
-          <p className="text-xs text-[#8F7479] mt-1">{settings.address} · WhatsApp {formatPhone(settings.whatsapp.slice(-11))}</p>
+          <p className="text-xs text-[#857566] mt-1">{settings.address} · WhatsApp {formatPhone(settings.whatsapp.slice(-11))}</p>
           <h1 className="p-display text-2xl mt-4">Ficha de Anamnese e Termo de Consentimento</h1>
         </header>
 
@@ -93,9 +93,9 @@ export default async function ConsentPage({ params }: PageProps<"/painel/cliente
         </section>
 
         <footer className="grid grid-cols-2 gap-10 mt-14 text-center text-[12px]">
-          <div><div className="border-t border-[#2C1A1E] pt-1">{c.name}</div></div>
-          <div><div className="border-t border-[#2C1A1E] pt-1">Profissional responsável</div></div>
-          <p className="col-span-2 text-[#8F7479]">São Paulo, {fmtDate(todaySP(), { month: "long" })}</p>
+          <div><div className="border-t border-[#2B221B] pt-1">{c.name}</div></div>
+          <div><div className="border-t border-[#2B221B] pt-1">Profissional responsável</div></div>
+          <p className="col-span-2 text-[#857566]">São Paulo, {fmtDate(todaySP(), { month: "long" })}</p>
         </footer>
       </article>
     </>

@@ -17,13 +17,13 @@ const COLUMNS: { stage: ClientStage; hint: string; color: string }[] = [
   { stage: "em_contato", hint: "Conversa em andamento / 1º horário", color: "#5B6FC9" },
   { stage: "cliente", hint: "Já foram atendidas", color: "#3F9A5E" },
   { stage: "vip", hint: "Frequentes ou de alto valor", color: "#8E4BA0" },
-  { stage: "inativa", hint: "Pararam de vir", color: "#B8AEAF" },
+  { stage: "inativa", hint: "Pararam de vir", color: "#B8AFA2" },
 ];
 
 const SEGMENTS = {
   aniversariantes: { label: "Aniversariantes do mês", template: "aniversario" },
   retorno: { label: "Retorno vencendo", template: "retorno" },
-  inativas: { label: "Inativas", template: "reativacao" },
+  inativas: { label: "Inativos", template: "reativacao" },
   leads: { label: "Leads sem atendimento", template: "retorno" },
   vip: { label: "VIPs", template: "retorno" },
   todas: { label: "Todas (com permissão)", template: "retorno" },
@@ -119,25 +119,25 @@ export default async function CrmPage({ searchParams }: PageProps<"/painel/crm">
                 .filter((c) => c.stage === col.stage)
                 .sort((a, b) => (lastContact.get(b.id) ?? b.created_at).localeCompare(lastContact.get(a.id) ?? a.created_at));
               return (
-                <section key={col.stage} className="rounded-2xl p-2.5 flex flex-col" style={{ background: "rgba(255,255,255,.55)", border: "1px solid #EFE2DE" }} aria-label={STAGE_LABEL[col.stage]}>
+                <section key={col.stage} className="rounded-2xl p-2.5 flex flex-col" style={{ background: "rgba(255,255,255,.55)", border: "1px solid #EEE5D8" }} aria-label={STAGE_LABEL[col.stage]}>
                   <header className="px-1.5 pt-1 pb-2.5" style={{ borderTop: `3px solid ${col.color}`, marginTop: -10, paddingTop: 12 }}>
-                    <h2 className="flex items-center gap-2 p-display text-xl text-[#2C1A1E]">
-                      {STAGE_LABEL[col.stage]} <span className="text-sm text-[#8F7479] font-sans">{list.length}</span>
+                    <h2 className="flex items-center gap-2 p-display text-xl text-[#2B221B]">
+                      {STAGE_LABEL[col.stage]} <span className="text-sm text-[#857566] font-sans">{list.length}</span>
                     </h2>
-                    <p className="text-[11px] text-[#8F7479] leading-4">{col.hint}</p>
+                    <p className="text-[11px] text-[#857566] leading-4">{col.hint}</p>
                   </header>
                   <div className="flex flex-col gap-2 max-h-[62vh] overflow-y-auto">
-                    {list.length === 0 && <p className="text-xs text-[#A88D92] text-center py-4">Vazio</p>}
+                    {list.length === 0 && <p className="text-xs text-[#A69885] text-center py-4">Vazio</p>}
                     {list.map((c) => {
                       const last = lastContact.get(c.id);
                       return (
-                        <article key={c.id} className="rounded-xl bg-white border border-[#F1E5E2] p-3 shadow-[0_1px_2px_rgba(44,26,30,.04)]">
+                        <article key={c.id} className="rounded-xl bg-white border border-[#F0E8DB] p-3 shadow-[0_1px_2px_rgba(43,34,27,.04)]">
                           <Link href={`/painel/clientes/${c.id}`} className="flex items-center gap-2 mb-1.5 group">
                             <Avatar name={c.name} size={26} />
-                            <span className="text-sm font-bold text-[#2C1A1E] truncate group-hover:text-[#8B3A42]">{c.name}</span>
+                            <span className="text-sm font-bold text-[#2B221B] truncate group-hover:text-[#6B4A10]">{c.name}</span>
                           </Link>
-                          <p className="text-[11px] text-[#8F7479]">{SOURCE_LABEL[c.source]} · {Number(c.stats?.visits ?? 0)} visitas</p>
-                          <p className="text-[11px] text-[#8F7479] mb-2">{last ? `Último contato ${fmtDate(last, { year: undefined })}` : `Cadastro ${fmtDate(c.created_at, { year: undefined })}`}</p>
+                          <p className="text-[11px] text-[#857566]">{SOURCE_LABEL[c.source]} · {Number(c.stats?.visits ?? 0)} visitas</p>
+                          <p className="text-[11px] text-[#857566] mb-2">{last ? `Último contato ${fmtDate(last, { year: undefined })}` : `Cadastro ${fmtDate(c.created_at, { year: undefined })}`}</p>
                           <StageSelect id={c.id} stage={c.stage} name={c.name} />
                         </article>
                       );
@@ -157,11 +157,11 @@ export default async function CrmPage({ searchParams }: PageProps<"/painel/crm">
               {tasks.map((t) => {
                 const wa = whatsappLink(t.clients?.phone, `Oi, ${firstName(t.clients?.name ?? "")}! Aqui é da ${settings.clinic_name} 🌸`);
                 return (
-                  <li key={t.id} className="flex items-center gap-3 rounded-xl border border-[#F1E5E2] bg-white px-3 py-2.5">
+                  <li key={t.id} className="flex items-center gap-3 rounded-xl border border-[#F0E8DB] bg-white px-3 py-2.5">
                     <Badge tone={t.due_on! < today ? "red" : t.due_on === today ? "gold" : "gray"}>{t.due_on === today ? "Hoje" : fmtDate(t.due_on, { year: undefined })}</Badge>
                     <div className="flex-1 min-w-0">
-                      <Link href={`/painel/clientes/${t.clients?.id}?tab=relacionamento`} className="text-sm font-bold text-[#2C1A1E] hover:underline">{t.clients?.name}</Link>
-                      <p className="text-xs text-[#8F7479] line-clamp-2"><strong>{INTERACTION_LABEL[t.kind]}:</strong> {t.content}</p>
+                      <Link href={`/painel/clientes/${t.clients?.id}?tab=relacionamento`} className="text-sm font-bold text-[#2B221B] hover:underline">{t.clients?.name}</Link>
+                      <p className="text-xs text-[#857566] line-clamp-2"><strong>{INTERACTION_LABEL[t.kind]}:</strong> {t.content}</p>
                     </div>
                     {wa && <a href={wa} target="_blank" rel="noopener noreferrer" className="p-btn-ghost p-btn-sm" aria-label="WhatsApp"><MessageCircle size={13} /></a>}
                     <form action={completeInteraction}>
@@ -220,7 +220,7 @@ export default async function CrmPage({ searchParams }: PageProps<"/painel/crm">
             action={<Megaphone size={18} className="text-[#C9973A]" />}
             bodyClassName="p-3"
           >
-            <p className="text-xs text-[#8F7479] px-2 pb-3">
+            <p className="text-xs text-[#857566] px-2 pb-3">
               Clique em “Enviar” para abrir o WhatsApp com a mensagem pronta e depois em “Registrar” para marcar no histórico. Só aparecem clientes que aceitam mensagens (LGPD).
             </p>
             {audience.length === 0 ? <EmptyState icon={Send}>Ninguém neste segmento.</EmptyState> : (
@@ -229,11 +229,11 @@ export default async function CrmPage({ searchParams }: PageProps<"/painel/crm">
                   const text = fillTemplate(message, { nome: firstName(c.name), clinica: settings.clinic_name, servico: "tratamento" });
                   const done = recentWhats.has(c.id);
                   return (
-                    <li key={c.id} className={`flex items-center gap-3 rounded-xl border px-3 py-2 ${done ? "bg-[#F4FAF6] border-[#CFE7D7]" : "bg-white border-[#F1E5E2]"}`}>
+                    <li key={c.id} className={`flex items-center gap-3 rounded-xl border px-3 py-2 ${done ? "bg-[#F4FAF6] border-[#CFE7D7]" : "bg-white border-[#F0E8DB]"}`}>
                       <Avatar name={c.name} size={30} />
                       <div className="flex-1 min-w-0">
-                        <Link href={`/painel/clientes/${c.id}`} className="text-sm text-[#2C1A1E] hover:underline">{c.name}</Link>
-                        <p className="text-[11px] text-[#8F7479] truncate">
+                        <Link href={`/painel/clientes/${c.id}`} className="text-sm text-[#2B221B] hover:underline">{c.name}</Link>
+                        <p className="text-[11px] text-[#857566] truncate">
                           {segment === "aniversariantes" && c.birth_date ? `🎂 dia ${c.birth_date.slice(8)}` : `${Number(c.stats?.visits ?? 0)} visitas`}
                           {done && " · contatada nesta semana"}
                         </p>

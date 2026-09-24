@@ -23,8 +23,8 @@ export const CONDITIONS = [
 
 function Check({ name, label, checked }: { name: string; label: string; checked?: boolean }) {
   return (
-    <label className="flex items-center gap-2 text-sm text-[#2C1A1E] rounded-lg px-2.5 py-1.5 border border-[#F1E5E2] bg-white has-[:checked]:bg-[#FFF1F3] has-[:checked]:border-[#E3B4BA]">
-      <input type="checkbox" name={name} defaultChecked={checked} className="accent-[#A85B63]" /> {label}
+    <label className="flex items-center gap-2 text-sm text-[#2B221B] rounded-lg px-2.5 py-1.5 border border-[#F0E8DB] bg-white has-[:checked]:bg-[#FAF3E6] has-[:checked]:border-[#E3CFA0]">
+      <input type="checkbox" name={name} defaultChecked={checked} className="accent-[#82590F]" /> {label}
     </label>
   );
 }
@@ -35,7 +35,7 @@ function Multi({ name, label, options, values }: { name: string; label: string; 
       <legend className="p-label">{label}</legend>
       <div className="flex flex-wrap gap-1.5">
         {options.map((o) => (
-          <label key={o} className="text-[13px] rounded-full px-3 py-1 border border-[#EBDDD9] bg-white cursor-pointer has-[:checked]:bg-[#2C1A1E] has-[:checked]:text-white has-[:checked]:border-[#2C1A1E] transition-colors">
+          <label key={o} className="text-[13px] rounded-full px-3 py-1 border border-[#EAE0D0] bg-white cursor-pointer has-[:checked]:bg-[#2B221B] has-[:checked]:text-white has-[:checked]:border-[#2B221B] transition-colors">
             <input type="checkbox" name={name} value={o} defaultChecked={values?.includes(o)} className="sr-only" /> {o}
           </label>
         ))}
@@ -109,7 +109,7 @@ export default function AnamnesisForm({ clientId, a }: { clientId: string; a: An
           <textarea name="previous_procedures" rows={2} defaultValue={a.previous_procedures ?? ""} placeholder="Peelings, laser, toxina, preenchimentos, cirurgias…" className="p-input resize-y" />
         </label>
         <label className="sm:col-span-2">
-          <span className="p-label">Objetivos da cliente</span>
+          <span className="p-label">Objetivos do cliente</span>
           <textarea name="goals" rows={2} defaultValue={a.goals ?? ""} className="p-input resize-y" />
         </label>
       </div>

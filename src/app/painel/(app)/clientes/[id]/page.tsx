@@ -97,7 +97,7 @@ export default async function ClientPage({ params, searchParams }: PageProps<"/p
 
   return (
     <>
-      <Link href="/painel/clientes" className="inline-flex items-center gap-1 text-sm text-[#8F7479] hover:text-[#8B3A42] mb-4">
+      <Link href="/painel/clientes" className="inline-flex items-center gap-1 text-sm text-[#857566] hover:text-[#6B4A10] mb-4">
         <ArrowLeft size={14} /> Clientes
       </Link>
 
@@ -108,18 +108,18 @@ export default async function ClientPage({ params, searchParams }: PageProps<"/p
             <Avatar name={client.name} size={64} />
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="p-display text-4xl font-light text-[#2C1A1E] leading-none">{client.name}</h1>
+                <h1 className="p-display text-4xl font-light text-[#2B221B] leading-none">{client.name}</h1>
                 <StageBadge stage={client.stage} />
                 {client.consent_signed_at ? <Badge tone="green"><FileSignature size={11} /> Termo assinado</Badge> : <Badge tone="gold">Termo pendente</Badge>}
               </div>
-              <p className="text-sm text-[#8F7479] mt-2 flex flex-wrap gap-x-3 gap-y-1">
+              <p className="text-sm text-[#857566] mt-2 flex flex-wrap gap-x-3 gap-y-1">
                 {client.phone && <span className="p-num">{formatPhone(client.phone)}</span>}
                 {client.email && <span>{client.email}</span>}
                 {age !== null && <span>{age} anos</span>}
                 {a.fitzpatrick && <span>Fototipo {a.fitzpatrick}</span>}
                 <span>Via {SOURCE_LABEL[client.source]} · desde {fmtDate(client.created_at, { month: "short" })}</span>
               </p>
-              {client.tags.length > 0 && <div className="flex flex-wrap gap-1 mt-2">{client.tags.map((t) => <Badge key={t} tone="rose">{t}</Badge>)}</div>}
+              {client.tags.length > 0 && <div className="flex flex-wrap gap-1 mt-2">{client.tags.map((t) => <Badge key={t} tone="bronze">{t}</Badge>)}</div>}
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -157,7 +157,7 @@ export default async function ClientPage({ params, searchParams }: PageProps<"/p
                 <ul className="flex flex-col gap-2">
                   {upcoming.map((ap) => (
                     <li key={ap.id}>
-                      <Link href={`/painel/agenda?d=${dateSP(ap.starts_at)}&a=${ap.id}`} className="flex items-center justify-between gap-2 rounded-xl border border-[#F1E5E2] px-3 py-2 hover:bg-[#FFF8F6]">
+                      <Link href={`/painel/agenda?d=${dateSP(ap.starts_at)}&a=${ap.id}`} className="flex items-center justify-between gap-2 rounded-xl border border-[#F0E8DB] px-3 py-2 hover:bg-[#FDFAF5]">
                         <span className="text-sm"><strong className="p-num">{fmtDate(ap.starts_at, { year: undefined })} {fmtTime(ap.starts_at)}</strong> · {ap.services?.name}</span>
                         <StatusBadge status={ap.status} />
                       </Link>
@@ -166,26 +166,26 @@ export default async function ClientPage({ params, searchParams }: PageProps<"/p
                 </ul>
               )}
             </Card>
-            <Card title="Pacotes ativos" action={<Link href={tabHref("pacotes")} className="text-xs text-[#A85B63] hover:underline">Gerenciar</Link>}>
+            <Card title="Pacotes ativos" action={<Link href={tabHref("pacotes")} className="text-xs text-[#82590F] hover:underline">Gerenciar</Link>}>
               {activePkgs.length === 0 ? <EmptyState icon={Package}>Nenhum pacote ativo.</EmptyState> : (
                 <ul className="flex flex-col gap-4">
                   {activePkgs.map((p) => (
                     <li key={p.id}>
-                      <div className="flex justify-between text-sm mb-1.5"><span>{p.name}</span><span className="p-num text-[#8F7479]">{p.sessions_used}/{p.sessions_total}</span></div>
+                      <div className="flex justify-between text-sm mb-1.5"><span>{p.name}</span><span className="p-num text-[#857566]">{p.sessions_used}/{p.sessions_total}</span></div>
                       <Progress value={Number(p.sessions_used)} max={p.sessions_total} />
-                      {p.expires_on && <p className="text-[11px] text-[#8F7479] mt-1">Válido até {fmtDate(p.expires_on)}</p>}
+                      {p.expires_on && <p className="text-[11px] text-[#857566] mt-1">Válido até {fmtDate(p.expires_on)}</p>}
                     </li>
                   ))}
                 </ul>
               )}
               {pendingTx.length > 0 && <div className="mt-4"><Alert>Há {pendingTx.length} parcela(s) a receber: {brl(pendingTx.reduce((s, t) => s + Number(t.amount), 0))}.</Alert></div>}
             </Card>
-            <Card title="Última evolução" action={<Link href={tabHref("evolucao")} className="text-xs text-[#A85B63] hover:underline">Prontuário</Link>}>
+            <Card title="Última evolução" action={<Link href={tabHref("evolucao")} className="text-xs text-[#82590F] hover:underline">Prontuário</Link>}>
               {records[0] ? (
                 <div className="text-sm">
-                  <p className="text-xs text-[#8F7479] mb-1">{fmtDate(records[0].record_date)} · {records[0].procedure}</p>
-                  <p className="text-[#2C1A1E] whitespace-pre-line line-clamp-6">{records[0].observations ?? records[0].parameters ?? "—"}</p>
-                  {records[0].next_steps && <p className="text-xs mt-2 text-[#6B4C52]"><strong>Próximos passos:</strong> {records[0].next_steps}</p>}
+                  <p className="text-xs text-[#857566] mb-1">{fmtDate(records[0].record_date)} · {records[0].procedure}</p>
+                  <p className="text-[#2B221B] whitespace-pre-line line-clamp-6">{records[0].observations ?? records[0].parameters ?? "—"}</p>
+                  {records[0].next_steps && <p className="text-xs mt-2 text-[#6B5A4B]"><strong>Próximos passos:</strong> {records[0].next_steps}</p>}
                 </div>
               ) : <EmptyState icon={NotebookPen}>Nenhuma evolução registrada.</EmptyState>}
             </Card>
@@ -201,7 +201,7 @@ export default async function ClientPage({ params, searchParams }: PageProps<"/p
               {client.consent_signed_at ? (
                 <p className="text-sm text-[#1F6B3A] mb-3">Assinado em {fmtDate(client.consent_signed_at)}.</p>
               ) : (
-                <p className="text-sm text-[#8F7479] mb-3">Imprima a ficha com o termo, colete a assinatura e marque como assinado.</p>
+                <p className="text-sm text-[#857566] mb-3">Imprima a ficha com o termo, colete a assinatura e marque como assinado.</p>
               )}
               <div className="flex flex-wrap gap-2">
                 <Link href={`/painel/clientes/${client.id}/termo`} className="p-btn-ghost p-btn-sm"><Printer size={13} /> Imprimir</Link>
@@ -215,7 +215,7 @@ export default async function ClientPage({ params, searchParams }: PageProps<"/p
               </div>
             </Card>
             <Card title="Guia de fototipos">
-              <ul className="text-xs text-[#6B4C52] flex flex-col gap-1">{FITZPATRICK.map((f) => <li key={f.v}>{f.l}</li>)}</ul>
+              <ul className="text-xs text-[#6B5A4B] flex flex-col gap-1">{FITZPATRICK.map((f) => <li key={f.v}>{f.l}</li>)}</ul>
             </Card>
           </div>
         </div>
@@ -252,13 +252,13 @@ export default async function ClientPage({ params, searchParams }: PageProps<"/p
           </Card>
           <Card title="Linha do tempo do tratamento" eyebrow={`${records.length} registros`}>
             {records.length === 0 ? <EmptyState icon={ClipboardList}>Nenhuma evolução ainda. Registre ao concluir cada sessão.</EmptyState> : (
-              <ol className="relative border-l-2 border-[#F1E4E1] ml-3 flex flex-col gap-6">
+              <ol className="relative border-l-2 border-[#F0E7DA] ml-3 flex flex-col gap-6">
                 {records.map((r) => (
                   <li key={r.id} className="pl-6 relative">
                     <span className="absolute -left-[9px] top-1 w-4 h-4 rounded-full border-2 border-white" style={{ background: "linear-gradient(135deg,#E8C882,#C9973A)" }} />
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="p-display text-xl text-[#2C1A1E]">{r.procedure}</p>
-                      <span className="text-xs text-[#8F7479]">{fmtDate(r.record_date)}</span>
+                      <p className="p-display text-xl text-[#2B221B]">{r.procedure}</p>
+                      <span className="text-xs text-[#857566]">{fmtDate(r.record_date)}</span>
                     </div>
                     <dl className="grid sm:grid-cols-2 gap-x-6 gap-y-2 mt-2 text-sm">
                       {r.products_used && <div><dt className="p-label mb-0.5">Produtos</dt><dd className="whitespace-pre-line">{r.products_used}</dd></div>}
@@ -282,18 +282,18 @@ export default async function ClientPage({ params, searchParams }: PageProps<"/p
         <div className="grid xl:grid-cols-[340px_1fr] gap-5">
           <div className="flex flex-col gap-3">
             <PhotoUploader clientId={client.id} />
-            <p className="text-xs text-[#8F7479] px-1">As fotos ficam em armazenamento privado e só aparecem para a equipe logada. Peça autorização da cliente antes de usar em divulgação.</p>
+            <p className="text-xs text-[#857566] px-1">As fotos ficam em armazenamento privado e só aparecem para a equipe logada. Peça autorização da cliente antes de usar em divulgação.</p>
           </div>
           <Card title="Antes e depois" eyebrow={`${photos.length} fotos`}>
             {photos.length === 0 ? <EmptyState icon={Images}>Nenhuma foto ainda.</EmptyState> : (
               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
                 {photos.map((p) => (
-                  <figure key={p.id} className="group relative rounded-xl overflow-hidden bg-[#F6ECE9] aspect-[3/4]">
+                  <figure key={p.id} className="group relative rounded-xl overflow-hidden bg-[#F5EEE3] aspect-[3/4]">
                     {photoUrls.get(p.path) && (
                       // eslint-disable-next-line @next/next/no-img-element -- URL assinada temporária do Storage
                       <a href={photoUrls.get(p.path)} target="_blank" rel="noopener noreferrer"><img src={photoUrls.get(p.path)} alt={p.caption ?? `Foto ${p.kind}`} className="w-full h-full object-cover" /></a>
                     )}
-                    <figcaption className="absolute inset-x-0 bottom-0 p-2 text-[11px] text-white" style={{ background: "linear-gradient(transparent, rgba(42,23,27,.8))" }}>
+                    <figcaption className="absolute inset-x-0 bottom-0 p-2 text-[11px] text-white" style={{ background: "linear-gradient(transparent, rgba(41,32,26,.8))" }}>
                       <strong className="uppercase tracking-wider">{p.kind}</strong> · {fmtDate(p.taken_on, { year: "2-digit" })}
                       {p.caption && <span className="block truncate">{p.caption}</span>}
                     </figcaption>
@@ -347,13 +347,13 @@ export default async function ClientPage({ params, searchParams }: PageProps<"/p
             {pkgs.length === 0 ? <EmptyState icon={Package}>Nenhum pacote.</EmptyState> : (
               <ul className="flex flex-col gap-4">
                 {pkgs.map((p) => (
-                  <li key={p.id} className="rounded-xl border border-[#F1E5E2] p-4">
+                  <li key={p.id} className="rounded-xl border border-[#F0E8DB] p-4">
                     <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                       <p className="p-display text-xl">{p.name}</p>
                       <Badge tone={p.status === "ativo" ? "green" : p.status === "concluido" ? "blue" : "gray"}>{p.status}</Badge>
                     </div>
                     <Progress value={Number(p.sessions_used)} max={p.sessions_total} />
-                    <p className="text-xs text-[#8F7479] mt-2">
+                    <p className="text-xs text-[#857566] mt-2">
                       {p.sessions_used} realizadas · {p.sessions_scheduled} agendadas · {p.sessions_remaining} restantes · comprado em {fmtDate(p.purchased_on)} por {brl(p.price)}
                       {p.expires_on && ` · validade ${fmtDate(p.expires_on)}`}
                     </p>
@@ -432,7 +432,7 @@ export default async function ClientPage({ params, searchParams }: PageProps<"/p
               <div><SubmitButton>Registrar</SubmitButton></div>
             </ActionForm>
             {client.phone && (
-              <div className="mt-5 pt-4 border-t border-[#F6ECE9]">
+              <div className="mt-5 pt-4 border-t border-[#F5EEE3]">
                 <p className="p-label">Mensagens prontas</p>
                 <div className="flex flex-wrap gap-2">
                   {(["retorno", "reativacao", "aniversario"] as const).map((k) => (
@@ -446,19 +446,19 @@ export default async function ClientPage({ params, searchParams }: PageProps<"/p
           </Card>
           <Card title="Histórico de relacionamento" eyebrow={`${interactions.length} registros`}>
             {interactions.length === 0 ? <EmptyState>Sem registros ainda.</EmptyState> : (
-              <ol className="relative border-l-2 border-[#F1E4E1] ml-2 flex flex-col gap-4">
+              <ol className="relative border-l-2 border-[#F0E7DA] ml-2 flex flex-col gap-4">
                 {interactions.map((i) => {
                   const openTask = i.due_on && !i.done_at;
                   return (
                     <li key={i.id} className="pl-5 relative">
-                      <span className="absolute -left-[7px] top-1.5 w-3 h-3 rounded-full border-2 border-white" style={{ background: openTask ? "#D4A73C" : "#E3C2C7" }} />
-                      <div className="flex flex-wrap items-center gap-1.5 text-xs text-[#8F7479]">
-                        <strong className="text-[#2C1A1E]">{INTERACTION_LABEL[i.kind]}</strong>
+                      <span className="absolute -left-[7px] top-1.5 w-3 h-3 rounded-full border-2 border-white" style={{ background: openTask ? "#D4A73C" : "#E6D8BC" }} />
+                      <div className="flex flex-wrap items-center gap-1.5 text-xs text-[#857566]">
+                        <strong className="text-[#2B221B]">{INTERACTION_LABEL[i.kind]}</strong>
                         <span>· {fmtDate(i.created_at)} {fmtTime(i.created_at)}</span>
                         {openTask && <Badge tone={i.due_on! < today ? "red" : "gold"}>Lembrar {fmtDate(i.due_on, { year: undefined })}</Badge>}
                         {i.due_on && i.done_at && <Badge tone="green">Feito</Badge>}
                       </div>
-                      <p className="text-sm text-[#2C1A1E] whitespace-pre-line mt-0.5">{i.content}</p>
+                      <p className="text-sm text-[#2B221B] whitespace-pre-line mt-0.5">{i.content}</p>
                       <div className="flex gap-1.5 mt-1.5">
                         {openTask && (
                           <form action={completeInteraction}>
@@ -484,7 +484,7 @@ export default async function ClientPage({ params, searchParams }: PageProps<"/p
         <div className="flex flex-col gap-5">
           <Card title="Dados cadastrais"><ClientForm client={client} /></Card>
           <Card title="Excluir cliente" eyebrow="Zona de risco">
-            <p className="text-sm text-[#8F7479] mb-3">Remove a cliente com agendamentos, prontuário, fotos e anotações (direito de exclusão da LGPD). Os lançamentos financeiros permanecem, sem vínculo.</p>
+            <p className="text-sm text-[#857566] mb-3">Remove a cliente com agendamentos, prontuário, fotos e anotações (direito de exclusão da LGPD). Os lançamentos financeiros permanecem, sem vínculo.</p>
             <form action={deleteClientAction}>
               <input type="hidden" name="id" value={client.id} />
               <ConfirmButton confirmText="Excluir definitivamente"><Trash2 size={13} /> Excluir cliente</ConfirmButton>

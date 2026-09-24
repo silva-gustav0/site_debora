@@ -4,7 +4,7 @@ import { DEFAULT_HOURS } from "./hours";
 import type { Settings } from "./types";
 
 export const DEFAULT_SETTINGS: Settings = {
-  clinic_name: "Clínica Debora Silva",
+  clinic_name: "Clínica Débora Silva",
   whatsapp: "551165782211",
   address: "Av. Paulista, 1337 - Bela Vista, São Paulo — SP",
   business_hours: DEFAULT_HOURS,
@@ -20,7 +20,7 @@ export const DEFAULT_SETTINGS: Settings = {
     pos_atendimento: "Oi, {nome}! Obrigada pela visita hoje 💕 Como você está se sentindo depois do {servico}? Qualquer dúvida sobre os cuidados em casa, é só chamar.",
     retorno: "Oi, {nome}! Tudo bem? Aqui é da {clinica} 🌸 Já está na hora da sua próxima sessão de {servico}. Quer que eu reserve um horário para você?",
     reativacao: "Oi, {nome}! Que saudade 💕 Faz tempo que você não vem aqui na {clinica}. Que tal agendar um momento de cuidado? Temos horários esta semana!",
-    aniversario: "Feliz aniversário, {nome}! 🎉💕 Toda a equipe da {clinica} deseja um dia lindo para você!",
+    aniversario: "Feliz aniversário, {nome}! 🎉💕 A {clinica} deseja um dia lindo para você!",
   },
 };
 

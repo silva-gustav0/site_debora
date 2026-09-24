@@ -6,16 +6,6 @@ export type Service = {
   highlight?: boolean;
 };
 
-export type TeamMember = {
-  id: string;
-  name: string;
-  role: string;
-  bio: string;
-  specialties: string[];
-  initials: string;
-  color: string;
-};
-
 export type BlogPost = {
   slug: string;
   category: string;
@@ -52,8 +42,6 @@ export const services: Service[] = [
     highlight: true,
   },
 ];
-
-export const teamMembers: TeamMember[] = [];
 
 export const blogPosts: BlogPost[] = [
   {
@@ -128,8 +116,8 @@ export const timeSlots = [
 ];
 
 export const clinicInfo = {
-  name:         "Clínica Debora Silva",
-  shortName:    "Debora Silva",
+  name:         "Clínica Débora Silva",
+  shortName:    "Débora Silva",
   address:      "Av. Paulista, 1337 - Bela Vista",
   neighborhood: "Bela Vista",
   city:         "São Paulo — SP",

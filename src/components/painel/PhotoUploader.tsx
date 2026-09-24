@@ -38,12 +38,12 @@ export default function PhotoUploader({ clientId }: { clientId: string }) {
 
   const busy = pending || preparing;
   return (
-    <form ref={formRef} onSubmit={onSubmit} className="rounded-2xl border border-dashed border-[#E3C4C8] bg-[#FFFBFA] p-4 flex flex-col gap-3">
+    <form ref={formRef} onSubmit={onSubmit} className="rounded-2xl border border-dashed border-[#E6D8BC] bg-[#FEFBF7] p-4 flex flex-col gap-3">
       <input type="hidden" name="client_id" value={clientId} />
-      <label className="flex flex-col items-center justify-center gap-2 rounded-xl bg-white border border-[#F1E5E2] py-6 cursor-pointer hover:border-[#C8737A] transition-colors">
+      <label className="flex flex-col items-center justify-center gap-2 rounded-xl bg-white border border-[#F0E8DB] py-6 cursor-pointer hover:border-[#9A6F1E] transition-colors">
         <Camera size={22} className="text-[#C9973A]" />
-        <span className="text-sm text-[#6B4C52]">Toque para escolher ou tirar fotos</span>
-        <span className="text-[11px] text-[#A88D92]">Até 6 por vez · comprimidas automaticamente</span>
+        <span className="text-sm text-[#6B5A4B]">Toque para escolher ou tirar fotos</span>
+        <span className="text-[11px] text-[#A69885]">Até 6 por vez · comprimidas automaticamente</span>
         <input type="file" name="photos" accept="image/*" capture="environment" multiple required className="sr-only" />
       </label>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">

@@ -656,7 +656,7 @@ export async function saveSettings(_prev: ActionState, fd: FormData): Promise<Ac
     hours[d] = { open, close, break_start: hasBreak ? bs : null, break_end: hasBreak ? be : null };
   }
   const row = {
-    clinic_name: str(fd, "clinic_name", 120) || "Clínica Debora Silva",
+    clinic_name: str(fd, "clinic_name", 120) || "Clínica Débora Silva",
     whatsapp: digits(str(fd, "whatsapp", 20)),
     address: str(fd, "address", 200),
     business_hours: hours,

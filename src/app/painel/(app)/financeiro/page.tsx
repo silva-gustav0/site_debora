@@ -139,7 +139,7 @@ export default async function FinancePage({ searchParams }: PageProps<"/painel/f
         <>
           {unpaid.length > 0 && (
             <Card title="Atendimentos sem pagamento registrado" eyebrow="Confira o caixa" gold action={<Badge tone="gold">{unpaid.length}</Badge>} className="mb-5">
-              <ul className="flex flex-col divide-y divide-[#F6ECE9]">
+              <ul className="flex flex-col divide-y divide-[#F5EEE3]">
                 {unpaid.map((a) => (
                   <li key={a.id} className="py-2.5">
                     <ActionForm action={createTransaction} className="flex flex-wrap items-center gap-2">
@@ -150,8 +150,8 @@ export default async function FinancePage({ searchParams }: PageProps<"/painel/f
                       <input type="hidden" name="description" value={a.services?.name ?? ""} />
                       <input type="hidden" name="occurred_on" value={dateSP(a.starts_at)} />
                       <span className="flex-1 min-w-48 text-sm">
-                        <Link href={`/painel/clientes/${a.client_id}`} className="text-[#2C1A1E] hover:underline">{a.clients?.name}</Link>
-                        <span className="text-[#8F7479]"> · {a.services?.name} · {fmtDate(a.starts_at, { year: undefined })}</span>
+                        <Link href={`/painel/clientes/${a.client_id}`} className="text-[#2B221B] hover:underline">{a.clients?.name}</Link>
+                        <span className="text-[#857566]"> · {a.services?.name} · {fmtDate(a.starts_at, { year: undefined })}</span>
                       </span>
                       <input name="amount" inputMode="decimal" defaultValue={String(a.price).replace(".", ",")} className="p-input w-28 p-num" aria-label="Valor" />
                       <select name="method" defaultValue="pix" className="p-input w-36" aria-label="Forma de pagamento">
@@ -176,13 +176,13 @@ export default async function FinancePage({ searchParams }: PageProps<"/painel/f
                   ...group(expenses, (t) => t.category, (t) => Number(t.amount)).slice(0, 6).map((g) => [`(−) ${g.label}`, -g.value, false] as const),
                   ["= Resultado", result, true],
                 ].map(([label, value, strong], i) => (
-                  <div key={i} className={`flex justify-between py-1.5 ${strong ? "border-t border-[#EBDDD9] font-bold" : ""}`}>
-                    <dt className={strong ? "text-[#2C1A1E]" : "text-[#6B4C52]"}>{label as string}</dt>
+                  <div key={i} className={`flex justify-between py-1.5 ${strong ? "border-t border-[#EAE0D0] font-bold" : ""}`}>
+                    <dt className={strong ? "text-[#2B221B]" : "text-[#6B5A4B]"}>{label as string}</dt>
                     <dd className={`p-num ${Number(value) < 0 ? "text-[#9B2C2C]" : ""}`}>{brl(value as number)}</dd>
                   </div>
                 ))}
               </dl>
-              <p className="text-[11px] text-[#A88D92] mt-3">Ticket médio por atendimento avulso: {brl(ticket)}</p>
+              <p className="text-[11px] text-[#A69885] mt-3">Ticket médio por atendimento avulso: {brl(ticket)}</p>
             </Card>
           </div>
 
@@ -201,7 +201,7 @@ export default async function FinancePage({ searchParams }: PageProps<"/painel/f
 
       {tab === "lancamentos" && (
         <Card bodyClassName="overflow-x-auto">
-          <div className="px-4 py-3 border-b border-[#F6ECE9]">
+          <div className="px-4 py-3 border-b border-[#F5EEE3]">
             <Chips
               current={kindFilter ?? "todos"}
               items={[
@@ -219,12 +219,12 @@ export default async function FinancePage({ searchParams }: PageProps<"/painel/f
                   <tr key={t.id}>
                     <td className="p-num whitespace-nowrap">{fmtDate(t.occurred_on, { year: undefined })}</td>
                     <td>{t.description ?? "—"}</td>
-                    <td className="text-[#6B4C52]">{t.category}</td>
+                    <td className="text-[#6B5A4B]">{t.category}</td>
                     <td>{t.clients ? <Link href={`/painel/clientes/${t.clients.id}`} className="hover:underline">{t.clients.name}</Link> : "—"}</td>
                     <td>{METHOD_LABEL[t.method]}</td>
                     <td>{t.status === "pago" ? <Badge tone="green">pago</Badge> : <Badge tone="gold">pendente</Badge>}</td>
                     <td className={`text-right p-num whitespace-nowrap font-bold ${t.kind === "despesa" ? "text-[#9B2C2C]" : "text-[#1F6B3A]"}`}>{t.kind === "despesa" ? "− " : "+ "}{brl(t.amount)}</td>
-                    <td className="text-right p-num text-xs text-[#8F7479]">{Number(t.fee) ? brl(t.fee) : ""}</td>
+                    <td className="text-right p-num text-xs text-[#857566]">{Number(t.fee) ? brl(t.fee) : ""}</td>
                     <td className="text-right">
                       <form action={deleteTransaction}>
                         <input type="hidden" name="id" value={t.id} />
@@ -248,14 +248,14 @@ export default async function FinancePage({ searchParams }: PageProps<"/painel/f
                   {(items as Tx[]).map((t) => {
                     const overdue = t.due_on! < today;
                     return (
-                      <li key={t.id} className="flex items-center gap-3 rounded-xl border px-3 py-2.5" style={{ borderColor: overdue ? "#F2C1C1" : "#F1E5E2", background: overdue ? "#FFF6F6" : "#fff" }}>
+                      <li key={t.id} className="flex items-center gap-3 rounded-xl border px-3 py-2.5" style={{ borderColor: overdue ? "#F2C1C1" : "#F0E8DB", background: overdue ? "#FFF6F6" : "#fff" }}>
                         <div className="text-center w-12 shrink-0">
                           <p className="p-display text-2xl leading-none">{t.due_on!.slice(8)}</p>
-                          <p className="text-[10px] uppercase text-[#8F7479]">{monthName(t.due_on!.slice(0, 7), "short").slice(0, 3)}</p>
+                          <p className="text-[10px] uppercase text-[#857566]">{monthName(t.due_on!.slice(0, 7), "short").slice(0, 3)}</p>
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm truncate">{t.description ?? t.category}</p>
-                          <p className="text-xs text-[#8F7479] truncate">{t.clients?.name ?? t.category} {overdue && <strong className="text-[#9B2C2C]">· vencida</strong>}</p>
+                          <p className="text-xs text-[#857566] truncate">{t.clients?.name ?? t.category} {overdue && <strong className="text-[#9B2C2C]">· vencida</strong>}</p>
                         </div>
                         <p className="p-num font-bold whitespace-nowrap">{brl(t.amount)}</p>
                         <form action={markTransactionPaid}>
@@ -306,7 +306,7 @@ export default async function FinancePage({ searchParams }: PageProps<"/painel/f
               </label>
             )}
             <label><span className="p-label">Descrição</span><input name="description" className="p-input" placeholder={newKind === "despesa" ? "Ex.: Aluguel de outubro" : "Opcional"} /></label>
-            <p className="text-[11px] text-[#8F7479]">
+            <p className="text-[11px] text-[#857566]">
               Com mais de 1 parcela, o valor é dividido em lançamentos mensais (as seguintes ficam pendentes). Taxas de cartão: crédito {settings.fee_credit}% · débito {settings.fee_debit}%.
             </p>
             <div><SubmitButton>Lançar</SubmitButton></div>

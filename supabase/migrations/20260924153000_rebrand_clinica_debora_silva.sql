@@ -1,8 +1,8 @@
--- Renomeia a clínica para "Clínica Debora Silva".
+-- Renomeia a clínica para "Clínica Débora Silva".
 -- O nome só é trocado se ainda for o padrão antigo, para não sobrescrever uma edição feita em Configurações.
-alter table public.settings alter column clinic_name set default 'Clínica Debora Silva';
+alter table public.settings alter column clinic_name set default 'Clínica Débora Silva';
 
 update public.settings
-   set clinic_name = 'Clínica Debora Silva'
+   set clinic_name = 'Clínica Débora Silva'
  where id = 1
    and clinic_name = 'Talissa Estética e Bem Estar';

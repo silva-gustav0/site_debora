@@ -8,14 +8,14 @@ import { brl, fmtDate, fmtTime, fmtWeekday, dateSP, whatsappLink } from "@/lib/f
 import CancelBooking from "./CancelBooking";
 
 export const metadata: Metadata = {
-  title: "Meu agendamento · Clínica Debora Silva",
+  title: "Meu agendamento · Clínica Débora Silva",
   robots: { index: false, follow: false },
 };
 
 const STATUS_TEXT: Record<string, { label: string; color: string; text: string }> = {
   solicitado: { label: "Aguardando confirmação", color: "#A87B25", text: "Recebemos seu pedido. Vamos confirmar pelo WhatsApp em breve." },
   confirmado: { label: "Confirmado", color: "#2E7D4F", text: "Está tudo certo! Te esperamos." },
-  concluido: { label: "Realizado", color: "#6B4C52", text: "Obrigada pela visita! Esperamos ver você de novo em breve." },
+  concluido: { label: "Realizado", color: "#6B5A4B", text: "Obrigada pela visita! Esperamos ver você de novo em breve." },
   cancelado: { label: "Cancelado", color: "#9B2C2C", text: "Este agendamento foi cancelado." },
   faltou: { label: "Não compareceu", color: "#9B2C2C", text: "Sentimos sua falta. Que tal remarcar?" },
 };
@@ -33,15 +33,15 @@ export default async function MyBookingPage({ params }: PageProps<"/meu-agendame
   return (
     <main
       className="min-h-screen px-4 py-10 sm:py-16"
-      style={{ background: "linear-gradient(160deg, #FFF5F7 0%, #FDFAF7 45%, #FFF8E7 100%)" }}
+      style={{ background: "linear-gradient(160deg, #FBF7EE 0%, #FDFAF7 45%, #FFF8E7 100%)" }}
     >
       <div className="max-w-lg mx-auto">
         <Link href="/" className="flex justify-center mb-8">
-          <Image src="/images/clinica/logo.png" alt={b.clinicName} width={974} height={414} priority className="h-14 w-auto" />
+          <Image src="/images/clinica/logo.png" alt={b.clinicName} width={1052} height={577} priority className="h-20 w-auto" />
         </Link>
 
-        <article className="rounded-3xl bg-white overflow-hidden shadow-[0_20px_70px_rgba(139,58,66,0.12)] border border-[#F9C7CE]">
-          <div className="px-7 pt-7 pb-6" style={{ background: "linear-gradient(135deg, #2C1A1E 0%, #4A2830 100%)" }}>
+        <article className="rounded-3xl bg-white overflow-hidden shadow-[0_20px_70px_rgba(107,74,16,0.12)] border border-[#EEDFBF]">
+          <div className="px-7 pt-7 pb-6" style={{ background: "linear-gradient(135deg, #2B221B 0%, #48392B 100%)" }}>
             <p className="text-[10.5px] tracking-[0.28em] uppercase" style={{ color: "#E8C882" }}>
               {b.clientFirstName ? `Olá, ${b.clientFirstName}` : "Seu horário"}
             </p>
@@ -57,22 +57,22 @@ export default async function MyBookingPage({ params }: PageProps<"/meu-agendame
 
           <div className="px-7 py-6 flex flex-col gap-4">
             <p className="text-sm text-text-secondary">{st.text}</p>
-            <ul className="flex flex-col gap-3 text-[15px] text-[#2C1A1E]">
+            <ul className="flex flex-col gap-3 text-[15px] text-[#2B221B]">
               <li className="flex items-center gap-3">
-                <CalendarDays size={18} className="text-rose-500" />
+                <CalendarDays size={18} className="text-bronze-500" />
                 {fmtWeekday(day, "long")}, {fmtDate(day, { month: "long" })}
               </li>
               <li className="flex items-center gap-3">
-                <Clock size={18} className="text-rose-500" /> {fmtTime(b.startsAt)} às {fmtTime(b.endsAt)}
+                <Clock size={18} className="text-bronze-500" /> {fmtTime(b.startsAt)} às {fmtTime(b.endsAt)}
                 {b.price > 0 && <span className="text-text-muted">· {brl(b.price)}</span>}
               </li>
               <li className="flex items-start gap-3">
-                <MapPin size={18} className="text-rose-500 mt-0.5" />
+                <MapPin size={18} className="text-bronze-500 mt-0.5" />
                 <a
                   href={`https://maps.google.com/?q=${encodeURIComponent(b.address)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-rose-600 underline decoration-rose-200 underline-offset-4"
+                  className="hover:text-bronze-600 underline decoration-bronze-200 underline-offset-4"
                 >
                   {b.address}
                 </a>
@@ -93,7 +93,7 @@ export default async function MyBookingPage({ params }: PageProps<"/meu-agendame
             </div>
 
             {upcoming && (
-              <div className="border-t border-rose-50 pt-4">
+              <div className="border-t border-bronze-50 pt-4">
                 {b.canCancel ? (
                   <CancelBooking token={b.token} />
                 ) : (
@@ -107,7 +107,7 @@ export default async function MyBookingPage({ params }: PageProps<"/meu-agendame
         </article>
 
         <p className="text-center text-xs text-text-muted mt-6">
-          Guarde este link para consultar seu agendamento. · <Link href="/" className="hover:text-rose-600">{b.clinicName}</Link>
+          Guarde este link para consultar seu agendamento. · <Link href="/" className="hover:text-bronze-600">{b.clinicName}</Link>
         </p>
       </div>
     </main>

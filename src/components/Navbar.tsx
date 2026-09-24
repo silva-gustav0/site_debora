@@ -10,7 +10,6 @@ const NAV_LINKS = [
   { label: "Início",    hash: "inicio"      },
   { label: "Sobre",     hash: "sobre"       },
   { label: "Serviços",  hash: "servicos"    },
-  { label: "Equipe",    hash: "equipe"      },
   { label: "Blog",      hash: "blog"        },
   { label: "Contato",   hash: "contato"     },
 ];
@@ -33,7 +32,7 @@ export default function Navbar() {
   }, []);
 
   const navBg = scrolled
-    ? "bg-[#FDFAF7]/95 backdrop-blur-md shadow-[0_2px_24px_rgba(200,115,122,0.1)]"
+    ? "bg-[#FDFAF7]/95 backdrop-blur-md shadow-[0_2px_24px_rgba(154,111,30,0.1)]"
     : "bg-transparent";
 
   return (
@@ -46,11 +45,11 @@ export default function Navbar() {
             <a href={href("inicio")} className="flex items-center group">
               <Image
                 src="/images/clinica/logo.png"
-                alt="Clínica Debora Silva"
-                width={974}
-                height={414}
+                alt="Clínica Débora Silva"
+                width={1052}
+                height={577}
                 priority
-                className="h-12 w-auto transition-opacity group-hover:opacity-80"
+                className="h-16 w-auto transition-opacity group-hover:opacity-80"
               />
             </a>
 
@@ -60,11 +59,11 @@ export default function Navbar() {
                 <a
                   key={l.hash}
                   href={href(l.hash)}
-                  className="text-[12px] font-light tracking-[0.15em] uppercase hover:text-rose-500 transition-colors duration-200 relative group"
-                  style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B4C52" }}
+                  className="text-[12px] font-light tracking-[0.15em] uppercase hover:text-bronze-500 transition-colors duration-200 relative group"
+                  style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B5A4B" }}
                 >
                   {l.label}
-                  <span className="absolute -bottom-0.5 left-0 h-px w-0 bg-rose-400 group-hover:w-full transition-all duration-300" />
+                  <span className="absolute -bottom-0.5 left-0 h-px w-0 bg-bronze-400 group-hover:w-full transition-all duration-300" />
                 </a>
               ))}
             </nav>
@@ -73,8 +72,8 @@ export default function Navbar() {
             <div className="hidden md:flex items-center gap-5">
               <Link
                 href="/painel"
-                className="flex items-center gap-1.5 text-[12px] font-light tracking-[0.15em] uppercase hover:text-rose-500 transition-colors duration-200"
-                style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B4C52" }}
+                className="flex items-center gap-1.5 text-[12px] font-light tracking-[0.15em] uppercase hover:text-bronze-500 transition-colors duration-200"
+                style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B5A4B" }}
               >
                 <LogIn size={14} /> Área da equipe
               </Link>
@@ -86,7 +85,7 @@ export default function Navbar() {
             {/* Hamburger */}
             <button
               className="md:hidden p-2"
-              style={{ color: "#8B3A42" }}
+              style={{ color: "#6B4A10" }}
               onClick={() => setOpen(true)}
               aria-label="Abrir menu"
             >
@@ -101,18 +100,18 @@ export default function Navbar() {
         <div className="mobile-nav-enter fixed inset-0 z-[100] bg-[#FDFAF7] flex flex-col">
           <div
             className="flex items-center justify-between px-6 h-[72px] border-b"
-            style={{ borderColor: "#FFE8ED" }}
+            style={{ borderColor: "#F6EEDB" }}
           >
             <Image
               src="/images/clinica/logo.png"
-              alt="Clínica Debora Silva"
-              width={974}
-              height={414}
-              className="h-10 w-auto"
+              alt="Clínica Débora Silva"
+              width={1052}
+              height={577}
+              className="h-12 w-auto"
             />
             <button
               className="p-2"
-              style={{ color: "#8B3A42" }}
+              style={{ color: "#6B4A10" }}
               onClick={() => setOpen(false)}
               aria-label="Fechar menu"
             >
@@ -126,11 +125,11 @@ export default function Navbar() {
                 key={l.hash}
                 href={href(l.hash)}
                 onClick={() => setOpen(false)}
-                className="py-4 text-[18px] font-light tracking-[0.05em] border-b hover:text-rose-500 transition-colors"
+                className="py-4 text-[18px] font-light tracking-[0.05em] border-b hover:text-bronze-500 transition-colors"
                 style={{
                   fontFamily: "var(--font-cormorant), serif",
-                  color: "#2C1A1E",
-                  borderColor: "#FFF5F7",
+                  color: "#2B221B",
+                  borderColor: "#FBF7EE",
                 }}
               >
                 {l.label}
@@ -143,7 +142,7 @@ export default function Navbar() {
               href="/painel"
               onClick={() => setOpen(false)}
               className="flex items-center justify-center gap-2 py-3 text-[13px] tracking-[0.1em] uppercase"
-              style={{ fontFamily: "var(--font-lato), sans-serif", color: "#8B3A42" }}
+              style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B4A10" }}
             >
               <LogIn size={16} /> Área da equipe
             </Link>

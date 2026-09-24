@@ -13,10 +13,10 @@ export const metadata = { title: "Recorrência" };
 
 const FILTERS: { key: RecurrenceStatus | "todas"; label: string }[] = [
   { key: "todas", label: "Precisam de atenção" },
-  { key: "atrasada", label: "Atrasadas" },
+  { key: "atrasada", label: "Atrasados" },
   { key: "proxima", label: "Próximos 7 dias" },
-  { key: "inativa", label: "Inativas" },
-  { key: "agendada", label: "Já agendadas" },
+  { key: "inativa", label: "Inativos" },
+  { key: "agendada", label: "Já agendados" },
   { key: "em_dia", label: "Em dia" },
 ];
 
@@ -49,7 +49,7 @@ export default async function RecurrencePage({ searchParams }: PageProps<"/paine
         </div>
         <StatTile label="Frequência média" value={avgInterval ? `${avgInterval} dias` : "—"} hint="entre visitas" />
         <StatTile label="Retorno atrasado" value={count("atrasada")} tone={count("atrasada") ? "warn" : "default"} hint={`${count("proxima")} vencem em 7 dias`} href="/painel/recorrencia?filtro=atrasada" />
-        <StatTile label="Inativas" value={count("inativa")} hint="reative com campanha" href="/painel/crm?tab=campanhas&seg=inativas" />
+        <StatTile label="Inativos" value={count("inativa")} hint="reative com campanha" href="/painel/crm?tab=campanhas&seg=inativas" />
       </div>
 
       <div className="mb-4">
@@ -57,7 +57,7 @@ export default async function RecurrencePage({ searchParams }: PageProps<"/paine
       </div>
 
       <Card bodyClassName="overflow-x-auto">
-        {list.length === 0 ? <EmptyState icon={Repeat}>Nenhuma cliente nesta lista. 🌿</EmptyState> : (
+        {list.length === 0 ? <EmptyState icon={Repeat}>Nenhum cliente nesta lista. 🌿</EmptyState> : (
           <table className="p-table">
             <thead>
               <tr><th>Cliente</th><th>Situação</th><th>Último serviço</th><th>Última visita</th><th className="text-right">Frequência</th><th>Retorno previsto</th><th><span className="sr-only">Ações</span></th></tr>
@@ -73,17 +73,17 @@ export default async function RecurrencePage({ searchParams }: PageProps<"/paine
                     <td>
                       <Link href={`/painel/clientes/${c.id}`} className="flex items-center gap-3 group">
                         <Avatar name={c.name} size={32} />
-                        <span><span className="block font-bold group-hover:text-[#8B3A42]">{c.name}</span><span className="text-xs text-[#8F7479]">{c.stats?.visits} visitas</span></span>
+                        <span><span className="block font-bold group-hover:text-[#6B4A10]">{c.name}</span><span className="text-xs text-[#857566]">{c.stats?.visits} visitas</span></span>
                       </Link>
                     </td>
                     <td><Badge tone={RECURRENCE_META[r.status].tone}>{RECURRENCE_META[r.status].label}</Badge></td>
                     <td>{svc ?? "—"}</td>
-                    <td className="whitespace-nowrap">{fmtDate(r.lastVisit)}<p className="text-xs text-[#8F7479]">há {r.daysSinceLast} dias</p></td>
-                    <td className="text-right p-num whitespace-nowrap">{r.interval} dias<p className="text-xs text-[#8F7479]">{r.learned ? "média real" : "sugerida"}</p></td>
+                    <td className="whitespace-nowrap">{fmtDate(r.lastVisit)}<p className="text-xs text-[#857566]">há {r.daysSinceLast} dias</p></td>
+                    <td className="text-right p-num whitespace-nowrap">{r.interval} dias<p className="text-xs text-[#857566]">{r.learned ? "média real" : "sugerida"}</p></td>
                     <td className="whitespace-nowrap">
                       {r.status === "agendada" ? fmtDate(c.stats?.next_appointment) : fmtDate(r.dueDate)}
                       {r.daysUntilDue !== null && r.status !== "agendada" && (
-                        <p className={`text-xs ${r.daysUntilDue < 0 ? "text-[#9B2C2C]" : "text-[#8F7479]"}`}>
+                        <p className={`text-xs ${r.daysUntilDue < 0 ? "text-[#9B2C2C]" : "text-[#857566]"}`}>
                           {r.daysUntilDue < 0 ? `${-r.daysUntilDue} dias de atraso` : r.daysUntilDue === 0 ? "hoje" : `em ${r.daysUntilDue} dias`}
                         </p>
                       )}
@@ -91,7 +91,7 @@ export default async function RecurrencePage({ searchParams }: PageProps<"/paine
                     <td>
                       <div className="flex gap-1.5 justify-end">
                         {wa ? <a href={wa} target="_blank" rel="noopener noreferrer" className="p-btn-ghost p-btn-sm"><MessageCircle size={13} /> Chamar</a>
-                          : <span className="text-xs text-[#A88D92]" title="Sem telefone ou não aceita mensagens">—</span>}
+                          : <span className="text-xs text-[#A69885]" title="Sem telefone ou não aceita mensagens">—</span>}
                         <form action={logContact}>
                           <input type="hidden" name="client_id" value={c.id} />
                           <input type="hidden" name="content" value="Mensagem de retorno enviada pelo WhatsApp." />
@@ -107,7 +107,7 @@ export default async function RecurrencePage({ searchParams }: PageProps<"/paine
           </table>
         )}
       </Card>
-      <p className="text-xs text-[#8F7479] mt-3">
+      <p className="text-xs text-[#857566] mt-3">
         A frequência usa o intervalo médio real entre as visitas concluídas. Com menos de duas visitas, usa o retorno sugerido do serviço (ajustável em Serviços).
       </p>
     </>

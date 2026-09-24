@@ -67,16 +67,16 @@ export default async function ClientsPage({ searchParams }: PageProps<"/painel/c
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        <StatTile label="Cadastradas" value={all.length} icon={Users} />
+        <StatTile label="Cadastrados" value={all.length} icon={Users} />
         <StatTile label="Já atendidas" value={withVisits.length} hint={all.length ? `${Math.round((withVisits.length / all.length) * 100)}% da base` : undefined} />
         <StatTile label="Valor médio por cliente" value={brl(ltv)} hint="total investido (LTV)" />
-        <StatTile label="Novas no mês" value={newMonth} />
+        <StatTile label="Novos no mês" value={newMonth} />
       </div>
 
       <div className="flex flex-col lg:flex-row lg:items-center gap-3 mb-4">
         <form className="relative flex-1 max-w-md" action="/painel/clientes">
           {stage && <input type="hidden" name="etapa" value={stage} />}
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A88D92]" aria-hidden="true" />
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A69885]" aria-hidden="true" />
           <input name="q" defaultValue={q} placeholder="Nome, telefone, e-mail ou etiqueta" className="p-input pl-9" aria-label="Buscar clientes" />
         </form>
         <Chips
@@ -89,17 +89,17 @@ export default async function ClientsPage({ searchParams }: PageProps<"/painel/c
       </div>
 
       <Card bodyClassName="overflow-x-auto">
-        <div className="flex items-center justify-between px-4 py-2.5 border-b border-[#F6ECE9] text-xs text-[#8F7479]">
+        <div className="flex items-center justify-between px-4 py-2.5 border-b border-[#F5EEE3] text-xs text-[#857566]">
           <span>{list.length} {list.length === 1 ? "cliente" : "clientes"}</span>
           <span className="flex items-center gap-2">
             Ordenar:
             {Object.entries(SORTS).map(([k, l]) => (
-              <Link key={k} href={href({ ordem: k === "nome" ? null : k })} className={k === sort ? "font-bold text-[#2C1A1E]" : "hover:text-[#8B3A42]"}>{l}</Link>
+              <Link key={k} href={href({ ordem: k === "nome" ? null : k })} className={k === sort ? "font-bold text-[#2B221B]" : "hover:text-[#6B4A10]"}>{l}</Link>
             ))}
           </span>
         </div>
         {list.length === 0 ? (
-          <EmptyState icon={Users}>{all.length === 0 ? "Nenhuma cliente cadastrada ainda." : "Nenhuma cliente encontrada."}</EmptyState>
+          <EmptyState icon={Users}>{all.length === 0 ? "Nenhum cliente cadastrado ainda." : "Nenhum cliente encontrado."}</EmptyState>
         ) : (
           <table className="p-table">
             <thead>
@@ -112,8 +112,8 @@ export default async function ClientsPage({ searchParams }: PageProps<"/painel/c
                     <Link href={`/painel/clientes/${c.id}`} className="flex items-center gap-3 group">
                       <Avatar name={c.name} size={34} />
                       <span>
-                        <span className="block font-bold text-[#2C1A1E] group-hover:text-[#8B3A42]">{c.name}</span>
-                        {c.tags.length > 0 && <span className="flex flex-wrap gap-1 mt-0.5">{c.tags.slice(0, 3).map((t) => <Badge key={t} tone="rose">{t}</Badge>)}</span>}
+                        <span className="block font-bold text-[#2B221B] group-hover:text-[#6B4A10]">{c.name}</span>
+                        {c.tags.length > 0 && <span className="flex flex-wrap gap-1 mt-0.5">{c.tags.slice(0, 3).map((t) => <Badge key={t} tone="bronze">{t}</Badge>)}</span>}
                       </span>
                     </Link>
                   </td>

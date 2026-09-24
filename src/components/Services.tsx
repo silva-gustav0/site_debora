@@ -12,9 +12,9 @@ const serviceConfig: Record<string, {
 }> = {
   "limpeza-pele": {
     Icon: Sparkles,
-    color: "#C8737A",
-    bg: "#FFF5F7",
-    border: "#F9C7CE",
+    color: "#9A6F1E",
+    bg: "#FBF7EE",
+    border: "#EEDFBF",
   },
   "drenagem-linfatica": {
     Icon: Waves,
@@ -24,9 +24,9 @@ const serviceConfig: Record<string, {
   },
   "massagem-relaxante": {
     Icon: Heart,
-    color: "#6A7BC9",
-    bg: "#F5F7FF",
-    border: "#C4CAE8",
+    color: "#6B8F71",
+    bg: "#F4F8F5",
+    border: "#C9DACF",
   },
 };
 
@@ -45,11 +45,11 @@ export default function Services() {
           </AnimateIn>
           <AnimateIn animation="up" delay={100}>
             <h2
-              className="text-4xl sm:text-5xl font-light text-rose-900 mt-4 mb-5"
+              className="text-4xl sm:text-5xl font-light text-bronze-900 mt-4 mb-5"
               style={{ fontFamily: "var(--font-cormorant), serif" }}
             >
               Nossos{" "}
-              <em className="italic font-normal" style={{ color: "#C8737A" }}>
+              <em className="italic font-normal" style={{ color: "#9A6F1E" }}>
                 Serviços
               </em>
             </h2>
@@ -62,7 +62,7 @@ export default function Services() {
               className="text-base font-light text-text-secondary max-w-lg leading-7"
               style={{ fontFamily: "var(--font-lato), sans-serif" }}
             >
-              Atendimentos personalizados para cuidar da beleza, relaxamento e bem-estar feminino.
+              Atendimentos personalizados para cuidar da beleza, relaxamento e bem-estar.
             </p>
           </AnimateIn>
         </div>
@@ -78,20 +78,20 @@ export default function Services() {
                   className="hover-lift rounded-2xl p-8 flex flex-col h-full"
                   style={{
                     background: "white",
-                    border: `1px solid ${cfg?.border ?? "#F9C7CE"}`,
-                    boxShadow: "0 2px 24px rgba(200,115,122,0.07)",
+                    border: `1px solid ${cfg?.border ?? "#EEDFBF"}`,
+                    boxShadow: "0 2px 24px rgba(154,111,30,0.07)",
                   }}
                 >
                   <div
                     className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6"
-                    style={{ background: cfg?.bg ?? "#FFF5F7", border: `1px solid ${cfg?.border ?? "#F9C7CE"}` }}
+                    style={{ background: cfg?.bg ?? "#FBF7EE", border: `1px solid ${cfg?.border ?? "#EEDFBF"}` }}
                   >
-                    <Icon size={22} style={{ color: cfg?.color ?? "#C8737A" }} />
+                    <Icon size={22} style={{ color: cfg?.color ?? "#9A6F1E" }} />
                   </div>
 
                   <h3
                     className="text-2xl font-light mb-3"
-                    style={{ fontFamily: "var(--font-cormorant), serif", color: "#4A1820" }}
+                    style={{ fontFamily: "var(--font-cormorant), serif", color: "#3B2A12" }}
                   >
                     {s.title}
                   </h3>
@@ -106,7 +106,7 @@ export default function Services() {
                   <a
                     href="#agendamento"
                     className="flex items-center gap-2 text-[11px] tracking-widest uppercase hover:gap-3 transition-all duration-200"
-                    style={{ fontFamily: "var(--font-lato), sans-serif", color: cfg?.color ?? "#C8737A" }}
+                    style={{ fontFamily: "var(--font-lato), sans-serif", color: cfg?.color ?? "#9A6F1E" }}
                   >
                     Agendar <ArrowRight size={11} />
                   </a>
@@ -121,7 +121,7 @@ export default function Services() {
           <div
             className="rounded-2xl p-8 sm:p-10 flex flex-col sm:flex-row items-center justify-between gap-6"
             style={{
-              background: "linear-gradient(135deg, #2C1A1E 0%, #3D2328 100%)",
+              background: "linear-gradient(135deg, #2B221B 0%, #3B2E24 100%)",
               border: "1px solid rgba(201,151,58,0.3)",
             }}
           >

@@ -13,7 +13,7 @@ export const metadata = { title: "Relatórios" };
 
 const PERIODS = { mes: "Este mês", anterior: "Mês passado", trimestre: "Últimos 3 meses", ano: "Últimos 12 meses" } as const;
 const WEEK = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
-const HEAT = ["#FBF3F1", "#F6DCDF", "#EDB9C0", "#DE8F99", "#C8737A", "#A2505A", "#7A2E39"];
+const HEAT = ["#FAF5EC", "#F1E4CB", "#E8D3A6", "#D2AE66", "#9A6F1E", "#7A5410", "#553A0B"];
 
 export default async function ReportsPage({ searchParams }: PageProps<"/painel/relatorios">) {
   const sp = await searchParams;
@@ -117,7 +117,7 @@ export default async function ReportsPage({ searchParams }: PageProps<"/painel/r
         <StatTile label="Atendimentos" value={done.length} hint={`${appts.length} agendados · ${siteShare}% pelo site`} icon={CalendarCheck} />
         <StatTile label="Taxa de faltas" value={`${noShowRate}%`} tone={noShowRate > 10 ? "warn" : "default"} hint={`${noShow.length} faltas`} icon={UserX} />
         <StatTile label="Cancelamentos" value={`${cancelRate}%`} hint={`${cancelled.length} cancelados`} />
-        <StatTile label="Clientes atendidas" value={attended.size} hint={`${newClients} novas · ${returning} recorrentes`} icon={UserCheck} />
+        <StatTile label="Clientes atendidos" value={attended.size} hint={`${newClients} novos · ${returning} recorrentes`} icon={UserCheck} />
       </div>
 
       <div className="grid xl:grid-cols-3 gap-5 mb-5">
@@ -128,13 +128,13 @@ export default async function ReportsPage({ searchParams }: PageProps<"/painel/r
                 <thead>
                   <tr>
                     <th />
-                    {hours.map((h) => <th key={h} className="text-[10.5px] font-normal text-[#8F7479] p-num w-11">{h}h</th>)}
+                    {hours.map((h) => <th key={h} className="text-[10.5px] font-normal text-[#857566] p-num w-11">{h}h</th>)}
                   </tr>
                 </thead>
                 <tbody>
                   {WEEK.map((w, wi) => (
                     <tr key={w}>
-                      <th className="text-[11px] font-bold text-[#6B4C52] pr-2 text-right">{w}</th>
+                      <th className="text-[11px] font-bold text-[#6B5A4B] pr-2 text-right">{w}</th>
                       {hours.map((h) => {
                         const v = heat.get(`${wi}-${h}`) ?? 0;
                         const idx = v === 0 ? 0 : Math.min(HEAT.length - 1, Math.ceil((v / heatMax) * (HEAT.length - 1)));
@@ -143,7 +143,7 @@ export default async function ReportsPage({ searchParams }: PageProps<"/painel/r
                             key={h}
                             title={`${w} ${h}h: ${v} atendimento${v === 1 ? "" : "s"}`}
                             className="h-9 w-11 rounded-md text-center text-[11px] p-num"
-                            style={{ background: HEAT[idx], color: idx >= 4 ? "#fff" : "#6B4C52" }}
+                            style={{ background: HEAT[idx], color: idx >= 4 ? "#fff" : "#6B5A4B" }}
                           >
                             {v || ""}
                           </td>
@@ -153,7 +153,7 @@ export default async function ReportsPage({ searchParams }: PageProps<"/painel/r
                   ))}
                 </tbody>
               </table>
-              <figcaption className="flex items-center gap-2 text-[11px] text-[#8F7479] mt-3">
+              <figcaption className="flex items-center gap-2 text-[11px] text-[#857566] mt-3">
                 Menos {HEAT.map((c) => <span key={c} className="w-4 h-3 rounded-sm inline-block" style={{ background: c }} />)} Mais
                 <span className="ml-2">· use para decidir horários de promoção e folgas</span>
               </figcaption>
@@ -166,8 +166,8 @@ export default async function ReportsPage({ searchParams }: PageProps<"/painel/r
       </div>
 
       <div className="grid xl:grid-cols-3 gap-5">
-        <Card title="Origem das novas clientes" eyebrow="Marketing">
-          <BarList rows={sourceRows} format={(n) => String(n)} empty="Nenhuma cliente nova no período." color="#C9973A" />
+        <Card title="Origem dos novos clientes" eyebrow="Marketing">
+          <BarList rows={sourceRows} format={(n) => String(n)} empty="Nenhum cliente novo no período." color="#C9973A" />
         </Card>
         <Card title="Faturamento por dia da semana">
           <BarList rows={byWeekday} />
@@ -177,8 +177,8 @@ export default async function ReportsPage({ searchParams }: PageProps<"/painel/r
             <ol className="flex flex-col gap-1">
               {topClients.map(([id, v], i) => (
                 <li key={id}>
-                  <Link href={`/painel/clientes/${id}`} className="flex items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-[#FFF8F6]">
-                    <span className="w-5 text-xs text-[#A88D92] p-num">{i + 1}</span>
+                  <Link href={`/painel/clientes/${id}`} className="flex items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-[#FDFAF5]">
+                    <span className="w-5 text-xs text-[#A69885] p-num">{i + 1}</span>
                     <Avatar name={nameById.get(id) ?? "?"} size={28} />
                     <span className="flex-1 text-sm truncate">{nameById.get(id)}</span>
                     <span className="p-num text-sm">{brl(v)}</span>
