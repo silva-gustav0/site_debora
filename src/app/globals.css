@@ -326,7 +326,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 .p-tab:hover { color: #6B4A10; }
 .p-tab[aria-current="page"] { color: #2B221B; font-weight: 700; border-bottom-color: #C9973A; }
-.p-rise { animation: fadeInUp .5s cubic-bezier(.16,1,.3,1) both; }
+@keyframes p-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.p-rise { animation: p-rise .18s ease-out both; }
 details > summary { list-style: none; cursor: pointer; }
 details > summary::-webkit-details-marker { display: none; }
 

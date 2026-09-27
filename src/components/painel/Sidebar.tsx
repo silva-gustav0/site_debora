@@ -55,8 +55,7 @@ export default function Sidebar({ name, badges }: { name: string; badges: Sideba
     href === "/painel/agenda" ? badges.agenda : href === "/painel/estoque" ? badges.estoque : href === "/painel/financeiro" ? badges.financeiro : 0;
   const totalAlerts = badges.agenda + badges.estoque + badges.financeiro;
 
-  // Na gaveta (celular/tablet em pé) os links não pré-carregam: abrir o menu não dispara 12 páginas de uma vez.
-  const content = (drawer = false) => (
+  const content = () => (
     <>
       <Link href="/painel" className="flex items-center gap-3 px-3 mb-6" onClick={() => setOpen(false)}>
         <span
@@ -93,7 +92,6 @@ export default function Sidebar({ name, badges }: { name: string; badges: Sideba
                   <Link
                     key={href}
                     href={href}
-                    prefetch={drawer ? false : undefined}
                     onClick={() => setOpen(false)}
                     aria-current={isActive(href) ? "page" : undefined}
                     className="nav-link flex items-center gap-3 rounded-lg px-3 py-2 text-[13.5px] transition-colors"
@@ -161,7 +159,7 @@ export default function Sidebar({ name, badges }: { name: string; badges: Sideba
             <button onClick={() => setOpen(false)} aria-label="Fechar menu" className="absolute top-4 right-3 p-2 text-white/70">
               <X size={20} />
             </button>
-            {content(true)}
+            {content()}
           </div>
         </div>
       )}

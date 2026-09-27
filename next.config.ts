@@ -17,6 +17,8 @@ const nextConfig: NextConfig = {
   experimental: {
     // Fotos do prontuário são comprimidas no navegador; o limite da Vercel é 4,5 MB.
     serverActions: { bodySizeLimit: "4mb" },
+    // Telas do painel visitadas há menos de 30 s reabrem na hora (salvar algo limpa esse cache).
+    staleTimes: { dynamic: 30 },
   },
   images: {
     remotePatterns: [
