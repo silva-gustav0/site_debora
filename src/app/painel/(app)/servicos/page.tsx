@@ -1,10 +1,11 @@
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { requireStaff } from "@/lib/dal";
 import { listServices } from "@/lib/queries";
 import ActionForm from "@/components/painel/ActionForm";
+import ConfirmButton from "@/components/painel/ConfirmButton";
 import SubmitButton from "@/components/painel/SubmitButton";
 import { Badge, PageHeader } from "@/components/painel/ui";
-import { saveService } from "../../actions";
+import { deleteService, saveService } from "../../actions";
 import type { ServiceRow } from "@/lib/types";
 import { SERVICE_ICONS } from "@/lib/site-content";
 
@@ -86,9 +87,13 @@ export default async function ServicesPage() {
       <div className="flex flex-col gap-3">
         {services.map((s) => (
           <section key={s.id} className="p-card p-5">
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex flex-wrap items-start gap-2 mb-3">
               <h2 className="text-xl text-bronze-900">{s.name}</h2>
               {!s.active && <Badge>Inativo</Badge>}
+              <ActionForm action={deleteService} className="ml-auto flex flex-col items-end max-w-md text-right">
+                <input type="hidden" name="id" value={s.id} />
+                <ConfirmButton><Trash2 size={13} /> Excluir</ConfirmButton>
+              </ActionForm>
             </div>
             <ServiceForm service={s} />
           </section>

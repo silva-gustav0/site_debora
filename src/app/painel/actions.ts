@@ -651,6 +651,16 @@ export async function saveService(_prev: ActionState, fd: FormData): Promise<Act
   return done(isNew ? "Serviço criado." : "Serviço atualizado.");
 }
 
+/** Exclui o serviço; se já tiver agendamentos ou pacotes, o banco impede para não perder o histórico. */
+export async function deleteService(_prev: ActionState, fd: FormData): Promise<ActionState> {
+  const { supabase } = await requireStaff();
+  const { error } = await supabase.from("services").delete().eq("id", str(fd, "id"));
+  if (error?.code === "23503") return fail("Este serviço já tem agendamentos ou pacotes no histórico e não pode ser excluído. Desmarque “Disponível no site” para escondê-lo.");
+  if (error) return fail("Não foi possível excluir o serviço.");
+  revalidatePath("/", "layout");
+  return done("Serviço excluído.");
+}
+
 // ─── Configurações ─────────────────────────────────────────────────────
 export async function saveSettings(_prev: ActionState, fd: FormData): Promise<ActionState> {
   const { supabase } = await requireStaff();
