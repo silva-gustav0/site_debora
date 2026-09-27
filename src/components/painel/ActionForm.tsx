@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, startTransition, useActionState, useEffect, useRef, type ReactNode } from "react";
+import { createContext, startTransition, useActionState, useEffect, useRef, useState, type ReactNode } from "react";
 import type { ActionState } from "@/lib/types";
 
 /** Estado "enviando" do ActionForm mais próximo (lido pelo SubmitButton). */
@@ -21,6 +21,7 @@ export default function ActionForm({
 }) {
   const [state, formAction, pending] = useActionState(action, null);
   const ref = useRef<HTMLFormElement>(null);
+  const [waiting, setWaiting] = useState(false);
 
   useEffect(() => {
     if (state?.ok && resetOnSuccess) ref.current?.reset();
@@ -29,14 +30,16 @@ export default function ActionForm({
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    startTransition(() => formAction(fd));
+    setWaiting(fd.has("__uploading"));
+    if (!fd.has("__uploading")) startTransition(() => formAction(fd));
   };
 
   return (
     <ActionPendingContext.Provider value={pending}>
       <form ref={ref} onSubmit={onSubmit} className={className}>
         {children}
-        {state && !pending && (
+        {waiting && <p role="alert" className="text-sm rounded-lg px-3 py-2 mt-3 bg-[#FFF6DD] text-[#5C4010]">Aguarde a foto terminar de enviar e clique em Salvar de novo.</p>}
+        {state && !pending && !waiting && (
           <p
             role={state.ok ? "status" : "alert"}
             className="text-sm rounded-lg px-3 py-2 mt-3"

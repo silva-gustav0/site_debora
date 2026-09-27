@@ -4,8 +4,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { blogPosts as staticPosts, services as staticServices } from "@/lib/data";
 import { todaySP } from "@/lib/format";
 import {
-  BLOG_FALLBACK_IMAGE, DEFAULT_CONTENT, mergeContent,
-  type BlogPost, type BlogPostRow, type HomeService, type Promotion, type ServiceIcon, type SiteContent,
+  BLOG_FALLBACK_IMAGE, mergeContent,
+  type BlogPost, type BlogPostRow, type FullContent, type HomeService, type Promotion, type ServiceIcon,
 } from "@/lib/site-content";
 
 /**
@@ -13,12 +13,10 @@ import {
  * tudo cai no conteúdo padrão, para o site nunca ficar em branco.
  */
 
-export const getSiteContent = cache(async (): Promise<SiteContent> => {
+export const getSiteContent = cache(async (): Promise<FullContent> => {
   const db = createAdminClient();
-  if (!db) return DEFAULT_CONTENT;
-  const { data, error } = await db.from("site_content").select("section, content");
-  if (error || !data) return DEFAULT_CONTENT;
-  return mergeContent(data);
+  const { data, error } = db ? await db.from("site_content").select("section, content") : { data: null, error: null };
+  return mergeContent(error || !data ? [] : data);
 });
 
 const STATIC_ICONS: Record<string, ServiceIcon> = {

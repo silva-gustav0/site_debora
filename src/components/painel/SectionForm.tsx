@@ -1,6 +1,6 @@
 import { RotateCcw } from "lucide-react";
 import { resetSection, saveSection } from "@/app/painel/site-actions";
-import { DEFAULT_CONTENT, SECTION_FIELDS, type SectionKey, type SiteContent } from "@/lib/site-content";
+import { DEFAULT_CONTENT, SECTION_FIELDS, TEXT_MAX, type SectionKey, type SiteContent } from "@/lib/site-content";
 import ActionForm from "./ActionForm";
 import ConfirmButton from "./ConfirmButton";
 import ImageField from "./ImageField";
@@ -73,9 +73,9 @@ export default function SectionForm<S extends SectionKey>({
                           <label key={sf.key}>
                             <span className="p-label">{sf.label} {i + 1}</span>
                             {sf.textarea ? (
-                              <textarea name={`${f.key}.${i}.${sf.key}`} defaultValue={item[sf.key]} rows={5} className="p-input resize-y" />
+                              <textarea name={`${f.key}.${i}.${sf.key}`} defaultValue={item[sf.key]} rows={5} maxLength={1500} className="p-input resize-y" />
                             ) : (
-                              <input name={`${f.key}.${i}.${sf.key}`} defaultValue={item[sf.key]} className="p-input" />
+                              <input name={`${f.key}.${i}.${sf.key}`} defaultValue={item[sf.key]} maxLength={TEXT_MAX} className="p-input" />
                             )}
                           </label>
                         ))}
@@ -90,9 +90,9 @@ export default function SectionForm<S extends SectionKey>({
                 <label key={f.key}>
                   <span className="p-label">{f.label}</span>
                   {f.type === "text" ? (
-                    <input name={f.key} defaultValue={text} className="p-input" />
+                    <input name={f.key} defaultValue={text} maxLength={TEXT_MAX} className="p-input" />
                   ) : (
-                    <textarea name={f.key} defaultValue={text} rows={f.rows ?? 3} className="p-input resize-y" />
+                    <textarea name={f.key} defaultValue={text} rows={f.rows ?? 3} maxLength={f.type === "lines" ? 3000 : 5000} className="p-input resize-y" />
                   )}
                   {f.hint && <span className="block text-[11px] text-[#A69885] mt-1">{f.hint}</span>}
                 </label>

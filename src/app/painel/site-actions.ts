@@ -4,7 +4,10 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireStaff } from "@/lib/dal";
 import { bool, fail, int, isDate, isUuid, money, opt, str } from "@/lib/form";
-import { DEFAULT_CONTENT, SECTION_FIELDS, type SectionKey } from "@/lib/site-content";
+import {
+  BUILTIN_SECTIONS, DEFAULT_CONTENT, parseLayout, SECTION_FIELDS, TEXT_MAX, toCustomSection,
+  type BuiltinSection, type SectionKey, type SiteLayout,
+} from "@/lib/site-content";
 import type { ActionState } from "@/lib/types";
 
 /** O site público e o painel leem o mesmo conteúdo: revalida tudo. */
@@ -16,7 +19,7 @@ const done = (message: string): ActionState => {
 const IMAGE_TYPES: Record<string, string> = {
   "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/avif": "avif",
 };
-const FOLDERS = ["marca", "inicio", "sobre", "promocoes", "blog"];
+const FOLDERS = ["marca", "inicio", "sobre", "promocoes", "blog", "secoes"];
 
 /** Aceita caminho local (/images/...) ou URL https. */
 const imageUrl = (fd: FormData, key: string) => {
@@ -54,7 +57,7 @@ export async function saveSection(_prev: ActionState, fd: FormData): Promise<Act
   const content: Record<string, unknown> = {};
   for (const f of fields) {
     switch (f.type) {
-      case "text": content[f.key] = str(fd, f.key, 300); break;
+      case "text": content[f.key] = str(fd, f.key, TEXT_MAX); break;
       case "textarea": content[f.key] = str(fd, f.key, 5000); break;
       case "image": content[f.key] = imageUrl(fd, f.key); break;
       case "toggle": content[f.key] = bool(fd, f.key); break;
@@ -64,7 +67,7 @@ export async function saveSection(_prev: ActionState, fd: FormData): Promise<Act
       case "items": {
         const defaults = (DEFAULT_CONTENT[section] as Record<string, unknown>)[f.key] as unknown[];
         content[f.key] = defaults.map((_, i) =>
-          Object.fromEntries(f.fields.map((sf) => [sf.key, str(fd, `${f.key}.${i}.${sf.key}`, sf.textarea ? 1500 : 200)])),
+          Object.fromEntries(f.fields.map((sf) => [sf.key, str(fd, `${f.key}.${i}.${sf.key}`, sf.textarea ? 1500 : TEXT_MAX)])),
         );
         break;
       }
@@ -80,6 +83,51 @@ export async function resetSection(fd: FormData) {
   const { supabase } = await requireStaff();
   await supabase.from("site_content").delete().eq("section", str(fd, "section"));
   revalidatePath("/", "layout");
+}
+
+// ─── Seções (ocultar fixas, criar/editar/remover/reordenar novas) ──────
+type Db = Awaited<ReturnType<typeof requireStaff>>["supabase"];
+
+/** Lê o layout atual, aplica a alteração e grava de volta. */
+async function updateLayout(db: Db, change: (l: SiteLayout) => SiteLayout | string): Promise<ActionState> {
+  const { data, error: readError } = await db.from("site_content").select("content").eq("section", "layout").maybeSingle();
+  if (readError) return fail("Não foi possível ler as seções. A migração do banco já foi aplicada?");
+  const next = change(parseLayout(data?.content));
+  if (typeof next === "string") return fail(next);
+  const { error } = await db.from("site_content").upsert({ section: "layout", content: next });
+  return error ? fail("Não foi possível salvar as seções.") : done("Salvo! O site já está atualizado.");
+}
+
+export async function saveSectionVisibility(_prev: ActionState, fd: FormData): Promise<ActionState> {
+  const { supabase } = await requireStaff();
+  const hidden = (Object.keys(BUILTIN_SECTIONS) as BuiltinSection[]).filter((k) => k !== "hero" && !bool(fd, `show_${k}`));
+  return updateLayout(supabase, (l) => ({ ...l, hidden }));
+}
+
+export async function saveCustomSection(_prev: ActionState, fd: FormData): Promise<ActionState> {
+  const { supabase } = await requireStaff();
+  const s = toCustomSection({ ...Object.fromEntries(fd), id: str(fd, "id") || crypto.randomUUID().replace(/-/g, "").slice(0, 10) });
+  if (!s.title.trim() && !s.title_highlight.trim() && !s.text.trim()) return fail("Preencha pelo menos o título ou o texto da seção.");
+  if (s.image_position === "background" && !s.image) return fail("Escolha uma foto para usar como fundo.");
+  return updateLayout(supabase, (l) => {
+    const exists = l.custom.some((c) => c.id === s.id);
+    if (!exists && l.custom.length >= 20) return "Limite de 20 seções atingido.";
+    return { ...l, custom: exists ? l.custom.map((c) => (c.id === s.id ? s : c)) : [...l.custom, s] };
+  });
+}
+
+export async function deleteCustomSection(fd: FormData) {
+  const { supabase } = await requireStaff();
+  await updateLayout(supabase, (l) => ({ ...l, custom: l.custom.filter((c) => c.id !== str(fd, "id")) }));
+}
+
+export async function moveCustomSection(fd: FormData) {
+  const { supabase } = await requireStaff();
+  await updateLayout(supabase, (l) => {
+    const c = [...l.custom], i = c.findIndex((x) => x.id === str(fd, "id")), j = i + (str(fd, "dir") === "up" ? -1 : 1);
+    if (i >= 0 && j >= 0 && j < c.length) [c[i], c[j]] = [c[j], c[i]];
+    return { ...l, custom: c };
+  });
 }
 
 // ─── Promoções ─────────────────────────────────────────────────────────

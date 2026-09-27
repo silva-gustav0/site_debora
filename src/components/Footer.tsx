@@ -5,11 +5,11 @@ import { AtSign, Phone, Mail, MapPin, Heart } from "lucide-react";
 import { instagramUrl, telHref, type HomeService, type SiteContent } from "@/lib/site-content";
 
 const navLinks = [
-  { label: "Início", href: "#inicio" },
-  { label: "Sobre Nós", href: "#sobre" },
-  { label: "Serviços", href: "#servicos" },
-  { label: "Blog", href: "#blog" },
-  { label: "Contato", href: "#contato" },
+  { label: "Início", href: "#inicio", section: "hero" },
+  { label: "Sobre Nós", href: "#sobre", section: "about" },
+  { label: "Serviços", href: "#servicos", section: "services" },
+  { label: "Blog", href: "#blog", section: "blog" },
+  { label: "Contato", href: "#contato", section: "contact" },
 ];
 
 type FooterProps = {
@@ -18,11 +18,11 @@ type FooterProps = {
   footer: SiteContent["footer"];
   services: HomeService[];
   hours: string;
-  showBlog?: boolean;
+  hidden?: string[];
 };
 
-export default function Footer({ brand, contact, footer, services, hours, showBlog = true }: FooterProps) {
-  const links = navLinks.filter((l) => showBlog || l.href !== "#blog");
+export default function Footer({ brand, contact, footer, services, hours, hidden = [] }: FooterProps) {
+  const links = navLinks.filter((l) => !hidden.includes(l.section));
   const social = [
     { icon: AtSign, href: contact.instagram ? instagramUrl(contact.instagram) : null, label: "Instagram" },
     { icon: Phone, href: telHref(contact.phone), label: "Telefone" },

@@ -26,7 +26,7 @@ export default async function BlogPage() {
 
   return (
     <>
-      <Navbar logo={brand.logo} name={brand.full_name} />
+      <Navbar logo={brand.logo} name={brand.full_name} hidden={content.layout.hidden} />
       <main>
         {/* Header */}
         <section
@@ -147,7 +147,7 @@ export default async function BlogPage() {
         </section>
       </main>
       <Footer
-        brand={brand} contact={content.contact} footer={content.footer} services={services}
+        brand={brand} contact={content.contact} footer={content.footer} services={services} hidden={content.layout.hidden}
         hours={hoursSummary(config?.hours ?? DEFAULT_HOURS)}
       />
     </>

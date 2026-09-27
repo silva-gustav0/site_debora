@@ -7,15 +7,16 @@ import Link from "next/link";
 import { LogIn, Menu, X } from "lucide-react";
 
 const NAV_LINKS = [
-  { label: "Início",    hash: "inicio"      },
-  { label: "Sobre",     hash: "sobre"       },
-  { label: "Serviços",  hash: "servicos"    },
-  { label: "Blog",      hash: "blog"        },
-  { label: "Contato",   hash: "contato"     },
+  { label: "Início",    hash: "inicio",   section: "hero"     },
+  { label: "Sobre",     hash: "sobre",    section: "about"    },
+  { label: "Serviços",  hash: "servicos", section: "services" },
+  { label: "Blog",      hash: "blog",     section: "blog"     },
+  { label: "Contato",   hash: "contato",  section: "contact"  },
 ];
 
-export default function Navbar({ logo, name, showBlog = true }: { logo: string; name: string; showBlog?: boolean }) {
-  const links = NAV_LINKS.filter((l) => showBlog || l.hash !== "blog");
+export default function Navbar({ logo, name, hidden = [], extra = [] }: { logo: string; name: string; hidden?: string[]; extra?: { label: string; hash: string }[] }) {
+  const base  = NAV_LINKS.filter((l) => !hidden.includes(l.section));
+  const links = [...base.slice(0, -1), ...extra, ...base.slice(-1)];
   const [open, setOpen]       = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname              = usePathname();

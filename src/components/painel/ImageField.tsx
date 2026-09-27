@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { ImagePlus, Loader2, RotateCcw, Trash2 } from "lucide-react";
 import { uploadSiteImage } from "@/app/painel/site-actions";
 
@@ -43,6 +43,12 @@ export default function ImageField({
   const inputRef = useRef<HTMLInputElement>(null);
   const shown = url || fallback || "";
 
+  useEffect(() => {
+    const form = inputRef.current?.form, reset = () => setUrl(defaultValue);
+    form?.addEventListener("reset", reset);
+    return () => form?.removeEventListener("reset", reset);
+  }, [defaultValue]);
+
   const onPick = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
@@ -62,6 +68,7 @@ export default function ImageField({
     <div>
       <span className="p-label">{label}</span>
       <input type="hidden" name={name} value={url} />
+      {pending && <input type="hidden" name="__uploading" value="1" />}
       <div className="flex flex-col sm:flex-row gap-3 sm:items-start">
         <div className={`relative w-full sm:w-48 ${aspect} rounded-xl overflow-hidden border border-[#EEDFBF] bg-[#FBF7EE] flex-shrink-0`}>
           {shown ? (

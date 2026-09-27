@@ -3,6 +3,7 @@
  * painel mostra em cada área. O que estiver salvo em `site_content` sobrepõe o padrão.
  */
 
+export const TEXT_MAX = 600;
 export type ItemField = { key: string; label: string; textarea?: boolean };
 export type Field =
   | { key: string; label: string; type: "text" | "textarea" | "image" | "lines" | "toggle"; hint?: string; rows?: number }
@@ -83,7 +84,6 @@ export const DEFAULT_CONTENT = {
     title_highlight: "Agendamento",
   },
   blog: {
-    visible: true,
     eyebrow: "Conteúdo & Dicas",
     title: "Nosso",
     title_highlight: "Blog",
@@ -150,7 +150,7 @@ export const SECTION_FIELDS: Record<SectionKey, Field[]> = {
   about: [
     ...TITLE_FIELDS,
     { key: "image", label: "Foto", type: "image" },
-    { key: "text", label: "Texto", type: "textarea", rows: 7, hint: "Deixe uma linha em branco entre parágrafos." },
+    { key: "text", label: "Texto", type: "textarea", rows: 7, hint: "Cada linha vira um parágrafo." },
     { key: "bullets", label: "Destaques (um por linha)", type: "lines", rows: 4 },
     { key: "quote", label: "Frase abaixo da foto", type: "textarea", rows: 2 },
     { key: "quote_author", label: "Assinatura da frase", type: "text" },
@@ -166,7 +166,6 @@ export const SECTION_FIELDS: Record<SectionKey, Field[]> = {
   ],
   schedule: TITLE_FIELDS,
   blog: [
-    { key: "visible", label: "Mostrar o blog na página inicial", type: "toggle" },
     ...TITLE_FIELDS,
     { key: "page_subtitle", label: "Texto no topo da página do blog", type: "textarea", rows: 2 },
   ],
@@ -209,14 +208,49 @@ export function mergeSection<T extends Json>(defaults: T, raw: unknown): T {
   return out as T;
 }
 
-export function mergeContent(rows: { section: string; content: unknown }[]): SiteContent {
+export function mergeContent(rows: { section: string; content: unknown }[]): FullContent {
   const bySection = new Map(rows.map((r) => [r.section, r.content]));
   const out = {} as Record<SectionKey, Json>;
   for (const key of Object.keys(DEFAULT_CONTENT) as SectionKey[]) {
     out[key] = mergeSection(DEFAULT_CONTENT[key] as Json, bySection.get(key));
   }
-  return out as SiteContent;
+  return { ...(out as SiteContent), layout: parseLayout(bySection.get("layout")) };
 }
+
+// ─── Seções: ocultar as fixas e criar novas ────────────────────────────
+export const BUILTIN_SECTIONS = { hero: "Topo", about: "Sobre", services: "Serviços", schedule: "Agendamento", blog: "Blog", contact: "Contato" } as const;
+export type BuiltinSection = keyof typeof BUILTIN_SECTIONS;
+export const IMAGE_POSITIONS = { left: "À esquerda do texto", right: "À direita do texto", top: "Acima do texto", bottom: "Abaixo do texto", background: "Como fundo da seção", none: "Sem foto" } as const;
+export const SECTION_BGS = { cream: "Creme", white: "Branco", sand: "Areia" } as const;
+export const BG_COLORS: Record<keyof typeof SECTION_BGS, string> = { cream: "#FDFAF7", white: "#FFFFFF", sand: "#FBF7EE" };
+
+export type CustomSection = {
+  id: string; eyebrow: string; title: string; title_highlight: string; text: string; image: string; menu_label: string;
+  image_position: keyof typeof IMAGE_POSITIONS; after: BuiltinSection; bg: keyof typeof SECTION_BGS;
+};
+export type SiteLayout = { hidden: BuiltinSection[]; custom: CustomSection[] };
+export type FullContent = SiteContent & { layout: SiteLayout };
+
+const pick = <T extends object>(obj: T, v: unknown, def: keyof T) => (typeof v === "string" && v in obj ? v : def) as keyof T;
+const txt = (v: unknown, max: number) => (typeof v === "string" ? v.slice(0, max) : "");
+
+/** Valida uma seção criada (vinda do banco ou do formulário), descartando o que não for esperado. */
+export const toCustomSection = (r: Json): CustomSection => ({
+  id: txt(r.id, 12).replace(/[^a-z0-9]/g, ""), eyebrow: txt(r.eyebrow, 120), title: txt(r.title, 200), title_highlight: txt(r.title_highlight, 200),
+  text: txt(r.text, 8000), image: /^(\/|https:\/\/)/.test(txt(r.image, 1000)) ? txt(r.image, 1000) : "", menu_label: txt(r.menu_label, 30),
+  image_position: pick(IMAGE_POSITIONS, r.image_position, "left"), after: pick(BUILTIN_SECTIONS, r.after, "about"), bg: pick(SECTION_BGS, r.bg, "cream"),
+});
+
+/** Lê o layout salvo, tolerando dados antigos ou incompletos. */
+export function parseLayout(raw: unknown): SiteLayout {
+  const r = (raw && typeof raw === "object" ? raw : {}) as Json;
+  const hidden = (Array.isArray(r.hidden) ? r.hidden : []).filter((k): k is BuiltinSection => typeof k === "string" && k in BUILTIN_SECTIONS && k !== "hero");
+  const custom = (Array.isArray(r.custom) ? r.custom : []).filter((c) => c && typeof c === "object").map((c) => toCustomSection(c as Json)).filter((c) => c.id);
+  return { hidden, custom };
+}
+
+/** Parágrafos de um texto livre: cada linha não vazia vira um parágrafo. */
+export const paragraphs = (text: string) => text.split(/\r?\n/).map((t) => t.trim()).filter(Boolean);
 
 /** Link do Instagram a partir do @usuario (ou de uma URL já completa). */
 export const instagramUrl = (handle: string) =>

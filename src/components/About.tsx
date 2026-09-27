@@ -1,7 +1,7 @@
 import Image from "next/image";
 import AnimateIn from "./AnimateIn";
 import { Heart, Eye, Diamond } from "lucide-react";
-import type { SiteContent } from "@/lib/site-content";
+import { paragraphs as toParagraphs, type SiteContent } from "@/lib/site-content";
 
 const pillarStyles = [
   {
@@ -28,7 +28,7 @@ export default function About({ content: c }: { content: SiteContent["about"] })
   const pillars = c.pillars
     .map((p, i) => ({ ...pillarStyles[i % pillarStyles.length], ...p }))
     .filter((p) => p.title.trim() || p.text.trim());
-  const paragraphs = c.text.split(/\n\s*\n/).map((t) => t.trim()).filter(Boolean);
+  const paragraphs = toParagraphs(c.text);
 
   return (
     <section id="sobre" className="py-28 bg-[#FDFAF7] overflow-hidden">
@@ -167,7 +167,7 @@ export default function About({ content: c }: { content: SiteContent["about"] })
                   {p.title}
                 </h3>
                 <p
-                  className="text-sm font-light leading-7"
+                  className="text-sm font-light leading-7 whitespace-pre-line"
                   style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B5A4B" }}
                 >
                   {p.text}

@@ -626,9 +626,14 @@ export async function saveService(_prev: ActionState, fd: FormData): Promise<Act
   if (!Number.isFinite(price) || price < 0) return fail("Informe um preço válido.");
   if (!(duration >= 15 && duration <= 480)) return fail("Duração entre 15 e 480 minutos.");
 
-  const id = isNew
-    ? name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60)
-    : str(fd, "id");
+  // Compara nomes ignorando acentos/maiúsculas; o id é um apelido interno e ganha sufixo se já estiver em uso (ex.: serviço renomeado).
+  const slug = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 55);
+  const { data: existing, error: listError } = await supabase.from("services").select("id, name");
+  if (listError) return fail("Não foi possível conferir os serviços. Tente de novo.");
+  if (existing!.some((s) => s.id !== str(fd, "id") && slug(s.name) === slug(name))) return fail(`Já existe um serviço chamado “${name}”.`);
+  const base = slug(name) || "servico", ids = new Set(existing!.map((s) => s.id));
+  let id = isNew ? base : str(fd, "id");
+  for (let n = 2; isNew && ids.has(id); n++) id = `${base}-${n}`;
   const row = {
     id, name, price, duration_min: duration,
     return_days: returnDays > 0 ? returnDays : null,
@@ -641,7 +646,7 @@ export async function saveService(_prev: ActionState, fd: FormData): Promise<Act
   const { error } = isNew
     ? await supabase.from("services").insert({ ...row, sort_order: 99 })
     : await supabase.from("services").update(row).eq("id", id);
-  if (error) return fail(error.code === "23505" ? "Já existe um serviço com esse nome." : "Não foi possível salvar o serviço.");
+  if (error) return fail("Não foi possível salvar o serviço.");
   revalidatePath("/", "layout");
   return done(isNew ? "Serviço criado." : "Serviço atualizado.");
 }

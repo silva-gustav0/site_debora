@@ -1,22 +1,24 @@
 import Link from "next/link";
-import { ExternalLink, Pencil, Plus, Star, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, ExternalLink, EyeOff, Pencil, Plus, Star, Trash2 } from "lucide-react";
 import { requireStaff } from "@/lib/dal";
 import { brl, fmtDate, todaySP } from "@/lib/format";
 import { listServices } from "@/lib/queries";
 import { getSiteContent } from "@/lib/site";
-import { categoryColor, type BlogPostRow, type Promotion } from "@/lib/site-content";
+import { BUILTIN_SECTIONS, categoryColor, IMAGE_POSITIONS, type BlogPostRow, type Promotion } from "@/lib/site-content";
 import ActionForm from "@/components/painel/ActionForm";
 import ConfirmButton from "@/components/painel/ConfirmButton";
+import CustomSectionForm from "@/components/painel/CustomSectionForm";
 import ImageField from "@/components/painel/ImageField";
 import SectionForm from "@/components/painel/SectionForm";
 import SubmitButton from "@/components/painel/SubmitButton";
 import { Alert, Badge, Card, EmptyState, PageHeader, Tabs } from "@/components/painel/ui";
-import { deletePromotion, savePromotion } from "../../site-actions";
+import { deleteCustomSection, deletePromotion, moveCustomSection, savePromotion, saveSectionVisibility } from "../../site-actions";
 import type { ServiceRow } from "@/lib/types";
 
 export const metadata = { title: "Site" };
 
 const TABS = [
+  { key: "secoes", label: "Seções", anchor: "inicio" },
   { key: "inicio", label: "Início", anchor: "inicio" },
   { key: "sobre", label: "Sobre", anchor: "sobre" },
   { key: "servicos", label: "Serviços", anchor: "servicos" },
@@ -109,7 +111,7 @@ function PromotionForm({ promo, services }: { promo?: Promotion; services: Servi
 export default async function SitePage({ searchParams }: PageProps<"/painel/site">) {
   const sp = await searchParams;
   const { supabase } = await requireStaff();
-  const tab: TabKey = TABS.some((t) => t.key === sp.tab) ? (sp.tab as TabKey) : "inicio";
+  const tab: TabKey = TABS.some((t) => t.key === sp.tab) ? (sp.tab as TabKey) : "secoes";
   const content = await getSiteContent();
   const anchor = TABS.find((t) => t.key === tab)!.anchor;
 
@@ -144,6 +146,47 @@ export default async function SitePage({ searchParams }: PageProps<"/painel/site
           <Alert tone="red">
             O banco ainda não tem as tabelas do site. Aplique a migração <code>20260924200000_site_content.sql</code> com <code>supabase db push</code>.
           </Alert>
+        </div>
+      )}
+
+      {tab === "secoes" && (
+        <div className="grid gap-5">
+          <Card title="Seções do site" eyebrow="Desmarque para esconder uma seção inteira">
+            <ActionForm action={saveSectionVisibility} className="grid gap-4">
+              <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-[#4A3C30]">
+                {Object.entries(BUILTIN_SECTIONS).filter(([k]) => k !== "hero").map(([k, l]) => (
+                  <label key={k} className="flex items-center gap-2">
+                    <input type="checkbox" name={`show_${k}`} defaultChecked={!content.layout.hidden.includes(k as never)} className="accent-[#82590F] w-4 h-4" /> {l}
+                  </label>
+                ))}
+              </div>
+              <div><SubmitButton pendingText="Salvando…">Salvar</SubmitButton></div>
+            </ActionForm>
+          </Card>
+          {content.layout.custom.map((c, i, all) => (
+            <section key={c.id} className="p-card p-5">
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                <h2 className="p-display text-2xl text-[#2B221B] mr-1">{[c.title, c.title_highlight].filter(Boolean).join(" ") || c.eyebrow || "Seção sem título"}</h2>
+                <Badge>Depois de “{BUILTIN_SECTIONS[c.after]}”</Badge>
+                <Badge tone="gold">{IMAGE_POSITIONS[c.image_position]}</Badge>
+                {content.layout.hidden.includes(c.after) && <Badge tone="red"><EyeOff size={10} /> “{BUILTIN_SECTIONS[c.after]}” está oculta</Badge>}
+                <span className="ml-auto flex gap-1.5">
+                  {([["up", ArrowUp, i > 0], ["down", ArrowDown, i < all.length - 1]] as const).map(([dir, Icon, ok]) => ok && (
+                    <form key={String(dir)} action={moveCustomSection}>
+                      <input type="hidden" name="id" value={c.id} /><input type="hidden" name="dir" value={String(dir)} />
+                      <SubmitButton className="p-btn-ghost p-btn-sm" aria-label={dir === "up" ? "Subir" : "Descer"}><Icon size={13} /></SubmitButton>
+                    </form>
+                  ))}
+                  <form action={deleteCustomSection}>
+                    <input type="hidden" name="id" value={c.id} />
+                    <ConfirmButton><Trash2 size={13} /> Excluir</ConfirmButton>
+                  </form>
+                </span>
+              </div>
+              <CustomSectionForm s={c} />
+            </section>
+          ))}
+          <div id="nova-secao"><Card title="Nova seção" eyebrow="Equipe, nossa história, depoimentos…"><CustomSectionForm /></Card></div>
         </div>
       )}
 
@@ -231,7 +274,7 @@ export default async function SitePage({ searchParams }: PageProps<"/painel/site
               </ul>
             )}
           </Card>
-          <SectionForm section="blog" values={content.blog} title="Seção do blog" eyebrow="Títulos e visibilidade" />
+          <SectionForm section="blog" values={content.blog} title="Seção do blog" eyebrow="Para esconder o blog, use a aba Seções" />
         </div>
       )}
 
