@@ -10,6 +10,10 @@ const supabaseHost = (() => {
 })();
 
 const nextConfig: NextConfig = {
+  // O APK do app da equipe baixa como arquivo instalável no Android.
+  async headers() {
+    return [{ source: "/app/debora-equipe.apk", headers: [{ key: "Content-Type", value: "application/vnd.android.package-archive" }, { key: "Content-Disposition", value: "attachment" }] }];
+  },
   experimental: {
     // Fotos do prontuário são comprimidas no navegador; o limite da Vercel é 4,5 MB.
     serverActions: { bodySizeLimit: "4mb" },

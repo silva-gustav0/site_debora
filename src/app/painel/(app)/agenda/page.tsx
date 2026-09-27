@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { BellRing, CalendarPlus, ChevronLeft, ChevronRight, Lock, MessageCircle, Trash2 } from "lucide-react";
 import { requireStaff } from "@/lib/dal";
@@ -11,6 +12,7 @@ import ActionForm from "@/components/painel/ActionForm";
 import AgendaGrid from "@/components/painel/AgendaGrid";
 import AppointmentItem from "@/components/painel/AppointmentItem";
 import AppointmentPanel from "@/components/painel/AppointmentPanel";
+import MobileDayView from "@/components/painel/MobileDayView";
 import ConfirmButton from "@/components/painel/ConfirmButton";
 import Drawer from "@/components/painel/Drawer";
 import NewAppointmentForm from "@/components/painel/NewAppointmentForm";
@@ -83,6 +85,7 @@ export default async function AgendaPage({ searchParams }: PageProps<"/painel/ag
 
   return (
     <>
+      <Suspense><MobileDayView /></Suspense>
       <PageHeader
         eyebrow="Agenda"
         title={

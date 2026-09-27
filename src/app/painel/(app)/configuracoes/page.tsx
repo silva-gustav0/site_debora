@@ -42,7 +42,7 @@ export default async function SettingsPage({ searchParams }: PageProps<"/painel/
       />
 
       {tab === "clinica" && (
-        <ActionForm action={saveSettings} className="grid xl:grid-cols-2 gap-5">
+        <ActionForm action={saveSettings} className="grid grid-cols-1 xl:grid-cols-2 gap-5">
           <Card title="Dados da clínica">
             <div className="grid gap-3">
               <label><span className="p-label">Nome</span><input name="clinic_name" defaultValue={settings.clinic_name} className="p-input" /></label>

@@ -1,0 +1,10 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "br.com.clinicadeborasilva.equipe",
+      "sha256_cert_fingerprints": ["6A:48:3A:ED:AE:AA:F4:CD:64:5A:28:CD:AA:BC:B7:EA:0A:D6:41:38:31:F1:90:A8:49:4C:9F:F0:5D:15:A3:B1"]
+    }
+  }
+]

@@ -360,3 +360,15 @@ details > summary::-webkit-details-marker { display: none; }
   .panel-root { background: #fff !important; }
   .print-sheet { box-shadow: none !important; border: none !important; }
 }
+
+/* Celular/app: nada empurra a largura da página e os toques têm área confortável (mín. 40px). */
+.panel-root .grid > * { min-width: 0; }
+@media (pointer: coarse), (max-width: 767px) {
+  .p-btn, .p-btn-ghost { min-height: 42px; }
+  .p-btn-sm { min-height: 38px; padding: 7px 12px; font-size: 13px; }
+  .p-input { font-size: 16px; min-height: 44px; }
+  .panel-root input[type="checkbox"], .panel-root input[type="radio"] { width: 20px; height: 20px; }
+  .p-tab { padding-top: 12px; padding-bottom: 12px; }
+}
+/* Dentro do app instalado não faz sentido oferecer o download dele. */
+@media (display-mode: standalone) { .hide-in-app { display: none !important; } }

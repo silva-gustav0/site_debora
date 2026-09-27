@@ -16,9 +16,9 @@ const CATEGORIES = { facial: "Facial", corporal: "Corporal", terapias: "Terapias
 function ServiceForm({ service }: { service?: ServiceRow }) {
   const s = service;
   return (
-    <ActionForm action={saveService} resetOnSuccess={!s} className="grid sm:grid-cols-2 lg:grid-cols-12 gap-3 items-end">
+    <ActionForm action={saveService} resetOnSuccess={!s} className="grid grid-cols-2 lg:grid-cols-12 gap-3 items-end">
       {s && <input type="hidden" name="id" value={s.id} />}
-      <label className="lg:col-span-4">
+      <label className="col-span-2 lg:col-span-4">
         <span className="p-label">Nome</span>
         <input name="name" required defaultValue={s?.name} className="p-input" />
       </label>
@@ -40,11 +40,11 @@ function ServiceForm({ service }: { service?: ServiceRow }) {
         <span className="p-label" title="Em quantos dias a cliente deveria voltar">Retorno</span>
         <input name="return_days" type="number" min={1} max={365} defaultValue={s?.return_days ?? ""} placeholder="dias" className="p-input p-num" />
       </label>
-      <label className="lg:col-span-2 flex items-center gap-2 text-sm text-text-secondary pb-2">
+      <label className="col-span-2 lg:col-span-2 flex items-center gap-2 text-sm text-text-secondary pb-2">
         <input type="checkbox" name="active" defaultChecked={s?.active ?? true} className="accent-[#82590F]" />
         Disponível no site
       </label>
-      <label className="sm:col-span-2 lg:col-span-6">
+      <label className="col-span-2 lg:col-span-6">
         <span className="p-label">Descrição (aparece no site)</span>
         <input name="description" defaultValue={s?.description ?? ""} className="p-input" />
       </label>
@@ -58,7 +58,7 @@ function ServiceForm({ service }: { service?: ServiceRow }) {
         <input type="checkbox" name="show_on_home" defaultChecked={s?.show_on_home ?? false} className="accent-[#82590F]" />
         Cartão na página inicial
       </label>
-      <div className="lg:col-span-2">
+      <div className="col-span-2 lg:col-span-2">
         <SubmitButton className="p-btn w-full">{s ? "Salvar" : "Criar serviço"}</SubmitButton>
       </div>
     </ActionForm>

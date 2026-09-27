@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, CalendarDays, Users, Wallet, Repeat, KanbanSquare, Sparkles, LogOut, Menu, X, ExternalLink,
-  Package, Boxes, BarChart3, Settings, Search, Globe,
+  Package, Boxes, BarChart3, Settings, Search, Globe, Smartphone,
 } from "lucide-react";
 import { logout } from "@/app/painel/auth-actions";
 import { initials } from "@/lib/format";
@@ -112,6 +112,14 @@ export default function Sidebar({ name, badges }: { name: string; badges: Sideba
       </nav>
 
       <div className="border-t border-white/10 pt-4 mt-4">
+        <Link
+          href="/painel/app"
+          onClick={() => setOpen(false)}
+          className="hide-in-app flex items-center gap-3 rounded-xl px-3 py-2.5 mb-3 text-[13px] font-bold text-[#29201A]"
+          style={{ background: "linear-gradient(135deg,#F3DDA6,#C9973A)" }}
+        >
+          <Smartphone size={16} /> Baixar app Android
+        </Link>
         <div className="flex items-center gap-3 px-3 mb-3">
           <span className="p-avatar w-9 h-9 text-xs" style={{ background: "linear-gradient(135deg,#9A6F1E,#6B4A10)" }}>{initials(name)}</span>
           <div className="min-w-0">
