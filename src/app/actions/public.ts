@@ -1,10 +1,13 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { anamnesisUpdate } from "@/lib/anamnesis";
+import { getAnamnesisLink } from "@/lib/anamnesis-link";
 import { addDays, digits, todaySP } from "@/lib/format";
 import { dayHours, freeSlots, toTimestamp, SP_OFFSET } from "@/lib/hours";
 import { getSettings } from "@/lib/settings";
-import type { BusinessHours, ServiceRow, Settings } from "@/lib/types";
+import type { ActionState, BusinessHours, ServiceRow, Settings } from "@/lib/types";
 
 type Admin = NonNullable<ReturnType<typeof createAdminClient>>;
 
@@ -204,6 +207,22 @@ export async function cancelBookingByToken(token: string, reason: string): Promi
     .in("status", ["solicitado", "confirmado"]);
   if (error) return { ok: false, message: "Não foi possível cancelar. Tente novamente." };
   return { ok: true, message: "Agendamento cancelado." };
+}
+
+// ─── Anamnese pelo link ────────────────────────────────────────────────
+/** Grava a ficha preenchida pelo cliente, desde que o link ainda seja válido; registra no histórico do CRM. */
+export async function submitAnamnesisByToken(_prev: ActionState, fd: FormData): Promise<ActionState> {
+  const link = await getAnamnesisLink(clean(fd.get("token"), 40));
+  if (link.state !== "ok") return { ok: false, message: "Este link expirou ou não é mais válido. Peça um novo à clínica." };
+  const db = createAdminClient()!;
+  const { error } = await db.from("clients").update(anamnesisUpdate(fd, "cliente")).eq("id", link.clientId);
+  if (error) return { ok: false, message: "Não foi possível enviar. Tente novamente." };
+  await Promise.all([
+    db.from("anamnesis_links").update({ submitted_at: new Date().toISOString() }).eq("token", link.token),
+    link.submittedAt ? null : db.from("interactions").insert({ client_id: link.clientId, kind: "nota", content: "Anamnese preenchida pelo cliente pelo link." }),
+  ]);
+  revalidatePath("/painel", "layout");
+  return { ok: true, message: "Recebemos sua ficha. Obrigada! Você pode corrigir algo e enviar de novo enquanto o link estiver válido." };
 }
 
 // ─── Contato ───────────────────────────────────────────────────────────

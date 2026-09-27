@@ -195,7 +195,7 @@ export default async function ClientPage({ params, searchParams }: PageProps<"/p
 
       {tab === "anamnese" && (
         <div className="grid xl:grid-cols-[1fr_320px] gap-5">
-          <Card title="Ficha de anamnese" eyebrow="Avaliação"><AnamnesisForm clientId={client.id} a={a} /></Card>
+          <Card title="Ficha de anamnese" eyebrow={a.filled_at ? `Preenchida pel${a.filled_by === "cliente" ? "o cliente (link)" : "a equipe"} em ${fmtDate(a.filled_at)} ${fmtTime(a.filled_at)}` : "Avaliação"}><AnamnesisForm hidden={{ id: client.id }} a={a} /></Card>
           <div className="flex flex-col gap-5">
             <Card title="Termo de consentimento">
               {client.consent_signed_at ? (

@@ -1,7 +1,7 @@
 import ActionForm from "./ActionForm";
 import SubmitButton from "./SubmitButton";
 import { saveAnamnesis } from "@/app/painel/actions";
-import type { Anamnesis } from "@/lib/types";
+import type { ActionState, Anamnesis } from "@/lib/types";
 
 export const FITZPATRICK = [
   { v: "I", l: "I · Muito clara, sempre queima" },
@@ -44,11 +44,13 @@ function Multi({ name, label, options, values }: { name: string; label: string; 
   );
 }
 
-/** Ficha de anamnese estruturada para estética facial e corporal. */
-export default function AnamnesisForm({ clientId, a }: { clientId: string; a: Anamnesis }) {
+/** Ficha de anamnese estruturada para estética facial e corporal (painel ou link enviado ao cliente). */
+export default function AnamnesisForm({ a, hidden, action = saveAnamnesis, submitLabel = "Salvar anamnese" }: {
+  a: Anamnesis; hidden: Record<string, string>; action?: (prev: ActionState, fd: FormData) => Promise<ActionState>; submitLabel?: string;
+}) {
   return (
-    <ActionForm action={saveAnamnesis} className="flex flex-col gap-6">
-      <input type="hidden" name="id" value={clientId} />
+    <ActionForm action={action} className="flex flex-col gap-6">
+      {Object.entries(hidden).map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)}
 
       <div className="grid sm:grid-cols-2 gap-4">
         <label>
@@ -114,7 +116,7 @@ export default function AnamnesisForm({ clientId, a }: { clientId: string; a: An
         </label>
       </div>
 
-      <div><SubmitButton pendingText="Salvando…">Salvar anamnese</SubmitButton></div>
+      <div><SubmitButton pendingText="Enviando…">{submitLabel}</SubmitButton></div>
     </ActionForm>
   );
 }

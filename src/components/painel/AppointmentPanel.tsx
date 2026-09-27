@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BellRing, CalendarClock, CheckCircle2, Clock, MessageCircle, Package, UserRound, XCircle } from "lucide-react";
 import ActionForm from "./ActionForm";
+import AnamnesisLinkButton from "./AnamnesisLinkButton";
 import SubmitButton from "./SubmitButton";
 import { Avatar, Badge, StatusBadge } from "./ui";
 import {
@@ -9,7 +10,7 @@ import {
 import {
   brl, dateSP, fillTemplate, firstName, fmtDate, fmtTime, fmtWeekday, formatPhone, METHOD_LABEL, nowMs, SITE_URL, whatsappLink,
 } from "@/lib/format";
-import type { AppointmentWithRefs, ClientPackage, Settings } from "@/lib/types";
+import type { AnamnesisLink, AppointmentWithRefs, ClientPackage, Settings } from "@/lib/types";
 
 function StatusButton({ id, status, children, className = "p-btn-ghost p-btn-sm" }: { id: string; status: string; children: React.ReactNode; className?: string }) {
   return (
@@ -23,8 +24,8 @@ function StatusButton({ id, status, children, className = "p-btn-ghost p-btn-sm"
 
 /** Tudo sobre um atendimento: dados, mensagens prontas e ações. */
 export default function AppointmentPanel({
-  appt, settings, pkg,
-}: { appt: AppointmentWithRefs; settings: Settings; pkg?: ClientPackage | null }) {
+  appt, settings, pkg, anamnesisLink = null,
+}: { appt: AppointmentWithRefs; settings: Settings; pkg?: ClientPackage | null; anamnesisLink?: AnamnesisLink | null }) {
   const client = appt.clients;
   const service = appt.services?.name ?? "Atendimento";
   const day = dateSP(appt.starts_at);
@@ -40,6 +41,11 @@ export default function AppointmentPanel({
   };
   const wa = (key: keyof Settings["templates"]) => whatsappLink(client?.phone, fillTemplate(settings.templates[key], vars));
   const hoursUntil = (Date.parse(appt.starts_at) - nowMs()) / 3_600_000;
+  const al = anamnesisLink;
+  const anamnesisStatus = !al || al.revoked_at ? null
+    : al.submitted_at ? `Ficha recebida às ${fmtTime(al.submitted_at)} de ${fmtDate(al.submitted_at)}.`
+    : Date.parse(al.expires_at) > nowMs() ? `Link enviado às ${fmtTime(al.created_at)}, vale até ${fmtTime(al.expires_at)}.`
+    : `O último link expirou às ${fmtTime(al.expires_at)} de ${fmtDate(al.expires_at)}.`;
 
   return (
     <div className="flex flex-col gap-5">
@@ -101,6 +107,8 @@ export default function AppointmentPanel({
           </div>
         </section>
       )}
+
+      {client && <AnamnesisLinkButton appointmentId={appt.id} phone={client.phone} greeting={`Olá, ${vars.nome}!`} status={anamnesisStatus} />}
 
       {/* Status */}
       <section className="flex flex-wrap gap-2">

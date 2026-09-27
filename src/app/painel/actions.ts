@@ -3,13 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireStaff } from "@/lib/dal";
-import { addDays, digits, todaySP } from "@/lib/format";
-import { bool, fail, int, isDate, isTime, isUuid, list, money, opt, str } from "@/lib/form";
+import { addDays, digits, SITE_URL, todaySP } from "@/lib/format";
+import { anamnesisUpdate } from "@/lib/anamnesis";
+import { bool, fail, int, isDate, isTime, isUuid, money, opt, str } from "@/lib/form";
 import { toTimestamp } from "@/lib/hours";
 import { cardFee, getSettings } from "@/lib/settings";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { SERVICE_ICONS } from "@/lib/site-content";
-import type { ActionState, Anamnesis } from "@/lib/types";
+import type { ActionState } from "@/lib/types";
 
 // ─── helpers ───────────────────────────────────────────────────────────
 const refresh = () => revalidatePath("/painel", "layout");
@@ -77,36 +78,25 @@ export async function updateClientAction(_prev: ActionState, fd: FormData): Prom
 
 export async function saveAnamnesis(_prev: ActionState, fd: FormData): Promise<ActionState> {
   const { supabase } = await requireStaff();
-  const anamnesis: Anamnesis = {
-    fitzpatrick: opt(fd, "fitzpatrick", 4) ?? undefined,
-    skin_type: opt(fd, "skin_type", 40) ?? undefined,
-    concerns: list(fd, "concerns").slice(0, 20),
-    conditions: list(fd, "conditions").slice(0, 20),
-    medications: opt(fd, "medications", 1000) ?? undefined,
-    allergies_detail: opt(fd, "allergies_detail", 1000) ?? undefined,
-    pregnant: bool(fd, "pregnant"),
-    breastfeeding: bool(fd, "breastfeeding"),
-    uses_acids: bool(fd, "uses_acids"),
-    sunscreen: bool(fd, "sunscreen"),
-    smoker: bool(fd, "smoker"),
-    sun_exposure: opt(fd, "sun_exposure", 40) ?? undefined,
-    water_intake: opt(fd, "water_intake", 40) ?? undefined,
-    previous_procedures: opt(fd, "previous_procedures", 1500) ?? undefined,
-    goals: opt(fd, "goals", 1500) ?? undefined,
-  };
-  const { error } = await supabase.from("clients").update({
-    anamnesis,
-    skin_type: anamnesis.skin_type ?? null,
-    allergies: anamnesis.allergies_detail ?? null,
-    health_notes: [
-      anamnesis.pregnant && "Gestante",
-      anamnesis.breastfeeding && "Amamentando",
-      ...(anamnesis.conditions ?? []),
-      anamnesis.medications && `Medicamentos: ${anamnesis.medications}`,
-    ].filter(Boolean).join(" · ") || null,
-  }).eq("id", str(fd, "id"));
+  const { error } = await supabase.from("clients").update(anamnesisUpdate(fd, "equipe")).eq("id", str(fd, "id"));
   if (error) return fail("Não foi possível salvar a anamnese.");
   return done("Anamnese salva.");
+}
+
+export type AnamnesisLinkResult = { ok: true; url: string; expiresAt: string } | { ok: false; message: string };
+
+/** Gera um link único de anamnese (2 h) para o cliente do agendamento e invalida os links anteriores dele. */
+export async function createAnamnesisLink(appointmentId: string): Promise<AnamnesisLinkResult> {
+  const { supabase } = await requireStaff();
+  const { data: appt } = await supabase.from("appointments").select("id, client_id").eq("id", appointmentId).maybeSingle();
+  if (!appt?.client_id) return { ok: false, message: "Agendamento sem cliente." };
+  await supabase.from("anamnesis_links").update({ revoked_at: new Date().toISOString() })
+    .eq("appointment_id", appt.id).is("revoked_at", null).is("submitted_at", null);
+  const { data, error } = await supabase.from("anamnesis_links")
+    .insert({ appointment_id: appt.id, client_id: appt.client_id }).select("token, expires_at").single();
+  if (error) return { ok: false, message: "Não foi possível gerar o link. A migração do banco já foi aplicada?" };
+  refresh();
+  return { ok: true, url: `${SITE_URL}/anamnese/${data.token}`, expiresAt: data.expires_at };
 }
 
 export async function setConsent(fd: FormData) {

@@ -129,7 +129,11 @@ export type Anamnesis = {
   water_intake?: string;
   previous_procedures?: string;
   goals?: string;
+  filled_by?: "equipe" | "cliente";
+  filled_at?: string;
 };
+
+export type AnamnesisLink = { token: string; expires_at: string; submitted_at: string | null; revoked_at: string | null; created_at: string };
 
 export type DayHours = { open: string; close: string; break_start: string | null; break_end: string | null } | null;
 export type BusinessHours = Record<"0" | "1" | "2" | "3" | "4" | "5" | "6", DayHours>;

@@ -17,7 +17,7 @@ import NewAppointmentForm from "@/components/painel/NewAppointmentForm";
 import SubmitButton from "@/components/painel/SubmitButton";
 import { Card, Chips, PageHeader, STATUS_STYLE } from "@/components/painel/ui";
 import { createBlock, deleteBlock, markReminderSent } from "../../actions";
-import type { AppointmentWithRefs, ClientPackage } from "@/lib/types";
+import type { AnamnesisLink, AppointmentWithRefs, ClientPackage } from "@/lib/types";
 
 export const metadata = { title: "Agenda" };
 
@@ -41,7 +41,7 @@ export default async function AgendaPage({ searchParams }: PageProps<"/painel/ag
   const to = view === "dia" ? d : addDays(monday, 6);
   const tomorrow = addDays(today, 1);
 
-  const [appts, blocks, settings, services, clientsRes, packages, tomorrowAppts, drawerAppt] = await Promise.all([
+  const [appts, blocks, settings, services, clientsRes, packages, tomorrowAppts, drawerAppt, anamnesisRes] = await Promise.all([
     appointmentsBetween(supabase, from, to),
     blocksBetween(supabase, from, to),
     getSettings(supabase),
@@ -50,6 +50,7 @@ export default async function AgendaPage({ searchParams }: PageProps<"/painel/ag
     showNew || apptId ? activePackages(supabase) : Promise.resolve([] as ClientPackage[]),
     appointmentsBetween(supabase, tomorrow, tomorrow),
     apptId ? supabase.from("appointments").select(APPT_SELECT).eq("id", apptId).maybeSingle() : Promise.resolve({ data: null }),
+    apptId ? supabase.from("anamnesis_links").select("token, expires_at, submitted_at, revoked_at, created_at").eq("appointment_id", apptId).order("created_at", { ascending: false }).limit(1).maybeSingle() : Promise.resolve({ data: null }),
   ]);
 
   let days = Array.from({ length: view === "dia" ? 1 : 7 }, (_, i) => addDays(from, i));
@@ -179,7 +180,7 @@ export default async function AgendaPage({ searchParams }: PageProps<"/painel/ag
 
       {drawerA && (
         <Drawer title="Atendimento" eyebrow={drawerA.source === "site" ? "Agendado pelo site" : "Agendado no painel"} closeHref={baseHref}>
-          <AppointmentPanel appt={drawerA} settings={settings} pkg={packages.find((p) => p.id === drawerA.client_package_id) ?? null} />
+          <AppointmentPanel appt={drawerA} settings={settings} pkg={packages.find((p) => p.id === drawerA.client_package_id) ?? null} anamnesisLink={anamnesisRes.data as AnamnesisLink | null} />
         </Drawer>
       )}
 
