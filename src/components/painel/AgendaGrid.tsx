@@ -77,7 +77,7 @@ export default function AgendaGrid({
             const list = (byDay.get(d) ?? []).filter((a) => a.status !== "cancelado");
             const isToday = d === today;
             return (
-              <Link key={d} href={hrefFor({ view: "dia", d })} scroll={false} className="px-3 py-3 border-l border-[#F5EEE3] hover:bg-[#FDFAF5] transition-colors">
+              <Link key={d} href={hrefFor({ view: "dia", d })} prefetch={false} scroll={false} className="px-3 py-3 border-l border-[#F5EEE3] hover:bg-[#FDFAF5] transition-colors">
                 <p className={`text-[10.5px] uppercase tracking-[0.18em] font-bold ${isToday ? "text-[#9A6F1E]" : "text-[#9A8B78]"}`}>{fmtWeekday(d)}</p>
                 <div className="flex items-baseline gap-2">
                   <span
@@ -136,6 +136,7 @@ export default function AgendaGrid({
                 {slots.map((t) => (
                   <Link
                     key={t}
+                    prefetch={false}
                     href={hrefFor({ novo: "1", date: d, time: toHHMM(t) })}
                     scroll={false}
                     className="absolute left-0 right-0 z-[1] group"
@@ -156,6 +157,7 @@ export default function AgendaGrid({
                   return (
                     <Link
                       key={b.id}
+                      prefetch={false}
                       href={hrefFor({ bloqueio: b.id })}
                       scroll={false}
                       className="cal-block z-[2] flex items-start gap-1"
@@ -175,6 +177,7 @@ export default function AgendaGrid({
                   return (
                     <Link
                       key={appt.id}
+                      prefetch={false}
                       href={hrefFor({ a: appt.id })}
                       scroll={false}
                       className="cal-event z-[3]"

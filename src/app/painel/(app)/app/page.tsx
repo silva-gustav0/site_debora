@@ -17,7 +17,7 @@ export default function AppPage() {
     <>
       <PageHeader eyebrow="Celular" title="App da equipe" subtitle="O painel completo no celular, em tela cheia e sempre atualizado — sem precisar reinstalar a cada mudança." />
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-5 items-start">
-        <Card title="Instalar no Android" eyebrow="Versão 1.0.0 · 1,3 MB">
+        <Card title="Instalar no Android" eyebrow="Versão 1.0.1 · 1,3 MB">
           <ol className="flex flex-col gap-3 mb-5">
             {STEPS.map((s, i) => (
               <li key={i} className="flex gap-3 text-sm text-[#4A3C30]">

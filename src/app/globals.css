@@ -372,3 +372,12 @@ details > summary::-webkit-details-marker { display: none; }
 }
 /* Dentro do app instalado não faz sentido oferecer o download dele. */
 @media (display-mode: standalone) { .hide-in-app { display: none !important; } }
+[data-app] .hide-in-app { display: none !important; }
+/* Animação da atualização do app/painel. */
+@keyframes update-pulse { 0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(232,200,130,.45); } 50% { transform: scale(1.06); box-shadow: 0 0 0 18px rgba(232,200,130,0); } }
+@keyframes update-bar { from { width: 0; } to { width: 100%; } }
+.update-pulse { animation: update-pulse 1.4s ease-in-out infinite; }
+.update-bar { animation: update-bar 1.4s ease-out forwards; }
+/* Barra de progresso da navegação no painel. */
+@keyframes nav-progress { 0% { transform: translateX(-100%); } 60% { transform: translateX(-25%); } 100% { transform: translateX(-8%); } }
+.nav-progress { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 90; background: linear-gradient(90deg,#C9973A,#F3DDA6); box-shadow: 0 0 10px rgba(232,200,130,.7); animation: nav-progress 2.5s cubic-bezier(.1,.7,.3,1) forwards; }

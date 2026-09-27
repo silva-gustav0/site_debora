@@ -12,7 +12,7 @@
   "navigationDividerColorDark": "#000000",
   "backgroundColor": "#29201A",
   "enableNotifications": false,
-  "startUrl": "/painel",
+  "startUrl": "/painel?app=2",
   "iconUrl": "https://clinica-talissa-eta.vercel.app/app/icon-512.png",
   "maskableIconUrl": "https://clinica-talissa-eta.vercel.app/app/icon-maskable-512.png",
   "splashScreenFadeOutDuration": 300,
@@ -20,8 +20,8 @@
     "path": "C:/Users/gusta/clinica-debora-android/equipe.keystore",
     "alias": "equipe"
   },
-  "appVersionName": "1.0.0",
-  "appVersionCode": 1,
+  "appVersionName": "1.0.1",
+  "appVersionCode": 2,
   "shortcuts": [],
   "generatorApp": "unknown",
   "webManifestUrl": "https://clinica-talissa-eta.vercel.app/painel.webmanifest",
@@ -43,5 +43,5 @@
   "fileHandlers": [],
   "launchHandlerClientMode": "",
   "displayOverride": [],
-  "appVersion": "1.0.0"
+  "appVersion": "1.0.1"
 }
