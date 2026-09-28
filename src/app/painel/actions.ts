@@ -295,10 +295,14 @@ export async function completeAppointment(_prev: ActionState, fd: FormData): Pro
     if (txError) return fail("Atendimento concluído, mas o pagamento não foi registrado.");
   }
 
+  // Evolução para o prontuário (a tela de atendimento envia também produtos, parâmetros e orientações).
   const note = str(fd, "record_note", 3000);
-  if (note) {
+  const record = {
+    products_used: opt(fd, "products_used", 1000), parameters: opt(fd, "parameters", 1000), next_steps: opt(fd, "next_steps", 1000),
+  };
+  if (note || record.products_used || record.parameters || record.next_steps) {
     await supabase.from("session_records").insert({
-      client_id: appt.client_id, appointment_id: appt.id, procedure: serviceName, observations: note,
+      client_id: appt.client_id, appointment_id: appt.id, procedure: serviceName, observations: note || null, ...record,
     });
   }
 

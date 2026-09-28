@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BellRing, CalendarClock, CheckCircle2, Clock, MessageCircle, Package, UserRound, XCircle } from "lucide-react";
+import { BellRing, CalendarClock, CheckCircle2, Clock, MessageCircle, Package, Play, UserRound, XCircle } from "lucide-react";
 import ActionForm from "./ActionForm";
 import AnamnesisLinkButton from "./AnamnesisLinkButton";
 import SubmitButton from "./SubmitButton";
@@ -81,6 +81,12 @@ export default function AppointmentPanel({
         {appt.cancel_reason && <p className="col-span-2 text-xs text-[#9B2C2C]">Motivo: {appt.cancel_reason}</p>}
       </div>
       {appt.notes && <p className="text-sm rounded-xl bg-white border border-[#F3ECE0] px-4 py-3 text-[#6B5A4B]">“{appt.notes}”</p>}
+
+      {open && (
+        <Link href={`/painel/atendimento/${appt.id}`} prefetch className="p-btn p-btn-gold h-14 text-[15px] justify-center">
+          <Play size={17} /> Iniciar atendimento
+        </Link>
+      )}
 
       {/* Mensagens */}
       {client?.phone && (

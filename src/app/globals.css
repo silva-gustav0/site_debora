@@ -401,3 +401,62 @@ details > summary::-webkit-details-marker { display: none; }
 .rail-link { display: flex; flex-direction: column; align-items: center; gap: 3px; width: 64px; padding: 8px 0; margin: 1px 0; border-radius: 12px; font-size: 9.5px; line-height: 1.1; text-align: center; }
 .panel-sidebar .rail-link[aria-current="page"] { background: linear-gradient(180deg, rgba(232,200,130,.2), rgba(232,200,130,.06)); color: #fff; box-shadow: inset 0 0 0 1px rgba(232,200,130,.25); }
 @media (prefers-reduced-motion: reduce) { .panel-root *, .panel-root *::before, .panel-root *::after { animation-duration: .01ms !important; animation-delay: 0s !important; transition-duration: .01ms !important; } }
+/* Aviso fixo de promoção no site. */
+@keyframes promo-notice-in { from { opacity: 0; transform: translateY(24px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes promo-notice-glow { 0%, 100% { box-shadow: 0 0 0 0 rgba(232,200,130,.45); } 50% { box-shadow: 0 0 0 7px rgba(232,200,130,0); } }
+.promo-notice { animation: promo-notice-in .55s cubic-bezier(.2,.8,.2,1) both; }
+.promo-notice-icon { animation: promo-notice-glow 2.4s ease-in-out .8s 3; }
+@media (prefers-reduced-motion: reduce) { .promo-notice, .promo-notice-icon { animation: none; } }
+/* Tela de atendimento: cenas em traço animadas por procedimento (só transform/opacity/stroke). */
+.att-line { fill: none; stroke: var(--glow); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.att-fill { fill: var(--glow); stroke: none; }
+.att-bubble, .att-pulse { transform-box: fill-box; transform-origin: center; }
+@keyframes att-steam { 0% { opacity: 0; transform: translateY(0); } 40% { opacity: .85; } 100% { opacity: 0; transform: translateY(-46px); } }
+.att-steam { stroke-dasharray: 90; animation: att-steam 3.2s ease-out infinite; }
+@keyframes att-bubble { 0%, 100% { opacity: .25; transform: translateY(0) scale(.7); } 50% { opacity: .9; transform: translateY(-12px) scale(1.1); } }
+.att-bubble { animation: att-bubble 4s ease-in-out infinite; }
+@keyframes att-layer { from { transform: translateX(-10px); opacity: 0; } 20% { opacity: .7; } 80% { opacity: .7; } to { transform: translateX(190px); opacity: 0; } }
+.att-layer { stroke-width: 10; stroke-opacity: .28; animation: att-layer 4s cubic-bezier(.45,0,.55,1) infinite; }
+@keyframes att-pulse { 0%, 100% { opacity: .25; transform: scale(.5); } 50% { opacity: 1; transform: scale(1.35); } }
+.att-pulse { animation: att-pulse 1.6s ease-in-out infinite; }
+@keyframes att-pen { 0% { transform: translate(78px,150px); } 25% { transform: translate(98px,126px); } 50% { transform: translate(150px,150px); } 75% { transform: translate(164px,126px); } 100% { transform: translate(78px,150px); } }
+.att-pen { animation: att-pen 7s ease-in-out infinite; }
+@keyframes att-fade { 0%, 100% { opacity: .75; } 50% { opacity: .08; } }
+.att-fade { fill-opacity: .55; animation: att-fade 6s ease-in-out infinite; }
+@keyframes att-sheen { from { transform: translateX(-30px); } to { transform: translateX(170px); } }
+.att-sheen { fill: var(--glow); opacity: .16; animation: att-sheen 3.6s ease-in-out infinite; }
+@keyframes att-lift { from { stroke-dashoffset: 70; opacity: 0; } 50% { opacity: 1; } to { stroke-dashoffset: -70; opacity: 0; } }
+.att-lift { stroke-dasharray: 70; animation: att-lift 3s ease-in-out infinite; }
+@keyframes att-twinkle { 0%, 100% { opacity: 0; transform: scale(.2) rotate(0); } 50% { opacity: 1; transform: scale(1) rotate(45deg); } }
+.att-twinkle { opacity: 0; animation: att-twinkle 2.6s ease-in-out infinite; }
+@keyframes att-knead { 0%, 100% { transform: translate(0,0); } 25% { transform: translate(9px,-11px); } 50% { transform: translate(0,-22px); } 75% { transform: translate(-9px,-11px); } }
+.att-knead { animation: att-knead 3.2s ease-in-out infinite; }
+.att-knead-b { animation-delay: -1.6s; }
+.att-hand { stroke-width: 2; }
+@keyframes att-flow { to { stroke-dashoffset: -200; } }
+.att-flow { fill: none; stroke: var(--glow); stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 6 16; opacity: .8; animation: att-flow 3.4s linear infinite; }
+@keyframes att-glide { 0% { transform: translate(120px,214px); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translate(120px,52px); opacity: 0; } }
+.att-glide { animation: att-glide 5s ease-in-out infinite; }
+@keyframes att-strip { 0%, 10% { transform: translateY(0) rotate(0); opacity: 0; } 22%, 58% { opacity: 1; transform: translateY(0) rotate(0); } 78% { transform: translate(-18px,-34px) rotate(-38deg); opacity: 0; } 100% { opacity: 0; } }
+.att-strip { transform-origin: 96px 73px; animation: att-strip 4.2s ease-in-out infinite; }
+.att-strip-fill { fill: var(--glow); fill-opacity: .22; }
+@keyframes att-wave { from { transform: translateX(-14px); } to { transform: translateX(14px); } }
+.att-wave { animation: att-wave 2.6s ease-in-out infinite alternate; }
+@keyframes att-breathe { from { transform: translate(-50%,-50%) scale(.82); opacity: .35; } to { transform: translate(-50%,-50%) scale(1.04); opacity: .7; } }
+.att-breathe { background: radial-gradient(circle, color-mix(in srgb, var(--glow) 22%, transparent) 0%, transparent 62%); animation: att-breathe 4s ease-in-out infinite alternate; }
+@keyframes att-rise { from { transform: translateY(0) rotate(0); opacity: 0; } 12% { opacity: .55; } 85% { opacity: .35; } to { transform: translateY(-112vh) translateX(30px) rotate(200deg); opacity: 0; } }
+.att-particle { position: absolute; bottom: -24px; animation: att-rise linear infinite; }
+.att-p-bubble { border: 1.5px solid var(--glow); border-radius: 50%; }
+.att-p-petal { background: var(--glow); opacity: .5; border-radius: 0 100% 0 100%; }
+.att-p-dot { background: var(--glow); border-radius: 50%; }
+.att-p-spark { background: var(--glow); transform: rotate(45deg); border-radius: 2px; }
+.att-p-wave { height: 14px !important; border-top: 1.5px solid var(--glow); border-radius: 50% 50% 0 0; animation-name: att-rise-flat; }
+@keyframes att-rise-flat { from { transform: translateY(0); opacity: 0; } 12% { opacity: .5; } 85% { opacity: .3; } to { transform: translateY(-112vh) translateX(-20px); opacity: 0; } }
+.att-root a, .att-root button { -webkit-tap-highlight-color: transparent; }
+@keyframes att-done { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+.att-overtime { animation: att-done 1.2s ease-in-out infinite; }
+.att-chip { transition: transform .12s ease, background .15s, color .15s, border-color .15s; }
+.att-chip:active { transform: scale(.94); }
+@keyframes att-sheet { from { transform: translateY(100%); } to { transform: none; } }
+.att-sheet { animation: att-sheet .32s cubic-bezier(.2,.8,.2,1) both; }
+@media (prefers-reduced-motion: reduce) { .att-root *, .att-root *::before { animation: none !important; } }
