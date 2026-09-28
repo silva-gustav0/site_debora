@@ -45,6 +45,9 @@ const GROUPS = [
   },
 ];
 
+// Telas mais usadas: ficam pré-carregadas com os dados (o tempo real as atualiza quando o banco muda).
+const WARM = new Set(["/painel", "/painel/agenda", "/painel/clientes", "/painel/crm", "/painel/financeiro"]);
+
 export type SidebarBadges = { agenda: number; estoque: number; financeiro: number };
 
 export default function Sidebar({ name, badges }: { name: string; badges: SidebarBadges }) {
@@ -92,6 +95,7 @@ export default function Sidebar({ name, badges }: { name: string; badges: Sideba
                   <Link
                     key={href}
                     href={href}
+                    prefetch={WARM.has(href) ? true : undefined}
                     onClick={() => setOpen(false)}
                     aria-current={isActive(href) ? "page" : undefined}
                     className="nav-link flex items-center gap-3 rounded-lg px-3 py-2 text-[13.5px] transition-colors"
@@ -145,7 +149,23 @@ export default function Sidebar({ name, badges }: { name: string; badges: Sideba
     <>
       <aside className="panel-sidebar no-print hidden lg:flex fixed inset-y-0 left-0 w-64 flex-col px-3 py-6 z-30">{content()}</aside>
 
-      <header className="panel-sidebar no-print lg:hidden sticky top-0 z-40 flex items-center justify-between px-4 h-14">
+      <nav className="panel-sidebar no-print hidden md:flex lg:hidden fixed inset-y-0 left-0 w-[76px] flex-col items-center py-3 z-30 overflow-y-auto" aria-label="Painel">
+        <Link href="/painel" prefetch className="w-10 h-10 mb-2 flex-shrink-0 rounded-full flex items-center justify-center p-display text-xl text-[#29201A]" style={{ background: "linear-gradient(135deg,#F3DDA6,#C9973A)" }} aria-label="Início">D</Link>
+        <Link href="/painel/clientes" className="nav-link rail-link" aria-label="Buscar cliente"><Search size={19} strokeWidth={1.8} /><span>Buscar</span></Link>
+        {GROUPS.flatMap((g) => g.items).map(({ href, label, icon: Icon }) => (
+          <Link key={href} href={href} prefetch={WARM.has(href) ? true : undefined} aria-current={isActive(href) ? "page" : undefined} className="nav-link rail-link relative">
+            <Icon size={19} strokeWidth={1.8} />
+            <span>{label.split(" ")[0]}</span>
+            {badgeFor(href) > 0 && <span className="absolute top-1 right-2 rounded-full px-1 min-w-4 text-center text-[9.5px] font-bold text-[#29201A]" style={{ background: "#E8C882" }}>{badgeFor(href)}</span>}
+          </Link>
+        ))}
+        <div className="mt-auto pt-2 flex flex-col items-center gap-1 border-t border-white/10 w-full">
+          <Link href="/painel/app" className="nav-link rail-link hide-in-app" aria-label="Baixar app Android"><Smartphone size={19} strokeWidth={1.8} /><span>App</span></Link>
+          <form action={logout}><button className="nav-link rail-link" aria-label="Sair"><LogOut size={19} strokeWidth={1.8} /><span>Sair</span></button></form>
+        </div>
+      </nav>
+
+      <header className="panel-sidebar no-print md:hidden sticky top-0 z-40 flex items-center justify-between px-4 h-14">
         <Link href="/painel" className="p-display text-xl text-white">Débora Silva</Link>
         <button onClick={() => setOpen(true)} aria-label="Abrir menu" className="p-2 text-white relative">
           <Menu size={22} />
@@ -153,9 +173,9 @@ export default function Sidebar({ name, badges }: { name: string; badges: Sideba
         </button>
       </header>
       {open && (
-        <div className="lg:hidden fixed inset-0 z-50 flex">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setOpen(false)} />
-          <div className="panel-sidebar relative w-72 max-w-[85%] h-full px-3 py-5 flex flex-col">
+        <div className="md:hidden fixed inset-0 z-50 flex">
+          <div className="absolute inset-0 bg-black/40 fade-in" onClick={() => setOpen(false)} />
+          <div className="panel-sidebar relative w-72 max-w-[85%] h-full px-3 py-5 flex flex-col drawer-in">
             <button onClick={() => setOpen(false)} aria-label="Fechar menu" className="absolute top-4 right-3 p-2 text-white/70">
               <X size={20} />
             </button>

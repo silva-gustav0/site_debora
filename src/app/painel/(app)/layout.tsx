@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import LiveSync from "@/components/painel/LiveSync";
 import NavProgress from "@/components/painel/NavProgress";
 import Sidebar from "@/components/painel/Sidebar";
 import UpdateBanner from "@/components/painel/UpdateBanner";
@@ -29,10 +30,11 @@ export default async function PanelLayout({ children }: { children: React.ReactN
     <div className="panel-root">
       <Suspense><NavProgress /></Suspense>
       <Sidebar name={staff.name} badges={{ agenda: pending.count ?? 0, estoque: lowStock, financeiro: bills.count ?? 0 }} />
-      <main className="lg:pl-64">
+      <main className="md:pl-[76px] lg:pl-64">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10 py-6 lg:py-9">{children}</div>
       </main>
       <UpdateBanner version={WEB_VERSION} />
+      <LiveSync />
     </div>
   );
 }

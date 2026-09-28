@@ -12,13 +12,13 @@ const supabaseHost = (() => {
 const nextConfig: NextConfig = {
   // O APK do app da equipe baixa como arquivo instalável no Android.
   async headers() {
-    return [{ source: "/app/debora-equipe.apk", headers: [{ key: "Content-Type", value: "application/vnd.android.package-archive" }, { key: "Content-Disposition", value: "attachment" }] }];
+    return [{ source: "/sw.js", headers: [{ key: "Cache-Control", value: "no-cache" }] }, { source: "/app/debora-equipe.apk", headers: [{ key: "Content-Type", value: "application/vnd.android.package-archive" }, { key: "Content-Disposition", value: "attachment" }] }];
   },
   experimental: {
     // Fotos do prontuário são comprimidas no navegador; o limite da Vercel é 4,5 MB.
     serverActions: { bodySizeLimit: "4mb" },
-    // Telas do painel visitadas há menos de 30 s reabrem na hora (salvar algo limpa esse cache).
-    staleTimes: { dynamic: 30 },
+    // Telas do painel ficam guardadas no app por 5 min; o tempo real (LiveSync) limpa tudo quando o banco muda.
+    staleTimes: { dynamic: 300, static: 300 },
   },
   images: {
     remotePatterns: [

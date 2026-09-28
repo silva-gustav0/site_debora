@@ -33,6 +33,12 @@ function dbError(code: string | undefined, fallback: string) {
   return fallback;
 }
 
+/** Chamada pelo painel quando o banco avisa de uma mudança: limpa as telas guardadas e redesenha a atual. */
+export async function syncPanel() {
+  await requireStaff();
+  refresh();
+}
+
 // ─── Clientes ──────────────────────────────────────────────────────────
 function clientFields(fd: FormData) {
   const phone = digits(str(fd, "phone", 30)).slice(0, 13);
