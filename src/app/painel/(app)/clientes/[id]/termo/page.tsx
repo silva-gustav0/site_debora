@@ -6,10 +6,23 @@ import { getSettings } from "@/lib/settings";
 import { fmtDate, formatPhone, todaySP } from "@/lib/format";
 import PrintButton from "@/components/painel/PrintButton";
 import type { ClientRow } from "@/lib/types";
+import { formOrDefault, consentOrDefault, allQuestions, formatAnswer, fillConsent, RESERVED_KEYS, DEFAULT_ANAMNESIS_FORM } from "@/lib/anamnesis-schema";
 
 export const metadata = { title: "Ficha e termo" };
 
-const yes = (v?: boolean) => (v ? "Sim" : "Não");
+/** Verdadeiro se o valor não tem nada útil pra mostrar. */
+const isEmptyValue = (v: unknown) =>
+  v === undefined || v === null || v === "" || v === false || (Array.isArray(v) && v.length === 0);
+
+const DEFAULT_QUESTIONS = new Map(allQuestions(DEFAULT_ANAMNESIS_FORM).map((q) => [q.id, q]));
+
+/** Rótulo de uma resposta antiga (sem pergunta no modelo atual): o da ficha original, ou a chave legível. */
+const readableLabel = (key: string) => {
+  const known = DEFAULT_QUESTIONS.get(key)?.label;
+  if (known) return known;
+  const s = key.replace(/_/g, " ");
+  return s.charAt(0).toUpperCase() + s.slice(1);
+};
 
 function Row({ label, value }: { label: string; value?: string | null }) {
   return (
@@ -30,7 +43,14 @@ export default async function ConsentPage({ params }: PageProps<"/painel/cliente
   ]);
   const c = data as ClientRow | null;
   if (!c) notFound();
-  const a = c.anamnesis ?? {};
+  const a = (c.anamnesis ?? {}) as Record<string, unknown>;
+
+  const form = formOrDefault(settings.anamnesis_form);
+  const knownIds = new Set(allQuestions(form).map((q) => q.id));
+  const extraAnswers = Object.entries(a).filter(([k, v]) => !RESERVED_KEYS.has(k) && !knownIds.has(k) && !isEmptyValue(v));
+
+  const consentParagraphs = fillConsent(consentOrDefault(settings.consent_text), { clinica: settings.clinic_name, nome: c.name })
+    .split(/\n\s*\n/);
 
   return (
     <>
@@ -59,37 +79,33 @@ export default async function ConsentPage({ params }: PageProps<"/painel/cliente
           <Row label="Profissão" value={c.occupation} />
         </section>
 
-        <section className="mb-6">
-          <h2 className="p-eyebrow mb-2">Avaliação</h2>
-          <Row label="Fototipo" value={a.fitzpatrick} />
-          <Row label="Tipo de pele" value={a.skin_type} />
-          <Row label="Queixas" value={a.concerns?.join(", ")} />
-          <Row label="Condições de saúde" value={a.conditions?.join(", ")} />
-          <Row label="Medicamentos" value={a.medications} />
-          <Row label="Alergias" value={a.allergies_detail ?? c.allergies} />
-          <Row label="Gestante / amamentando" value={`${yes(a.pregnant)} / ${yes(a.breastfeeding)}`} />
-          <Row label="Usa ácidos / retinoides" value={yes(a.uses_acids)} />
-          <Row label="Protetor solar / fumante" value={`${yes(a.sunscreen)} / ${yes(a.smoker)}`} />
-          <Row label="Exposição solar" value={a.sun_exposure} />
-          <Row label="Procedimentos anteriores" value={a.previous_procedures} />
-          <Row label="Objetivos" value={a.goals} />
-        </section>
+        {form.sections.map((section) => (
+          <section key={section.id} className="mb-6">
+            <h2 className="p-eyebrow mb-2">{section.title}</h2>
+            {section.questions.map((q) => (
+              <Row
+                key={q.id}
+                label={q.label}
+                value={q.id === "allergies_detail" ? formatAnswer(q, a[q.id]) || c.allergies : formatAnswer(q, a[q.id])}
+              />
+            ))}
+          </section>
+        ))}
+
+        {extraAnswers.length > 0 && (
+          <section className="mb-6">
+            <h2 className="p-eyebrow mb-2">Respostas anteriores</h2>
+            {extraAnswers.map(([k, v]) => (
+              <Row key={k} label={readableLabel(k)} value={formatAnswer(DEFAULT_QUESTIONS.get(k) ?? { type: typeof v === "boolean" ? "yes_no" : "text" }, v)} />
+            ))}
+          </section>
+        )}
 
         <section className="mb-8 text-[13px] leading-6 text-justify">
           <h2 className="p-eyebrow mb-2">Termo de consentimento</h2>
-          <p className="mb-2">
-            Declaro que as informações acima são verdadeiras e que fui informada sobre os procedimentos estéticos a serem realizados,
-            seus objetivos, cuidados pré e pós-procedimento, possíveis reações e contraindicações. Comprometo-me a informar qualquer
-            alteração no meu estado de saúde e a seguir as orientações recebidas.
-          </p>
-          <p className="mb-2">
-            Estou ciente de que os resultados variam de pessoa para pessoa e dependem da continuidade do tratamento e dos cuidados em casa.
-          </p>
-          <p>
-            Autorizo o registro fotográfico para acompanhamento da evolução do tratamento, com armazenamento sigiloso, conforme a
-            Lei Geral de Proteção de Dados (Lei nº 13.709/2018). O uso das imagens em divulgação depende de autorização específica:
-            ( ) autorizo &nbsp; ( ) não autorizo.
-          </p>
+          {consentParagraphs.map((paragraph, i) => (
+            <p key={i} className="mb-2 whitespace-pre-line">{paragraph}</p>
+          ))}
         </section>
 
         <footer className="grid grid-cols-2 gap-10 mt-14 text-center text-[12px]">

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { requireStaff } from "@/lib/dal";
 import { addDays, digits, SITE_URL, todaySP } from "@/lib/format";
 import { anamnesisUpdate } from "@/lib/anamnesis";
+import { DEFAULT_CONSENT, formOrDefault, sanitizeForm, type AnamnesisFormDef } from "@/lib/anamnesis-schema";
 import { bool, fail, int, isDate, isTime, isUuid, money, opt, str } from "@/lib/form";
 import { toTimestamp } from "@/lib/hours";
 import { cardFee, getSettings } from "@/lib/settings";
@@ -84,7 +85,13 @@ export async function updateClientAction(_prev: ActionState, fd: FormData): Prom
 
 export async function saveAnamnesis(_prev: ActionState, fd: FormData): Promise<ActionState> {
   const { supabase } = await requireStaff();
-  const { error } = await supabase.from("clients").update(anamnesisUpdate(fd, "equipe")).eq("id", str(fd, "id"));
+  const id = str(fd, "id");
+  const [settings, { data: prev }] = await Promise.all([
+    getSettings(supabase),
+    supabase.from("clients").select("anamnesis").eq("id", id).maybeSingle(),
+  ]);
+  const { error } = await supabase.from("clients")
+    .update(anamnesisUpdate(fd, "equipe", formOrDefault(settings.anamnesis_form), prev?.anamnesis ?? null)).eq("id", id);
   if (error) return fail("Não foi possível salvar a anamnese.");
   return done("Anamnese salva.");
 }
@@ -690,6 +697,25 @@ export async function saveSettings(_prev: ActionState, fd: FormData): Promise<Ac
   if (error) return fail("Não foi possível salvar as configurações.");
   revalidatePath("/", "page");
   return done("Configurações salvas.");
+}
+
+/** Salva o modelo da ficha de anamnese e o texto do termo ("padrao" volta ao modelo original). */
+export async function saveAnamnesisModel(_prev: ActionState, fd: FormData): Promise<ActionState> {
+  const { supabase } = await requireStaff();
+  const reset = str(fd, "reset") === "1";
+  let form: AnamnesisFormDef | null = null;
+  if (!reset) {
+    try { form = sanitizeForm(JSON.parse(str(fd, "form", 200_000))); } catch { form = null; }
+    if (!form) return fail("A ficha precisa de pelo menos uma pergunta com nome (e opções, quando for de escolha).");
+  }
+  const consent = reset ? "" : str(fd, "consent", 8000);
+  const { error } = await supabase.from("settings").update({
+    anamnesis_form: reset ? null : form,
+    consent_text: consent && consent !== DEFAULT_CONSENT ? consent : null,
+    updated_at: new Date().toISOString(),
+  }).eq("id", 1);
+  if (error) return fail("Não foi possível salvar a ficha.");
+  return done(reset ? "Ficha e termo voltaram ao modelo original." : "Ficha e termo salvos. As próximas fichas já usam este modelo.");
 }
 
 export async function saveTemplates(_prev: ActionState, fd: FormData): Promise<ActionState> {

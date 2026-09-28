@@ -1,121 +1,86 @@
 import ActionForm from "./ActionForm";
 import SubmitButton from "./SubmitButton";
 import { saveAnamnesis } from "@/app/painel/actions";
+import { matchOption, type AnamnesisFormDef, type AnamnesisQuestion } from "@/lib/anamnesis-schema";
 import type { ActionState, Anamnesis } from "@/lib/types";
 
-export const FITZPATRICK = [
-  { v: "I", l: "I · Muito clara, sempre queima" },
-  { v: "II", l: "II · Clara, queima fácil" },
-  { v: "III", l: "III · Morena clara" },
-  { v: "IV", l: "IV · Morena moderada" },
-  { v: "V", l: "V · Morena escura" },
-  { v: "VI", l: "VI · Negra" },
-];
-export const SKIN_TYPES = ["Normal", "Seca", "Oleosa", "Mista", "Sensível", "Acneica"];
-export const CONCERNS = [
-  "Acne", "Manchas / melasma", "Linhas de expressão", "Flacidez", "Poros dilatados", "Olheiras", "Rosácea",
-  "Oleosidade", "Desidratação", "Celulite", "Gordura localizada", "Retenção de líquido", "Estrias", "Tensão muscular", "Estresse",
-];
-export const CONDITIONS = [
-  "Hipertensão", "Diabetes", "Problemas cardíacos", "Marca-passo", "Epilepsia", "Trombose / varizes", "Câncer (atual ou histórico)",
-  "Problemas de tireoide", "Herpes", "Queloide", "Doença autoimune", "Implante metálico", "Cirurgia recente", "Problemas renais",
-];
-
-function Check({ name, label, checked }: { name: string; label: string; checked?: boolean }) {
-  return (
-    <label className="flex items-center gap-2 text-sm text-[#2B221B] rounded-lg px-2.5 py-1.5 border border-[#F0E8DB] bg-white has-[:checked]:bg-[#FAF3E6] has-[:checked]:border-[#E3CFA0]">
-      <input type="checkbox" name={name} defaultChecked={checked} className="accent-[#82590F]" /> {label}
+function YesNo({ q, value }: { q: AnamnesisQuestion; value: unknown }) {
+  const opt = (v: "sim" | "nao", label: string, checked: boolean) => (
+    <label className="text-[13px] rounded-full px-3.5 py-1 border border-[#EAE0D0] bg-white cursor-pointer has-[:checked]:bg-[#2B221B] has-[:checked]:text-white has-[:checked]:border-[#2B221B] transition-colors">
+      <input type="radio" name={`q_${q.id}`} value={v} defaultChecked={checked} className="sr-only" /> {label}
     </label>
   );
-}
-
-function Multi({ name, label, options, values }: { name: string; label: string; options: string[]; values?: string[] }) {
   return (
-    <fieldset>
-      <legend className="p-label">{label}</legend>
-      <div className="flex flex-wrap gap-1.5">
-        {options.map((o) => (
-          <label key={o} className="text-[13px] rounded-full px-3 py-1 border border-[#EAE0D0] bg-white cursor-pointer has-[:checked]:bg-[#2B221B] has-[:checked]:text-white has-[:checked]:border-[#2B221B] transition-colors">
-            <input type="checkbox" name={name} value={o} defaultChecked={values?.includes(o)} className="sr-only" /> {o}
-          </label>
-        ))}
-      </div>
+    <fieldset className="flex items-center justify-between gap-3 rounded-lg px-3 py-2 border border-[#F0E8DB] bg-white">
+      <legend className="sr-only">{q.label}</legend>
+      <span aria-hidden className="text-sm text-[#2B221B]">{q.label}</span>
+      <span className="flex gap-1.5 flex-shrink-0">{opt("sim", "Sim", value === true)}{opt("nao", "Não", value === false)}</span>
     </fieldset>
   );
 }
 
-/** Ficha de anamnese estruturada para estética facial e corporal (painel ou link enviado ao cliente). */
-export default function AnamnesisForm({ a, hidden, action = saveAnamnesis, submitLabel = "Salvar anamnese" }: {
-  a: Anamnesis; hidden: Record<string, string>; action?: (prev: ActionState, fd: FormData) => Promise<ActionState>; submitLabel?: string;
+function Question({ q, value }: { q: AnamnesisQuestion; value: unknown }) {
+  const name = `q_${q.id}`;
+  switch (q.type) {
+    case "yes_no":
+      return <YesNo q={q} value={value} />;
+    case "multi":
+      return (
+        <fieldset className="sm:col-span-2">
+          <legend className="p-label">{q.label}</legend>
+          <div className="flex flex-wrap gap-1.5">
+            {q.options?.map((o) => (
+              <label key={o} className="text-[13px] rounded-full px-3 py-1 border border-[#EAE0D0] bg-white cursor-pointer has-[:checked]:bg-[#2B221B] has-[:checked]:text-white has-[:checked]:border-[#2B221B] transition-colors">
+                <input type="checkbox" name={name} value={o} defaultChecked={Array.isArray(value) && value.includes(o)} className="sr-only" /> {o}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      );
+    case "choice":
+      return (
+        <label>
+          <span className="p-label">{q.label}</span>
+          <select name={name} defaultValue={matchOption(q.options, value)} className="p-input">
+            <option value="">—</option>
+            {q.options?.map((o) => <option key={o} value={o}>{o}</option>)}
+          </select>
+        </label>
+      );
+    case "text":
+      return (
+        <label>
+          <span className="p-label">{q.label}</span>
+          <input name={name} maxLength={300} defaultValue={typeof value === "string" ? value : ""} placeholder={q.placeholder} className="p-input" />
+        </label>
+      );
+    case "long_text":
+      return (
+        <label className="sm:col-span-2">
+          <span className="p-label">{q.label}</span>
+          <textarea name={name} rows={2} maxLength={1500} defaultValue={typeof value === "string" ? value : ""} placeholder={q.placeholder} className="p-input resize-y" />
+        </label>
+      );
+  }
+}
+
+/** Ficha de anamnese montada a partir do modelo editável (painel ou link enviado ao cliente). */
+export default function AnamnesisForm({ a, form, hidden, action = saveAnamnesis, submitLabel = "Salvar anamnese" }: {
+  a: Anamnesis; form: AnamnesisFormDef; hidden: Record<string, string>;
+  action?: (prev: ActionState, fd: FormData) => Promise<ActionState>; submitLabel?: string;
 }) {
+  const answers = a as Record<string, unknown>;
   return (
-    <ActionForm action={action} className="flex flex-col gap-6">
+    <ActionForm action={action} className="flex flex-col gap-7">
       {Object.entries(hidden).map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)}
-
-      <div className="grid sm:grid-cols-2 gap-4">
-        <label>
-          <span className="p-label">Fototipo (Fitzpatrick)</span>
-          <select name="fitzpatrick" defaultValue={a.fitzpatrick ?? ""} className="p-input">
-            <option value="">—</option>
-            {FITZPATRICK.map((f) => <option key={f.v} value={f.v}>{f.l}</option>)}
-          </select>
-        </label>
-        <label>
-          <span className="p-label">Tipo de pele</span>
-          <select name="skin_type" defaultValue={a.skin_type ?? ""} className="p-input">
-            <option value="">—</option>
-            {SKIN_TYPES.map((s) => <option key={s} value={s}>{s}</option>)}
-          </select>
-        </label>
-      </div>
-
-      <Multi name="concerns" label="Queixas principais" options={CONCERNS} values={a.concerns} />
-      <Multi name="conditions" label="Condições de saúde" options={CONDITIONS} values={a.conditions} />
-
-      <fieldset>
-        <legend className="p-label">Contraindicações e hábitos</legend>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          <Check name="pregnant" label="Gestante" checked={a.pregnant} />
-          <Check name="breastfeeding" label="Amamentando" checked={a.breastfeeding} />
-          <Check name="uses_acids" label="Usa ácidos / retinoides" checked={a.uses_acids} />
-          <Check name="sunscreen" label="Usa protetor solar" checked={a.sunscreen} />
-          <Check name="smoker" label="Fumante" checked={a.smoker} />
-        </div>
-      </fieldset>
-
-      <div className="grid sm:grid-cols-2 gap-4">
-        <label>
-          <span className="p-label">Exposição ao sol</span>
-          <select name="sun_exposure" defaultValue={a.sun_exposure ?? ""} className="p-input">
-            <option value="">—</option>
-            <option>Baixa</option><option>Moderada</option><option>Alta</option>
-          </select>
-        </label>
-        <label>
-          <span className="p-label">Ingestão de água</span>
-          <select name="water_intake" defaultValue={a.water_intake ?? ""} className="p-input">
-            <option value="">—</option>
-            <option>Menos de 1 L/dia</option><option>1 a 2 L/dia</option><option>Mais de 2 L/dia</option>
-          </select>
-        </label>
-        <label className="sm:col-span-2">
-          <span className="p-label">Alergias (produtos, ativos, medicamentos)</span>
-          <textarea name="allergies_detail" rows={2} defaultValue={a.allergies_detail ?? ""} className="p-input resize-y" />
-        </label>
-        <label className="sm:col-span-2">
-          <span className="p-label">Medicamentos em uso</span>
-          <textarea name="medications" rows={2} defaultValue={a.medications ?? ""} className="p-input resize-y" />
-        </label>
-        <label className="sm:col-span-2">
-          <span className="p-label">Procedimentos estéticos anteriores</span>
-          <textarea name="previous_procedures" rows={2} defaultValue={a.previous_procedures ?? ""} placeholder="Peelings, laser, toxina, preenchimentos, cirurgias…" className="p-input resize-y" />
-        </label>
-        <label className="sm:col-span-2">
-          <span className="p-label">Objetivos do cliente</span>
-          <textarea name="goals" rows={2} defaultValue={a.goals ?? ""} className="p-input resize-y" />
-        </label>
-      </div>
-
+      {form.sections.map((s) => (
+        <section key={s.id}>
+          <h3 className="p-display text-xl text-[#2B221B] mb-3 pb-1.5 border-b border-[#F0E8DB]">{s.title}</h3>
+          <div className="grid sm:grid-cols-2 gap-x-4 gap-y-3">
+            {s.questions.map((q) => <Question key={q.id} q={q} value={answers[q.id]} />)}
+          </div>
+        </section>
+      ))}
       <div><SubmitButton pendingText="Enviando…">{submitLabel}</SubmitButton></div>
     </ActionForm>
   );

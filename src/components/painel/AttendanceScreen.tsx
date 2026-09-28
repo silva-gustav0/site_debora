@@ -3,7 +3,7 @@
 import { startTransition, useActionState, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AlertTriangle, ArrowLeft, Check, CheckCircle2, History, NotebookPen, Pause, Play, Plus, X } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Check, CheckCircle2, ChevronDown, History, NotebookPen, Pause, Play, Plus, X } from "lucide-react";
 import AttendanceScene, { AttendanceAmbient } from "./AttendanceScene";
 import { completeAppointment } from "@/app/painel/actions";
 import { firstName, fmtDate, METHOD_LABEL } from "@/lib/format";
@@ -71,6 +71,8 @@ export default function AttendanceScreen({ appointment, client, serviceName, min
   const clockKey = `atendimento:${id}`;
   const [clock, setClock] = useStored<Clock>(clockKey);
   const [notes, setNotes] = useStored<Notes>(`atendimento-notas:${id}`);
+  const [min, setMin] = useStored<boolean>("atendimento-observacoes-minimizado");
+  const minimized = min === true;
   const [now, setNow] = useState(0);
   const [tab, setTab] = useState(0);
   const [finishing, setFinishing] = useState(false);
@@ -157,7 +159,9 @@ export default function AttendanceScreen({ appointment, client, serviceName, min
 
   return (
     <div
-      className="att-root fixed inset-0 grid grid-rows-[minmax(0,1fr)_minmax(0,42%)] lg:grid-rows-1 lg:grid-cols-[minmax(0,1fr)_minmax(360px,32%)] text-white overflow-hidden"
+      className={`att-root fixed inset-0 grid text-white overflow-hidden ${
+        minimized ? "grid-rows-1 lg:grid-cols-1" : "grid-rows-[minmax(0,1fr)_minmax(0,42%)] lg:grid-rows-1 lg:grid-cols-[minmax(0,1fr)_minmax(360px,32%)]"
+      }`}
       style={{ background: `radial-gradient(120% 90% at 30% 20%, ${theme.to} 0%, ${theme.from} 70%)`, ["--glow" as string]: theme.glow }}
     >
       {/* Palco: cena animada + cronômetro */}
@@ -219,11 +223,29 @@ export default function AttendanceScreen({ appointment, client, serviceName, min
       </section>
 
       {/* Anotações */}
+      {minimized ? (
+        <button
+          onClick={() => setMin(null)}
+          aria-label="Abrir observações"
+          className="att-chip fade-in fixed bottom-5 right-5 z-20 flex items-center gap-2 h-12 pl-4 pr-4 rounded-full bg-[#FBF7F0] text-[#2B221B] shadow-[0_10px_30px_rgba(0,0,0,.35)]"
+        >
+          <NotebookPen size={18} className="text-[#9A6F1E]" />
+          <span className="text-[14px] font-medium">Observações</span>
+          {noteCount > 0 && <span className="text-[11px] rounded-full px-2 py-0.5 bg-[#2B221B] text-[#F3DDA6]">{noteCount}</span>}
+        </button>
+      ) : (
       <aside className="relative z-10 min-h-0 flex flex-col bg-[#FBF7F0] text-[#2B221B] rounded-t-3xl lg:rounded-none lg:rounded-l-3xl shadow-[0_-10px_40px_rgba(0,0,0,.25)]">
         <div className="px-5 pt-4 pb-2 flex items-center gap-2">
           <NotebookPen size={17} className="text-[#9A6F1E]" />
           <h2 className="p-display text-2xl flex-1">Observações</h2>
           {noteCount > 0 && <span className="text-[11px] rounded-full px-2 py-0.5 bg-[#2B221B] text-[#F3DDA6]">{noteCount}</span>}
+          <button
+            onClick={() => setMin(true)}
+            aria-label="Minimizar observações"
+            className="att-chip w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center text-[#6B5A4B] hover:bg-[#F0E6D2]"
+          >
+            <ChevronDown size={20} />
+          </button>
         </div>
 
         {(alerts.length > 0 || lastSession) && (
@@ -282,6 +304,7 @@ export default function AttendanceScreen({ appointment, client, serviceName, min
           />
         </div>
       </aside>
+      )}
 
       {finishing && (
         <FinishSheet

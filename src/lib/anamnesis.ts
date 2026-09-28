@@ -1,28 +1,41 @@
-import { bool, list, opt } from "./form";
+import { allQuestions, matchOption, type AnamnesisFormDef, type AnswerValue } from "./anamnesis-schema";
+import { str } from "./form";
 import type { Anamnesis } from "./types";
 
-/** Lê a ficha do formulário e devolve as colunas do cliente a atualizar (usada pela equipe e pelo link do cliente). */
-export function anamnesisUpdate(fd: FormData, filledBy: "equipe" | "cliente") {
-  const text = (k: string, max: number) => opt(fd, k, max) ?? undefined;
-  const anamnesis: Anamnesis = {
-    fitzpatrick: text("fitzpatrick", 4), skin_type: text("skin_type", 40),
-    concerns: list(fd, "concerns").slice(0, 20), conditions: list(fd, "conditions").slice(0, 20),
-    medications: text("medications", 1000), allergies_detail: text("allergies_detail", 1000),
-    pregnant: bool(fd, "pregnant"), breastfeeding: bool(fd, "breastfeeding"), uses_acids: bool(fd, "uses_acids"),
-    sunscreen: bool(fd, "sunscreen"), smoker: bool(fd, "smoker"),
-    sun_exposure: text("sun_exposure", 40), water_intake: text("water_intake", 40),
-    previous_procedures: text("previous_procedures", 1500), goals: text("goals", 1500),
-    filled_by: filledBy, filled_at: new Date().toISOString(),
-  };
+/** Resposta de uma pergunta lida do formulário (só valores permitidos pelo modelo). */
+function readAnswer(fd: FormData, q: ReturnType<typeof allQuestions>[number]): AnswerValue {
+  const key = `q_${q.id}`;
+  switch (q.type) {
+    case "yes_no": return fd.get(key) === "sim" ? true : fd.get(key) === "nao" ? false : undefined;
+    case "multi": return fd.getAll(key).map(String).filter((v) => q.options?.includes(v)).slice(0, 40);
+    case "choice": { const v = str(fd, key, 120); return q.options?.includes(v) ? v : undefined; }
+    case "text": return str(fd, key, 300) || undefined;
+    case "long_text": return str(fd, key, 1500) || undefined;
+  }
+}
+
+/**
+ * Lê a ficha do formulário conforme o modelo e devolve as colunas do cliente a atualizar
+ * (usada pela equipe e pelo link do cliente). Respostas de perguntas que saíram do modelo são mantidas.
+ */
+export function anamnesisUpdate(fd: FormData, filledBy: "equipe" | "cliente", form: AnamnesisFormDef, previous: Anamnesis | null) {
+  const questions = allQuestions(form);
+  const answers: Record<string, AnswerValue> = { ...(previous ?? {}) };
+  for (const q of questions) answers[q.id] = readAnswer(fd, q);
+  const anamnesis = { ...answers, filled_by: filledBy, filled_at: new Date().toISOString() } as Anamnesis;
+
+  const text = (id: string) => { const v = answers[id]; return typeof v === "string" && v ? v : null; };
+  const alerts = questions.filter((q) => q.alert).flatMap((q) => {
+    const v = answers[q.id];
+    if (q.type === "yes_no") return v === true ? [q.label] : [];
+    if (Array.isArray(v)) return v;
+    if (typeof v === "string" && v) return [q.type === "choice" ? `${q.label}: ${matchOption(q.options, v)}` : `${q.label}: ${v}`];
+    return [];
+  });
   return {
     anamnesis,
-    skin_type: anamnesis.skin_type ?? null,
-    allergies: anamnesis.allergies_detail ?? null,
-    health_notes: [
-      anamnesis.pregnant && "Gestante",
-      anamnesis.breastfeeding && "Amamentando",
-      ...(anamnesis.conditions ?? []),
-      anamnesis.medications && `Medicamentos: ${anamnesis.medications}`,
-    ].filter(Boolean).join(" · ") || null,
+    skin_type: text("skin_type"),
+    allergies: text("allergies_detail"),
+    health_notes: alerts.join(" · ") || null,
   };
 }

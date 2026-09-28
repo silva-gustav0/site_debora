@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { anamnesisUpdate } from "@/lib/anamnesis";
+import { formOrDefault } from "@/lib/anamnesis-schema";
 import { getAnamnesisLink } from "@/lib/anamnesis-link";
 import { addDays, digits, todaySP } from "@/lib/format";
 import { dayHours, freeSlots, toTimestamp, SP_OFFSET } from "@/lib/hours";
@@ -215,7 +216,9 @@ export async function submitAnamnesisByToken(_prev: ActionState, fd: FormData): 
   const link = await getAnamnesisLink(clean(fd.get("token"), 40));
   if (link.state !== "ok") return { ok: false, message: "Este link expirou ou não é mais válido. Peça um novo à clínica." };
   const db = createAdminClient()!;
-  const { error } = await db.from("clients").update(anamnesisUpdate(fd, "cliente")).eq("id", link.clientId);
+  const settings = await getSettings(db);
+  const { error } = await db.from("clients")
+    .update(anamnesisUpdate(fd, "cliente", formOrDefault(settings.anamnesis_form), link.anamnesis)).eq("id", link.clientId);
   if (error) return { ok: false, message: "Não foi possível enviar. Tente novamente." };
   await Promise.all([
     db.from("anamnesis_links").update({ submitted_at: new Date().toISOString() }).eq("token", link.token),

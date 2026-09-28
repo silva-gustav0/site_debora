@@ -152,6 +152,10 @@ export type Settings = {
   fee_credit: number;
   fee_debit: number;
   templates: Record<TemplateKey, string>;
+  /** Modelo da ficha (null = padrão); leia com formOrDefault. */
+  anamnesis_form: unknown;
+  /** Texto do termo (null = padrão); leia com consentOrDefault. */
+  consent_text: string | null;
 };
 
 export type TimeBlock = { id: string; starts_at: string; ends_at: string; reason: string };

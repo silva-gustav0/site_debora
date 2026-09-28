@@ -11,7 +11,8 @@ import {
 } from "@/lib/format";
 import { computeRecurrence, RECURRENCE_META } from "@/lib/recurrence";
 import ActionForm from "@/components/painel/ActionForm";
-import AnamnesisForm, { FITZPATRICK } from "@/components/painel/AnamnesisForm";
+import AnamnesisForm from "@/components/painel/AnamnesisForm";
+import { FITZPATRICK, formOrDefault } from "@/lib/anamnesis-schema";
 import ClientForm from "@/components/painel/ClientForm";
 import ConfirmButton from "@/components/painel/ConfirmButton";
 import PhotoUploader from "@/components/painel/PhotoUploader";
@@ -77,6 +78,7 @@ export default async function ClientPage({ params, searchParams }: PageProps<"/p
   const activePkgs = pkgs.filter((p) => p.status === "ativo");
   const pendingTx = txs.filter((t) => t.status === "pendente" && t.kind === "receita");
   const a = client.anamnesis ?? {};
+  const anamnesisForm = formOrDefault(settings.anamnesis_form);
 
   const photoUrls = new Map<string, string>();
   if (tab === "fotos" && photos.length) {
@@ -195,7 +197,7 @@ export default async function ClientPage({ params, searchParams }: PageProps<"/p
 
       {tab === "anamnese" && (
         <div className="grid xl:grid-cols-[1fr_320px] gap-5">
-          <Card title="Ficha de anamnese" eyebrow={a.filled_at ? `Preenchida pel${a.filled_by === "cliente" ? "o cliente (link)" : "a equipe"} em ${fmtDate(a.filled_at)} ${fmtTime(a.filled_at)}` : "Avaliação"}><AnamnesisForm hidden={{ id: client.id }} a={a} /></Card>
+          <Card title="Ficha de anamnese" eyebrow={a.filled_at ? `Preenchida pel${a.filled_by === "cliente" ? "o cliente (link)" : "a equipe"} em ${fmtDate(a.filled_at)} ${fmtTime(a.filled_at)}` : "Avaliação"}><AnamnesisForm hidden={{ id: client.id }} a={a} form={anamnesisForm} /></Card>
           <div className="flex flex-col gap-5">
             <Card title="Termo de consentimento">
               {client.consent_signed_at ? (
@@ -215,7 +217,7 @@ export default async function ClientPage({ params, searchParams }: PageProps<"/p
               </div>
             </Card>
             <Card title="Guia de fototipos">
-              <ul className="text-xs text-[#6B5A4B] flex flex-col gap-1">{FITZPATRICK.map((f) => <li key={f.v}>{f.l}</li>)}</ul>
+              <ul className="text-xs text-[#6B5A4B] flex flex-col gap-1">{FITZPATRICK.map((f) => <li key={f}>{f}</li>)}</ul>
             </Card>
           </div>
         </div>

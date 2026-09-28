@@ -4,6 +4,9 @@ import Link from "next/link";
 import { submitAnamnesisByToken } from "@/app/actions/public";
 import AnamnesisForm from "@/components/painel/AnamnesisForm";
 import { getAnamnesisLink } from "@/lib/anamnesis-link";
+import { formOrDefault } from "@/lib/anamnesis-schema";
+import { getSettings } from "@/lib/settings";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { dateSP, fmtDate, fmtTime } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Ficha de anamnese · Clínica Débora Silva", robots: { index: false, follow: false } };
@@ -17,6 +20,8 @@ const CLOSED = {
 /** Ficha de anamnese preenchida pelo cliente, sem login, pelo link único enviado no agendamento. */
 export default async function AnamnesisPage({ params }: PageProps<"/anamnese/[token]">) {
   const link = await getAnamnesisLink((await params).token);
+  const db = createAdminClient();
+  const form = formOrDefault(link.state === "ok" && db ? (await getSettings(db)).anamnesis_form : null);
   return (
     <main className="min-h-screen px-4 py-10 sm:py-16" style={{ background: "linear-gradient(160deg, #FBF7EE 0%, #FDFAF7 45%, #FFF8E7 100%)" }}>
       <div className="max-w-2xl mx-auto">
@@ -40,7 +45,7 @@ export default async function AnamnesisPage({ params }: PageProps<"/anamnese/[to
                   Essas informações ajudam a escolher o cuidado mais seguro para você e ficam guardadas só na sua ficha da clínica.
                   O link vale até às <strong>{fmtTime(link.expiresAt)}</strong>.
                 </p>
-                <AnamnesisForm a={link.anamnesis} hidden={{ token: link.token }} action={submitAnamnesisByToken} submitLabel="Enviar ficha" />
+                <AnamnesisForm a={link.anamnesis} form={form} hidden={{ token: link.token }} action={submitAnamnesisByToken} submitLabel="Enviar ficha" />
               </>
             ) : (
               <p role="alert" className="text-sm text-[#6B5A4B]">{CLOSED[link.state]}</p>

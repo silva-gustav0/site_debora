@@ -14,6 +14,8 @@ export const DEFAULT_SETTINGS: Settings = {
   cancel_min_hours: 24,
   fee_credit: 3.5,
   fee_debit: 1.5,
+  anamnesis_form: null,
+  consent_text: null,
   templates: {
     confirmacao: "Olá, {nome}! Aqui é da {clinica} 🌸 Passando para confirmar seu horário de {servico} em {data} às {hora}. Podemos confirmar?",
     lembrete: "Oi, {nome}! Lembrete do seu horário amanhã ({data}) às {hora} para {servico}. Te esperamos! 💕 Se precisar remarcar: {link}",

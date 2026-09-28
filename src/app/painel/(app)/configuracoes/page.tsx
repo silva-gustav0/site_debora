@@ -4,6 +4,8 @@ import { fmtDate } from "@/lib/format";
 import { hoursSummary, WEEKDAY_NAMES } from "@/lib/hours";
 import ActionForm from "@/components/painel/ActionForm";
 import SubmitButton from "@/components/painel/SubmitButton";
+import AnamnesisEditor from "@/components/painel/AnamnesisEditor";
+import { consentOrDefault, formOrDefault } from "@/lib/anamnesis-schema";
 import { Avatar, Card, PageHeader, Tabs } from "@/components/painel/ui";
 import { changeOwnPassword, createStaffMember, saveSettings, saveTemplates } from "../../actions";
 import type { BusinessHours, TemplateKey } from "@/lib/types";
@@ -22,7 +24,7 @@ const TEMPLATE_INFO: Record<TemplateKey, { title: string; when: string }> = {
 export default async function SettingsPage({ searchParams }: PageProps<"/painel/configuracoes">) {
   const sp = await searchParams;
   const { supabase } = await requireStaff();
-  const tab = ["clinica", "mensagens", "equipe"].includes(String(sp.tab)) ? String(sp.tab) : "clinica";
+  const tab = ["clinica", "mensagens", "anamnese", "equipe"].includes(String(sp.tab)) ? String(sp.tab) : "clinica";
   const [settings, staffRes] = await Promise.all([
     getSettings(supabase),
     supabase.from("staff").select("user_id, name, created_at").order("created_at"),
@@ -37,6 +39,7 @@ export default async function SettingsPage({ searchParams }: PageProps<"/painel/
         tabs={[
           { key: "clinica", label: "Clínica e agenda", href: "/painel/configuracoes" },
           { key: "mensagens", label: "Mensagens de WhatsApp", href: "/painel/configuracoes?tab=mensagens" },
+          { key: "anamnese", label: "Anamnese e termo", href: "/painel/configuracoes?tab=anamnese" },
           { key: "equipe", label: "Equipe", href: "/painel/configuracoes?tab=equipe" },
         ]}
       />
@@ -107,6 +110,14 @@ export default async function SettingsPage({ searchParams }: PageProps<"/painel/
           </div>
           <div><SubmitButton>Salvar mensagens</SubmitButton></div>
         </ActionForm>
+      )}
+
+      {tab === "anamnese" && (
+        <AnamnesisEditor
+          initialForm={formOrDefault(settings.anamnesis_form)}
+          initialConsent={consentOrDefault(settings.consent_text)}
+          customized={Boolean(settings.anamnesis_form || settings.consent_text)}
+        />
       )}
 
       {tab === "equipe" && (
