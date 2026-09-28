@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PromoNoticeSlot from "@/components/PromoNoticeSlot";
 import { getPublicConfig } from "@/app/actions/public";
 import { DEFAULT_HOURS, hoursSummary } from "@/lib/hours";
 import { getBlogPost, getBlogPosts, getHomeServices, getSiteContent } from "@/lib/site";
@@ -284,6 +285,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         brand={brand} contact={content.contact} footer={content.footer} services={services} hidden={content.layout.hidden}
         hours={hoursSummary(config?.hours ?? DEFAULT_HOURS)}
       />
+      <PromoNoticeSlot />
     </>
   );
 }

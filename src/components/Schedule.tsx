@@ -63,6 +63,9 @@ export default function Schedule({ config, content: c }: { config: PublicConfig 
       setServiceId(id); setTime(null); setStep(1); setDone(null); setError(null);
     };
     window.addEventListener("select-service", onSelect);
+    // Vindo de outra página (ex.: aviso de promoção no blog): /?servico=<id>#agendamento
+    const fromUrl = new URLSearchParams(window.location.search).get("servico");
+    if (fromUrl) window.dispatchEvent(new CustomEvent("select-service", { detail: fromUrl }));
     return () => window.removeEventListener("select-service", onSelect);
   }, [list]);
 

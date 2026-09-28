@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { ArrowDown, ArrowUp, ExternalLink, EyeOff, Pencil, Plus, Star, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, BellRing, ExternalLink, EyeOff, Pencil, Plus, Sparkles, Star, Trash2 } from "lucide-react";
 import { requireStaff } from "@/lib/dal";
 import { brl, fmtDate, todaySP } from "@/lib/format";
+import { PROMO_TEMPLATES, templateDates, type PromoTemplate } from "@/lib/promo-templates";
 import { listServices } from "@/lib/queries";
 import { getSiteContent } from "@/lib/site";
 import { BUILTIN_SECTIONS, categoryColor, IMAGE_POSITIONS, type BlogPostRow, type Promotion } from "@/lib/site-content";
@@ -38,11 +39,21 @@ function promoStatus(p: Promotion, today: string) {
   return <Badge tone="green">No ar</Badge>;
 }
 
-function PromotionForm({ promo, services }: { promo?: Promotion; services: ServiceRow[] }) {
-  const p = promo;
+/** Valores iniciais de uma nova promoção criada a partir de um modelo. */
+function fromTemplate(t: PromoTemplate, today: string): Partial<Promotion> {
+  const dates = templateDates(t, today);
+  return {
+    label: t.label, title: t.title, description: t.description, notice_text: t.notice, cta_label: t.cta,
+    starts_on: dates?.[0] ?? null, ends_on: dates?.[1] ?? null, active: true, show_as_notice: true,
+  };
+}
+
+function PromotionForm({ promo, preset, services }: { promo?: Promotion; preset?: Partial<Promotion>; services: ServiceRow[] }) {
+  const p: Partial<Promotion> | undefined = promo ?? preset;
   return (
-    <ActionForm action={savePromotion} resetOnSuccess={!p} className="grid gap-4">
-      {p && <input type="hidden" name="id" value={p.id} />}
+    <ActionForm key={preset?.label} action={savePromotion} resetOnSuccess={!promo} className="grid gap-4">
+      {promo && <input type="hidden" name="id" value={promo.id} />}
+      {!promo && preset && <input type="hidden" name="from_template" value="1" />}
       <div className="grid lg:grid-cols-[1fr_auto] gap-5">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 content-start">
           <label className="sm:col-span-2 lg:col-span-1">
@@ -99,11 +110,19 @@ function PromotionForm({ promo, services }: { promo?: Promotion; services: Servi
               <input type="checkbox" name="show_in_hero" defaultChecked={p?.show_in_hero ?? false} className="accent-[#82590F] w-4 h-4" />
               Destacar no topo da página
             </label>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" name="show_as_notice" defaultChecked={p?.show_as_notice ?? false} className="accent-[#82590F] w-4 h-4" />
+              Mostrar como aviso fixo no site
+            </label>
           </div>
+          <label className="sm:col-span-2 lg:col-span-4">
+            <span className="p-label" title="Frase curta do aviso flutuante; em branco, usa o título">Texto do aviso fixo (opcional)</span>
+            <input name="notice_text" maxLength={160} defaultValue={p?.notice_text ?? ""} placeholder="Condição especial para quem ensina" className="p-input" />
+          </label>
         </div>
         <ImageField name="image_url" label="Foto (opcional)" defaultValue={p?.image_url ?? ""} folder="promocoes" aspect="aspect-square" />
       </div>
-      <div><SubmitButton pendingText="Salvando…">{p ? "Salvar promoção" : "Criar promoção"}</SubmitButton></div>
+      <div><SubmitButton pendingText="Salvando…">{promo ? "Salvar promoção" : "Criar promoção"}</SubmitButton></div>
     </ActionForm>
   );
 }
@@ -126,6 +145,9 @@ export default async function SitePage({ searchParams }: PageProps<"/painel/site
   ]);
   const missingTables = Boolean(promosRes.error || postsRes.error);
   const today = todaySP();
+  const template = PROMO_TEMPLATES.find((t) => t.key === sp.modelo);
+  // Próximas datas primeiro; modelos sem data (aniversariante) no fim.
+  const templates = [...PROMO_TEMPLATES].sort((a, b) => (templateDates(a, today)?.[0] ?? "9999").localeCompare(templateDates(b, today)?.[0] ?? "9999"));
 
   return (
     <>
@@ -214,8 +236,10 @@ export default async function SitePage({ searchParams }: PageProps<"/painel/site
 
       {tab === "promocoes" && (
         <div className="flex flex-col gap-4">
+          {sp.criada && <Alert tone="green">Promoção criada. Ela aparece no site dentro do período escolhido.</Alert>}
           <p className="text-sm text-[#6B5A4B]">
-            Promoções ativas aparecem como faixa abaixo dos serviços; uma delas pode ir também para o cartão do topo.
+            Promoções ativas aparecem como faixa abaixo dos serviços. Uma delas pode ir também para o cartão do topo e
+            outra (ou a mesma) para o <strong>aviso fixo</strong>, um cartão que acompanha a rolagem e a visitante pode fechar.
             Para a cliente agendar com o preço da promoção, crie um serviço “Combo / Promoção” em{" "}
             <Link href="/painel/servicos" className="underline text-[#82590F]">Serviços</Link> e escolha-o aqui.
           </p>
@@ -225,6 +249,7 @@ export default async function SitePage({ searchParams }: PageProps<"/painel/site
                 <h2 className="p-display text-2xl text-[#2B221B] mr-1">{p.title}</h2>
                 {promoStatus(p, today)}
                 {p.show_in_hero && <Badge tone="gold"><Star size={10} /> No topo</Badge>}
+                {p.show_as_notice && <Badge tone="gold"><BellRing size={10} /> Aviso fixo</Badge>}
                 {p.price !== null && <span className="text-sm text-[#857566]">{brl(p.price)}</span>}
                 <form action={deletePromotion} className="ml-auto">
                   <input type="hidden" name="id" value={p.id} />
@@ -237,11 +262,36 @@ export default async function SitePage({ searchParams }: PageProps<"/painel/site
           {!missingTables && !promosRes.data?.length && (
             <div className="p-card"><EmptyState>Nenhuma promoção ainda. Crie a primeira abaixo.</EmptyState></div>
           )}
-          <details className="p-card" open={!promosRes.data?.length}>
+          <section className="p-card p-5">
+            <p className="p-display text-xl text-[#2B221B] flex items-center gap-2"><Sparkles size={16} className="text-[#C9973A]" /> Gerar promoção</p>
+            <p className="text-sm text-[#6B5A4B] mb-3">Escolha uma data comemorativa: o formulário abaixo vem preenchido com textos, período e aviso fixo.</p>
+              <div className="flex flex-wrap gap-2">
+                {templates.map((t) => {
+                  const dates = templateDates(t, today);
+                  return (
+                    <Link key={t.key} href={`/painel/site?tab=promocoes&modelo=${t.key}#nova-promocao`}
+                      aria-current={template?.key === t.key ? "true" : undefined}
+                      className={`p-btn-ghost text-[12.5px] ${template?.key === t.key ? "!border-[#C9973A] !bg-[#FBF3E2]" : ""}`}>
+                      {t.name}
+                      {dates && <span className="text-[#857566] font-normal">{fmtDate(dates[0], { year: undefined })}</span>}
+                    </Link>
+                  );
+                })}
+                {template && <Link href="/painel/site?tab=promocoes#nova-promocao" className="p-btn-ghost text-[12.5px]">Em branco</Link>}
+              </div>
+          </section>
+          <details id="nova-promocao" className="p-card" open={!promosRes.data?.length || Boolean(template)}>
             <summary className="flex items-center gap-2 px-5 py-3.5 text-[#2B221B] cursor-pointer">
               <Plus size={16} /> <span className="p-display text-xl">Nova promoção</span>
             </summary>
-            <div className="px-5 pb-5"><PromotionForm services={services} /></div>
+            <div className="px-5 pb-5">
+              {template && (
+                <p className="text-sm text-[#6B5A4B] mb-4">
+                  Modelo <strong>{template.name}</strong> aplicado. Confira os textos e as datas, informe o preço e escolha o serviço antes de criar.
+                </p>
+              )}
+              <PromotionForm preset={template ? fromTemplate(template, today) : undefined} services={services} />
+            </div>
           </details>
         </div>
       )}

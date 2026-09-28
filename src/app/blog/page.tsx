@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PromoNoticeSlot from "@/components/PromoNoticeSlot";
 import { getBlogPosts, getHomeServices, getSiteContent } from "@/lib/site";
 import { categoryColor } from "@/lib/site-content";
 import { getPublicConfig } from "@/app/actions/public";
@@ -150,6 +151,7 @@ export default async function BlogPage() {
         brand={brand} contact={content.contact} footer={content.footer} services={services} hidden={content.layout.hidden}
         hours={hoursSummary(config?.hours ?? DEFAULT_HOURS)}
       />
+      <PromoNoticeSlot />
     </>
   );
 }

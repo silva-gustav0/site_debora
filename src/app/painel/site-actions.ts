@@ -158,6 +158,8 @@ export async function savePromotion(_prev: ActionState, fd: FormData): Promise<A
     ends_on: isDate(endsOn) ? endsOn : null,
     active: bool(fd, "active"),
     show_in_hero: bool(fd, "show_in_hero"),
+    show_as_notice: bool(fd, "show_as_notice"),
+    notice_text: opt(fd, "notice_text", 160),
     sort_order: Number.isFinite(sortOrder) ? sortOrder : 0,
   };
 
@@ -167,11 +169,22 @@ export async function savePromotion(_prev: ActionState, fd: FormData): Promise<A
     if (isUuid(id)) q = q.neq("id", id);
     await q;
   }
+  // E só uma ocupa o aviso fixo do site.
+  if (row.show_as_notice) {
+    let q = supabase.from("promotions").update({ show_as_notice: false }).eq("show_as_notice", true);
+    if (isUuid(id)) q = q.neq("id", id);
+    await q;
+  }
 
   const { error } = isUuid(id)
     ? await supabase.from("promotions").update(row).eq("id", id)
     : await supabase.from("promotions").insert(row);
   if (error) return fail("Não foi possível salvar a promoção.");
+  // Criada a partir de um modelo: volta para a lista (senão o formulário continua preenchido e convida a duplicar).
+  if (!isUuid(id) && str(fd, "from_template")) {
+    revalidatePath("/", "layout");
+    redirect("/painel/site?tab=promocoes&criada=1");
+  }
   return done(isUuid(id) ? "Promoção atualizada." : "Promoção criada.");
 }
 

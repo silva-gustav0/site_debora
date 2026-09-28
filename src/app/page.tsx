@@ -8,6 +8,7 @@ import Schedule from "@/components/Schedule";
 import BlogSection from "@/components/BlogSection";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
+import PromoNoticeSlot from "@/components/PromoNoticeSlot";
 import CustomSection from "@/components/CustomSection";
 import { getPublicConfig } from "@/app/actions/public";
 import { DEFAULT_HOURS, hoursSummary } from "@/lib/hours";
@@ -58,6 +59,7 @@ export default async function Home() {
         ))}
       </main>
       <Footer brand={content.brand} contact={content.contact} footer={content.footer} services={services} hours={hours} hidden={hidden} />
+      <PromoNoticeSlot />
     </>
   );
 }

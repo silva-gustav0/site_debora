@@ -289,6 +289,8 @@ export type Promotion = {
   ends_on: string | null;
   active: boolean;
   show_in_hero: boolean;
+  show_as_notice: boolean;
+  notice_text: string | null;
   sort_order: number;
 };
 
