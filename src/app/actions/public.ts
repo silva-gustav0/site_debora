@@ -8,6 +8,7 @@ import { getAnamnesisLink } from "@/lib/anamnesis-link";
 import { addDays, digits, todaySP } from "@/lib/format";
 import { dayHours, freeSlots, toTimestamp, SP_OFFSET } from "@/lib/hours";
 import { getSettings } from "@/lib/settings";
+import { findUsableVoucher } from "@/lib/vouchers";
 import type { ActionState, BusinessHours, ServiceRow, Settings } from "@/lib/types";
 
 type Admin = NonNullable<ReturnType<typeof createAdminClient>>;
@@ -87,11 +88,12 @@ export type BookingInput = {
   phone: string;
   email: string;
   notes?: string;
+  voucherCode?: string;
   website?: string; // honeypot
 };
 
 export type BookingResult =
-  | { ok: true; serviceName: string; date: string; time: string; token: string }
+  | { ok: true; serviceName: string; date: string; time: string; token: string; voucher?: { code: string; covered: number; due: number } }
   | { ok: false; message: string; slotTaken?: boolean };
 
 export async function createBooking(input: BookingInput): Promise<BookingResult> {
@@ -112,9 +114,15 @@ export async function createBooking(input: BookingInput): Promise<BookingResult>
   const settings = await getSettings(db);
   if (!validDay(input.date, settings)) return { ok: false, message: "Data indisponível para agendamento." };
 
+  // Voucher: conferido de novo aqui (não confie no navegador). Voucher de serviço fixa o serviço.
+  const voucherRes = input.voucherCode ? await findUsableVoucher(db, clean(input.voucherCode, 30)) : null;
+  if (voucherRes && !voucherRes.ok) return { ok: false, message: voucherRes.message };
+  const voucher = voucherRes?.ok ? voucherRes.voucher : null;
+  const serviceId = voucher?.kind === "servico" && voucher.service_id ? voucher.service_id : input.serviceId;
+
   const { data: service } = await db
-    .from("services").select("id, name, duration_min, price").eq("id", input.serviceId).eq("active", true).maybeSingle();
-  if (!service) return { ok: false, message: "Serviço indisponível." };
+    .from("services").select("id, name, duration_min, price").eq("id", serviceId).eq("active", true).maybeSingle();
+  if (!service) return { ok: false, message: voucher ? "O serviço deste voucher não está disponível no momento. Fale conosco pelo WhatsApp." : "Serviço indisponível." };
 
   // Revalida o horário no servidor (não confie no que veio do navegador).
   const slot = (await slotsFor(db, settings, input.date, service.duration_min)).find((s) => s.time === input.time);
@@ -137,15 +145,22 @@ export async function createBooking(input: BookingInput): Promise<BookingResult>
     notes: notes || null,
     source: "site",
     status: "solicitado",
+    voucher_id: voucher?.id ?? null,
   }).select("public_token").single();
   if (error) {
+    if (error.code === "23505" && voucher) return { ok: false, message: "Este voucher acabou de ser reservado para outro agendamento." };
     if (error.code === "23P01") {
       return { ok: false, slotTaken: true, message: "Esse horário acabou de ser reservado. Escolha outro, por favor." };
     }
     return { ok: false, message: "Não foi possível concluir o agendamento. Tente novamente." };
   }
 
-  return { ok: true, serviceName: service.name, date: input.date, time: input.time, token: data.public_token };
+  const price = Number(service.price);
+  const covered = voucher ? (voucher.kind === "servico" ? price : Math.min(voucher.balance, price)) : 0;
+  return {
+    ok: true, serviceName: service.name, date: input.date, time: input.time, token: data.public_token,
+    ...(voucher ? { voucher: { code: voucher.code, covered, due: Math.max(0, Math.round((price - covered) * 100) / 100) } } : {}),
+  };
 }
 
 // ─── Área da cliente (link com token) ──────────────────────────────────

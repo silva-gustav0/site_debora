@@ -59,11 +59,17 @@ export type AppointmentRow = {
   confirmed_at: string | null;
   reminder_sent_at: string | null;
   cancel_reason: string | null;
+  voucher_id: string | null;
+  /** Quanto o voucher cobriu (gravado ao concluir). */
+  voucher_amount: number | null;
 };
+
+export type AppointmentVoucher = { id: string; code: string; kind: "servico" | "valor"; balance: number; service_name: string | null };
 
 export type AppointmentWithRefs = AppointmentRow & {
   clients: Pick<ClientRow, "id" | "name" | "phone"> | null;
   services: Pick<ServiceRow, "id" | "name" | "duration_min"> | null;
+  vouchers: AppointmentVoucher | null;
 };
 
 export type PaymentMethod = "pix" | "dinheiro" | "credito" | "debito" | "transferencia" | "outro";

@@ -5,10 +5,12 @@ import {
   ChevronLeft, ChevronRight, CalendarDays, Clock, CheckCircle2, Loader2, MessageCircle, AlertCircle,
 } from "lucide-react";
 import AnimateIn from "./AnimateIn";
+import VoucherField, { type AppliedVoucher } from "./VoucherField";
 import { clinicInfo, services as staticServices } from "@/lib/data";
 import { addDays, brl, fmtDate, fmtWeekday, maskPhone, todaySP, whatsappLink } from "@/lib/format";
 import { candidateSlots, dayHours, DEFAULT_HOURS, hoursSummary } from "@/lib/hours";
 import { createBooking, getAvailability, type PublicConfig } from "@/app/actions/public";
+import { checkVoucherCode } from "@/app/actions/vouchers";
 import type { ServiceRow } from "@/lib/types";
 import type { SiteContent } from "@/lib/site-content";
 
@@ -50,10 +52,27 @@ export default function Schedule({ config, content: c }: { config: PublicConfig 
   const [slots, setSlots] = useState<Slot[] | null>(null);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState<{ serviceName: string; date: string; time: string; token?: string } | null>(null);
+  const [done, setDone] = useState<{ serviceName: string; date: string; time: string; token?: string; voucher?: { code: string; due: number } } | null>(null);
+  const [voucher, setVoucher] = useState<AppliedVoucher | null>(null);
   const [pending, startTransition] = useTransition();
 
   const service = list.find((s) => s.id === serviceId);
+
+  /** Quanto o voucher cobre de um serviço e quanto sobra para pagar na clínica. */
+  const coverage = (s: ServiceRow) => {
+    if (!voucher) return null;
+    if (voucher.kind === "servico") return s.id === voucher.serviceId ? { due: 0 } : null;
+    return { due: Math.max(0, Math.round((s.price - Math.min(voucher.balance, s.price)) * 100) / 100) };
+  };
+  const lockedByVoucher = voucher?.kind === "servico";
+  const applyVoucher = (v: AppliedVoucher) => {
+    if (v.kind === "servico" && !list.some((s) => s.id === v.serviceId)) {
+      setError("O serviço deste voucher não está disponível no momento. Fale conosco pelo WhatsApp.");
+      return;
+    }
+    setVoucher(v);
+    if (v.kind === "servico" && v.serviceId) { setServiceId(v.serviceId); setTime(null); }
+  };
 
   // Botões "Agendar" dos serviços e promoções já escolhem o serviço aqui.
   useEffect(() => {
@@ -68,6 +87,18 @@ export default function Schedule({ config, content: c }: { config: PublicConfig 
     if (fromUrl) window.dispatchEvent(new CustomEvent("select-service", { detail: fromUrl }));
     return () => window.removeEventListener("select-service", onSelect);
   }, [list]);
+
+  // Link "Agendar com este voucher": /?voucher=DS-XXXX-XXXX#agendamento
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get("voucher");
+    if (!code || !online) return;
+    checkVoucherCode(code).then((r) => {
+      if (!r.ok) { setError(r.message); return; }
+      if (r.kind === "servico" && !list.some((s) => s.id === r.serviceId)) return;
+      setVoucher(r);
+      if (r.kind === "servico" && r.serviceId) setServiceId(r.serviceId);
+    }).catch(() => {});
+  }, [online, list]);
 
   /** Busca os horários livres do dia e vai para o passo 2. */
   const loadSlots = (d: string, svc: ServiceRow) => {
@@ -97,7 +128,7 @@ export default function Schedule({ config, content: c }: { config: PublicConfig 
   };
 
   const reset = () => {
-    setDone(null); setStep(1); setDate(null); setTime(null); setServiceId(""); setSlots(null); setError(null);
+    setDone(null); setStep(1); setDate(null); setTime(null); setServiceId(""); setSlots(null); setError(null); setVoucher(null);
     setForm({ name: "", phone: "", email: "", notes: "", website: "" });
   };
 
@@ -117,9 +148,9 @@ export default function Schedule({ config, content: c }: { config: PublicConfig 
     }
 
     startTransition(async () => {
-      const r = await createBooking({ serviceId: service.id, date, time, ...form });
+      const r = await createBooking({ serviceId: service.id, date, time, ...form, voucherCode: voucher?.code });
       if (r.ok) {
-        setDone({ serviceName: r.serviceName, date: r.date, time: r.time, token: r.token });
+        setDone({ serviceName: r.serviceName, date: r.date, time: r.time, token: r.token, voucher: r.voucher });
       } else {
         setError(r.message);
         if (r.slotTaken) { setTime(null); loadSlots(date, service); }
@@ -167,6 +198,12 @@ export default function Schedule({ config, content: c }: { config: PublicConfig 
               <br />
               {fmtWeekday(done.date, "long")}, {fmtDate(done.date)} às {done.time}
             </p>
+            {done.voucher && (
+              <p className="text-sm rounded-xl px-4 py-3 mb-4" style={{ background: "#EAF6EE", color: "#1F6B3A" }}>
+                Voucher <strong className="font-medium">{done.voucher.code}</strong> aplicado:{" "}
+                {done.voucher.due === 0 ? "seu atendimento já está pago." : `faltam ${brl(done.voucher.due)} para pagar na clínica.`}
+              </p>
+            )}
             <p className="text-sm font-light text-text-secondary leading-7 mb-8">
               {online
                 ? "Seu horário está reservado. Vamos confirmar pelo WhatsApp em breve. Guarde o link “Ver meu agendamento” para consultar, salvar na agenda do celular ou cancelar."
@@ -240,6 +277,10 @@ export default function Schedule({ config, content: c }: { config: PublicConfig 
                   </p>
                 )}
 
+                {step === 1 && online && (
+                  <VoucherField applied={voucher} onApply={applyVoucher} onRemove={() => setVoucher(null)} />
+                )}
+
                 {step === 1 && (
                   <div className="grid md:grid-cols-2 gap-8">
                     <fieldset>
@@ -249,10 +290,12 @@ export default function Schedule({ config, content: c }: { config: PublicConfig 
                       <div className="flex flex-col gap-2.5">
                         {list.map((s) => {
                           const selected = s.id === serviceId;
+                          const cover = coverage(s);
+                          const blocked = lockedByVoucher && !selected;
                           return (
                             <label
                               key={s.id}
-                              className="flex items-start gap-3 rounded-xl p-4 cursor-pointer transition-all"
+                              className={`flex items-start gap-3 rounded-xl p-4 transition-all ${blocked ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
                               style={{
                                 border: `1px solid ${selected ? "#9A6F1E" : "#EEDFBF"}`,
                                 background: selected ? "#FBF7EE" : "white",
@@ -264,6 +307,7 @@ export default function Schedule({ config, content: c }: { config: PublicConfig 
                                 name="service"
                                 value={s.id}
                                 checked={selected}
+                                disabled={blocked}
                                 onChange={() => { setServiceId(s.id); setTime(null); }}
                                 className="mt-1 accent-[#9A6F1E]"
                               />
@@ -272,7 +316,12 @@ export default function Schedule({ config, content: c }: { config: PublicConfig 
                                   <span className="text-lg text-bronze-800" style={{ fontFamily: "var(--font-cormorant), serif" }}>
                                     {s.name}
                                   </span>
-                                  {s.price > 0 && (
+                                  {cover ? (
+                                    <span className="text-right text-sm whitespace-nowrap leading-tight">
+                                      <span className="block text-[11px] line-through text-text-muted">{brl(s.price)}</span>
+                                      <span style={{ color: "#1F6B3A" }}>{cover.due === 0 ? "Pago com voucher" : `Você paga ${brl(cover.due)}`}</span>
+                                    </span>
+                                  ) : s.price > 0 && (
                                     <span className="text-sm whitespace-nowrap" style={{ color: "#A87B25" }}>{brl(s.price)}</span>
                                   )}
                                 </span>
@@ -467,7 +516,12 @@ export default function Schedule({ config, content: c }: { config: PublicConfig 
                           { label: "Serviço", value: service?.name ?? "—" },
                           { label: "Data", value: date ? fmtDate(date) : "—" },
                           { label: "Horário", value: time ?? "—" },
-                          { label: "Valor", value: service && service.price > 0 ? brl(service.price) : "A combinar" },
+                          {
+                            label: "Valor",
+                            value: service && coverage(service)
+                              ? (coverage(service)!.due === 0 ? "Pago com voucher" : `${brl(coverage(service)!.due)} + voucher`)
+                              : service && service.price > 0 ? brl(service.price) : "A combinar",
+                          },
                         ].map((item) => (
                           <div key={item.label}>
                             <p className="text-[10px] uppercase tracking-widest text-text-muted mb-0.5">{item.label}</p>

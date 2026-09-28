@@ -6,17 +6,26 @@ import Image from "next/image";
 import Link from "next/link";
 import { LogIn, Menu, X } from "lucide-react";
 
-const NAV_LINKS = [
-  { label: "Início",    hash: "inicio",   section: "hero"     },
-  { label: "Sobre",     hash: "sobre",    section: "about"    },
-  { label: "Serviços",  hash: "servicos", section: "services" },
-  { label: "Blog",      hash: "blog",     section: "blog"     },
-  { label: "Contato",   hash: "contato",  section: "contact"  },
+type NavItem = { label: string; hash: string; section?: string; path?: string };
+
+// Itens com `path` são páginas próprias (Link normal); os demais são âncoras da home.
+const NAV_LINKS: NavItem[] = [
+  { label: "Início",        hash: "inicio",   section: "hero"     },
+  { label: "Sobre",         hash: "sobre",    section: "about"    },
+  { label: "Serviços",      hash: "servicos", section: "services" },
+  { label: "Blog",          hash: "blog",     section: "blog"     },
+  { label: "Vale-presente", hash: "vouchers", section: "vouchers", path: "/vouchers" },
+  { label: "Contato",       hash: "contato",  section: "contact"  },
 ];
 
+/** Páginas próprias usam Link; âncoras da home continuam como <a> simples. */
+function NavLink({ path, ...props }: React.ComponentProps<"a"> & { path?: string; href: string }) {
+  return path ? <Link {...props} href={path} /> : <a {...props} />;
+}
+
 export default function Navbar({ logo, name, hidden = [], extra = [] }: { logo: string; name: string; hidden?: string[]; extra?: { label: string; hash: string }[] }) {
-  const base  = NAV_LINKS.filter((l) => !hidden.includes(l.section));
-  const links = [...base.slice(0, -1), ...extra, ...base.slice(-1)];
+  const base: NavItem[] = NAV_LINKS.filter((l) => !l.section || !hidden.includes(l.section));
+  const links: NavItem[] = [...base.slice(0, -1), ...extra, ...base.slice(-1)];
   const [open, setOpen]       = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname              = usePathname();
@@ -58,15 +67,16 @@ export default function Navbar({ logo, name, hidden = [], extra = [] }: { logo: 
             {/* Desktop nav */}
             <nav className="hidden md:flex items-center gap-8">
               {links.map((l) => (
-                <a
+                <NavLink
                   key={l.hash}
+                  path={l.path}
                   href={href(l.hash)}
                   className="text-[12px] font-light tracking-[0.15em] uppercase hover:text-bronze-500 transition-colors duration-200 relative group"
                   style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B5A4B" }}
                 >
                   {l.label}
                   <span className="absolute -bottom-0.5 left-0 h-px w-0 bg-bronze-400 group-hover:w-full transition-all duration-300" />
-                </a>
+                </NavLink>
               ))}
             </nav>
 
@@ -123,8 +133,9 @@ export default function Navbar({ logo, name, hidden = [], extra = [] }: { logo: 
 
           <nav className="flex flex-col gap-1 px-6 pt-8 flex-1">
             {links.map((l) => (
-              <a
+              <NavLink
                 key={l.hash}
+                path={l.path}
                 href={href(l.hash)}
                 onClick={() => setOpen(false)}
                 className="py-4 text-[18px] font-light tracking-[0.05em] border-b hover:text-bronze-500 transition-colors"
@@ -135,7 +146,7 @@ export default function Navbar({ logo, name, hidden = [], extra = [] }: { logo: 
                 }}
               >
                 {l.label}
-              </a>
+              </NavLink>
             ))}
           </nav>
 

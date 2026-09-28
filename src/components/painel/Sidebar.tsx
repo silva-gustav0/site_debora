@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, CalendarDays, Users, Wallet, Repeat, KanbanSquare, Sparkles, LogOut, Menu, X, ExternalLink,
-  Package, Boxes, BarChart3, Settings, Search, Globe, Smartphone,
+  Package, Boxes, BarChart3, Settings, Search, Globe, Smartphone, Gift,
 } from "lucide-react";
 import { logout } from "@/app/painel/auth-actions";
 import { initials } from "@/lib/format";
@@ -31,6 +31,7 @@ const GROUPS = [
     items: [
       { href: "/painel/financeiro", label: "Financeiro", icon: Wallet },
       { href: "/painel/pacotes", label: "Pacotes", icon: Package },
+      { href: "/painel/vouchers", label: "Vouchers", icon: Gift },
       { href: "/painel/estoque", label: "Estoque", icon: Boxes },
       { href: "/painel/relatorios", label: "Relatórios", icon: BarChart3 },
     ],

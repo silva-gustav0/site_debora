@@ -5,7 +5,7 @@ import { SP_OFFSET } from "./hours";
 import { computeRecurrence, type Recurrence } from "./recurrence";
 import type { AppointmentWithRefs, ClientPackage, ClientRow, ClientStats, ServiceRow, TimeBlock } from "./types";
 
-export const APPT_SELECT = "*, clients(id, name, phone), services(id, name, duration_min)";
+export const APPT_SELECT = "*, clients(id, name, phone), services(id, name, duration_min), vouchers(id, code, kind, balance, service_name)";
 
 /** Início do dia `date` em São Paulo, como timestamp. */
 export const dayStart = (date: string) => `${date}T00:00:00${SP_OFFSET}`;

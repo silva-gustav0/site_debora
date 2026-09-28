@@ -12,7 +12,7 @@ export default async function AttendancePage({ params }: PageProps<"/painel/aten
   const { supabase } = await requireStaff();
   const { data: appt } = await supabase
     .from("appointments")
-    .select("id, status, price, client_package_id, starts_at, ends_at, notes, clients(id, name, skin_type, allergies, health_notes), services(name, category, duration_min)")
+    .select("id, status, price, client_package_id, starts_at, ends_at, notes, voucher_amount, clients(id, name, skin_type, allergies, health_notes), services(name, category, duration_min), vouchers(code, kind, balance)")
     .eq("id", id).maybeSingle();
   if (!appt) notFound();
 
@@ -26,11 +26,16 @@ export default async function AttendancePage({ params }: PageProps<"/painel/aten
       : Promise.resolve({ data: null }),
   ]);
   const serviceName = service?.name ?? "Atendimento";
+  // Voucher: mesmo cálculo de completeAppointment (quanto ele cobre e o que falta cobrar).
+  const v = appt.vouchers as unknown as { code: string; kind: "servico" | "valor"; balance: number } | null;
+  const price = Number(appt.price);
+  const covered = !v ? 0 : appt.voucher_amount !== null ? Number(appt.voucher_amount) : v.kind === "servico" ? price : Math.min(Number(v.balance), price);
+  const voucher = v ? { code: v.code, covered, due: Math.max(0, Math.round((price - covered) * 100) / 100) } : null;
   const minutes = service?.duration_min ?? Math.max(15, Math.round((Date.parse(appt.ends_at) - Date.parse(appt.starts_at)) / 60_000));
 
   return (
     <AttendanceScreen
-      appointment={{ id: appt.id, status: appt.status, price: Number(appt.price), fromPackage: Boolean(appt.client_package_id), notes: appt.notes }}
+      appointment={{ id: appt.id, status: appt.status, price, fromPackage: Boolean(appt.client_package_id), notes: appt.notes, voucher }}
       client={client}
       serviceName={serviceName}
       minutes={minutes}

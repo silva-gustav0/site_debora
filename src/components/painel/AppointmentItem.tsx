@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRight, Package } from "lucide-react";
+import { ChevronRight, Gift, Package } from "lucide-react";
 import { Avatar, StatusBadge, STATUS_BORDER } from "./ui";
 import { dateSP, fmtDate, fmtTime } from "@/lib/format";
 import type { AppointmentWithRefs } from "@/lib/types";
@@ -23,6 +23,7 @@ export default function AppointmentItem({ appt, showDate = false }: { appt: Appo
         <p className="text-sm text-[#2B221B] truncate">{appt.clients?.name ?? "Cliente removido"}</p>
         <p className="text-xs text-[#857566] truncate flex items-center gap-1">
           {appt.client_package_id && <Package size={11} className="text-[#C9973A]" />}
+          {appt.voucher_id && <Gift size={11} className="text-[#1F6B3A]" aria-label="Pago com voucher" />}
           {appt.services?.name}
         </p>
       </div>

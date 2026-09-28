@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Globe, Package, Lock } from "lucide-react";
+import { Gift, Globe, Package, Lock } from "lucide-react";
 import { STATUS_STYLE } from "./ui";
 import { dateSP, fmtDate, fmtTime, fmtWeekday } from "@/lib/format";
 import { dayHours, toHHMM, toMinutes } from "@/lib/hours";
@@ -197,6 +197,7 @@ export default function AgendaGrid({
                       <span className="flex items-center gap-1 font-bold p-num">
                         {fmtTime(appt.starts_at)}
                         {appt.client_package_id && <Package size={10} aria-label="Pacote" />}
+                        {appt.voucher_id && <Gift size={10} aria-label="Pago com voucher" />}
                         {appt.source === "site" && <Globe size={10} aria-label="Pelo site" />}
                       </span>
                       <span className="block truncate">{appt.clients?.name ?? "—"}</span>

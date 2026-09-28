@@ -278,24 +278,42 @@ export async function completeAppointment(_prev: ActionState, fd: FormData): Pro
   const id = str(fd, "id");
 
   const { data: appt } = await supabase
-    .from("appointments").select("id, client_id, service_id, client_package_id, services(name)").eq("id", id).maybeSingle();
+    .from("appointments")
+    .select("id, client_id, service_id, client_package_id, price, voucher_id, voucher_amount, services(name), vouchers(id, code, kind, balance)")
+    .eq("id", id).maybeSingle();
   if (!appt) return fail("Atendimento não encontrado.");
   const serviceName = (appt.services as unknown as { name: string } | null)?.name ?? "Atendimento";
 
-  const register = bool(fd, "register_payment");
+  // Voucher: a venda já entrou no financeiro. Aqui só se desconta o saldo (uma vez) e se cobra a diferença, se houver.
+  const voucher = appt.vouchers as unknown as { id: string; code: string; kind: "servico" | "valor"; balance: number } | null;
+  const price = Number(appt.price);
+  const covered = !voucher ? 0
+    : appt.voucher_amount !== null ? Number(appt.voucher_amount)
+    : voucher.kind === "servico" ? price : Math.min(Number(voucher.balance), price);
+  const due = Math.max(0, Math.round((price - covered) * 100) / 100);
+
+  const register = bool(fd, "register_payment") && !(voucher && due === 0);
   const amount = money(fd, "amount");
   if (register && (!Number.isFinite(amount) || amount <= 0)) return fail("Informe o valor recebido.");
 
   const patch: Record<string, unknown> = { status: "concluido" };
-  if (register) patch.price = amount;
+  if (register && !voucher) patch.price = amount;
+  if (voucher && appt.voucher_amount === null) patch.voucher_amount = covered;
   const { error } = await supabase.from("appointments").update(patch).eq("id", id);
   if (error) return fail("Não foi possível concluir o atendimento.");
+
+  if (voucher && appt.voucher_amount === null) {
+    const balance = voucher.kind === "servico" ? 0 : Math.max(0, Math.round((Number(voucher.balance) - covered) * 100) / 100);
+    await supabase.from("vouchers").update({
+      balance, ...(balance === 0 ? { status: "usado", used_at: new Date().toISOString() } : {}),
+    }).eq("id", voucher.id);
+  }
 
   if (register) {
     const settings = await getSettings(supabase);
     const m = method(fd);
     const { error: txError } = await supabase.from("transactions").insert({
-      kind: "receita", category: "Atendimento", description: serviceName, amount, method: m,
+      kind: "receita", category: "Atendimento", description: voucher ? `${serviceName} (diferença do voucher ${voucher.code})` : serviceName, amount, method: m,
       fee: cardFee(settings, m, amount), occurred_on: todaySP(), status: "pago",
       client_id: appt.client_id, appointment_id: appt.id,
     });
@@ -322,6 +340,7 @@ export async function completeAppointment(_prev: ActionState, fd: FormData): Pro
   }
 
   await supabase.from("clients").update({ stage: "cliente" }).eq("id", appt.client_id).in("stage", ["lead", "em_contato", "inativa"]);
+  if (voucher && !register) return done(`Atendimento concluído. Pago com o voucher ${voucher.code}.`);
   return done(register ? "Atendimento concluído e pagamento registrado." : "Atendimento concluído.");
 }
 

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BellRing, CalendarClock, CheckCircle2, Clock, MessageCircle, Package, Play, UserRound, XCircle } from "lucide-react";
+import { BellRing, CalendarClock, CheckCircle2, Clock, Gift, MessageCircle, Package, Play, UserRound, XCircle } from "lucide-react";
 import ActionForm from "./ActionForm";
 import AnamnesisLinkButton from "./AnamnesisLinkButton";
 import SubmitButton from "./SubmitButton";
@@ -41,6 +41,10 @@ export default function AppointmentPanel({
   };
   const wa = (key: keyof Settings["templates"]) => whatsappLink(client?.phone, fillTemplate(settings.templates[key], vars));
   const hoursUntil = (Date.parse(appt.starts_at) - nowMs()) / 3_600_000;
+  // Voucher: quanto ele cobre e quanto falta cobrar (igual ao cálculo de completeAppointment).
+  const v = appt.vouchers;
+  const covered = !v ? 0 : appt.voucher_amount !== null ? Number(appt.voucher_amount) : v.kind === "servico" ? Number(appt.price) : Math.min(Number(v.balance), Number(appt.price));
+  const due = Math.max(0, Math.round((Number(appt.price) - covered) * 100) / 100);
   const al = anamnesisLink;
   const anamnesisStatus = !al || al.revoked_at ? null
     : al.submitted_at ? `Ficha recebida às ${fmtTime(al.submitted_at)} de ${fmtDate(al.submitted_at)}.`
@@ -69,11 +73,18 @@ export default function AppointmentPanel({
         </div>
         <p className="flex items-center gap-2 text-[#6B5A4B]"><CalendarClock size={15} className="text-[#C9973A]" /> {fmtWeekday(day)}, {fmtDate(day, { year: undefined })}</p>
         <p className="flex items-center gap-2 text-[#6B5A4B]"><Clock size={15} className="text-[#C9973A]" /> {time}–{fmtTime(appt.ends_at)}</p>
-        <p className="text-[#6B5A4B]">Valor: <strong className="p-num">{pkg ? "Pacote" : brl(appt.price)}</strong></p>
+        <p className="text-[#6B5A4B]">Valor: <strong className="p-num">{pkg ? "Pacote" : v ? (due === 0 ? "Pago (voucher)" : `${brl(due)} + voucher`) : brl(appt.price)}</strong></p>
         <p className="text-[#6B5A4B]">Origem: {appt.source === "site" ? "Site" : "Painel"}</p>
         {pkg && (
           <p className="col-span-2 flex items-center gap-2 text-[#6B5A4B]">
             <Package size={15} className="text-[#C9973A]" /> {pkg.name} · sessão {Number(pkg.sessions_used) + (appt.status === "concluido" ? 0 : 1)} de {pkg.sessions_total}
+          </p>
+        )}
+        {v && (
+          <p className="col-span-2 flex items-center gap-2 rounded-xl px-3 py-2 text-[#1F6B3A] bg-[#EAF6EE]">
+            <Gift size={15} /> Voucher <strong className="p-num">{v.code}</strong> ·{" "}
+            {v.kind === "servico" ? `${v.service_name ?? "serviço"} já pago` : `cobre ${brl(covered)}`}
+            {due > 0 && <span className="text-[#6B5A4B]"> · cobrar {brl(due)}</span>}
           </p>
         )}
         {appt.confirmed_at && <p className="col-span-2 text-xs text-[#857566]">Confirmado em {fmtDate(appt.confirmed_at)} {fmtTime(appt.confirmed_at)}</p>}
@@ -128,23 +139,30 @@ export default function AppointmentPanel({
         <ActionForm action={completeAppointment} className="rounded-2xl border border-[#EEE5D8] bg-white p-4 flex flex-col gap-3">
           <input type="hidden" name="id" value={appt.id} />
           <p className="p-display text-xl text-[#2B221B]">Concluir atendimento</p>
+          {v && due === 0 ? (
+            <p className="flex items-center gap-2 text-sm rounded-xl px-3 py-2.5 bg-[#EAF6EE] text-[#1F6B3A]">
+              <CheckCircle2 size={15} /> Já pago pelo voucher {v.code}. Não cobre a cliente.
+            </p>
+          ) : (<>
+          {v && <p className="text-sm text-[#6B5A4B]">O voucher {v.code} cobre {brl(covered)}. Cobre só a diferença.</p>}
           <label className="flex items-center gap-2 text-sm text-[#6B5A4B]">
             <input type="checkbox" name="register_payment" defaultChecked={!pkg} className="accent-[#82590F]" />
             Registrar pagamento {pkg && <Badge tone="plum">sessão de pacote já paga</Badge>}
           </label>
           <div className="grid grid-cols-2 gap-2">
             <label>
-              <span className="p-label">Valor recebido</span>
-              <input name="amount" inputMode="decimal" defaultValue={String(appt.price).replace(".", ",")} className="p-input p-num" />
+              <span className="p-label">{v ? "Diferença recebida" : "Valor recebido"}</span>
+              <input name="amount" inputMode="decimal" defaultValue={String(v ? due : appt.price).replace(".", ",")} className="p-input p-num" />
             </label>
             <label>
               <span className="p-label">Forma</span>
               <select name="method" defaultValue="pix" className="p-input">
-                {Object.entries(METHOD_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                {Object.entries(METHOD_LABEL).map(([m, l]) => <option key={m} value={m}>{l}</option>)}
               </select>
             </label>
           </div>
           <p className="text-[11px] text-[#857566]">Taxas da maquininha: crédito {settings.fee_credit}% · débito {settings.fee_debit}% (lançadas automaticamente).</p>
+          </>)}
           <label>
             <span className="p-label">Evolução da sessão (vai para o prontuário)</span>
             <textarea name="record_note" rows={3} placeholder="Como foi a sessão, produtos usados, reação da pele, orientações…" className="p-input resize-y" />
