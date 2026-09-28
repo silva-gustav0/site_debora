@@ -53,7 +53,7 @@ export const PROMO_TEMPLATES: PromoTemplate[] = [
     key: "pais", name: "Dia dos Pais", label: "Dia dos Pais",
     title: "Cuidado também é para ele",
     description: "Limpeza de pele e massagem com condição especial no mês do Dia dos Pais.",
-    notice: "Condição especial", cta: "Garantir o presente",
+    notice: "Condição especial para ele", cta: "Garantir o presente",
     period: (y) => { const d = iso(y, 8, nthWeekday(y, 8, 0, 2)); return [shift(d, -14), d]; },
   },
   {
@@ -88,7 +88,7 @@ export const PROMO_TEMPLATES: PromoTemplate[] = [
     key: "aniversario", name: "Aniversariante do mês", label: "Aniversariante do mês",
     title: "Seu aniversário merece um presente",
     description: "Desconto especial em qualquer procedimento no mês do seu aniversário.",
-    notice: "Aniversariante do mês ganha desconto especial", cta: "Quero meu presente",
+    notice: "Desconto especial no mês do seu aniversário", cta: "Quero meu presente",
   },
 ];
 
