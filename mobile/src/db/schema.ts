@@ -81,9 +81,14 @@ const sync_conflicts = new Table({
   created_at: text, table_name: text, row_id: text, operation: text, data: text, error_code: text, message: text,
 }, { localOnly: true });
 
+/** Só no aparelho: fotos tiradas sem internet, aguardando envio ao Storage (depois viram client_photos). */
+const photo_uploads = new Table({
+  client_id: text, local_uri: text, kind: text, taken_on: text, caption: text, created_at: text, error: text,
+}, { localOnly: true });
+
 export const AppSchema = new Schema({
   clients, appointments, services, time_blocks, session_records, client_photos, interactions, packages,
-  client_packages, products, stock_movements, transactions, vouchers, settings, staff, sync_conflicts,
+  client_packages, products, stock_movements, transactions, vouchers, settings, staff, sync_conflicts, photo_uploads,
 });
 
 export type Database = (typeof AppSchema)["types"];
