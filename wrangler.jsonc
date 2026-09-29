@@ -9,5 +9,10 @@
   "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "clinica-debora" }],
   // Otimização de imagens do next/image pelo Cloudflare Images.
   "images": { "binding": "IMAGES" },
+  // Domínios do site (DNS e certificado gerenciados pelo Cloudflare).
+  "routes": [
+    { "pattern": "deborasilvaestetica.com.br", "custom_domain": true },
+    { "pattern": "www.deborasilvaestetica.com.br", "custom_domain": true }
+  ],
   "observability": { "enabled": true }
 }
