@@ -10,7 +10,8 @@ import { getPublicConfig } from "@/app/actions/public";
 import { DEFAULT_HOURS, hoursSummary } from "@/lib/hours";
 import { ArrowRight, Clock, ArrowLeft } from "lucide-react";
 
-export const revalidate = 300;
+// Montada a cada acesso: edições do painel aparecem na hora (sem cache de páginas no Cloudflare).
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata() {
   const { brand } = await getSiteContent();

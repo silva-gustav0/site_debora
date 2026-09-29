@@ -11,12 +11,8 @@ import { getBlogPost, getBlogPosts, getHomeServices, getSiteContent } from "@/li
 import { categoryColor } from "@/lib/site-content";
 import { ArrowLeft, Clock, Calendar, ArrowRight } from "lucide-react";
 
-// Artigos novos ou editados no painel aparecem sem novo deploy.
-export const revalidate = 300;
-
-export function generateStaticParams() {
-  return [];
-}
+// Montada a cada acesso: artigos novos ou editados no painel aparecem na hora.
+export const dynamic = "force-dynamic";
 
 const defaultContent = (title: string, clinic: string) => `${title} é um tema fascinante no mundo da estética e bem-estar.
 

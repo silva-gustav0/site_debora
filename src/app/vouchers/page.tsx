@@ -10,7 +10,8 @@ import { DEFAULT_HOURS, hoursSummary } from "@/lib/hours";
 import { VOUCHER_MAX, VOUCHER_MIN, VOUCHER_MONTHS, navHidden, vouchersOnSale } from "@/lib/vouchers";
 import { CalendarHeart, CreditCard, Gift } from "lucide-react";
 
-export const revalidate = 300;
+// Montada a cada acesso: edições do painel aparecem na hora (sem cache de páginas no Cloudflare).
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata() {
   const { brand } = await getSiteContent();

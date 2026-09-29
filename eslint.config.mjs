@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // App Android (Expo) tem configuração própria.
     "mobile/**",
+    ".open-next/**",
+    ".wrangler/**",
   ]),
 ]);
 

@@ -152,7 +152,7 @@ export function shiftMonth(ym: string, delta: number) {
 export const lastDayOfMonth = (ym: string) => addDays(`${shiftMonth(ym, 1)}-01`, -1);
 
 /** Endereço público do site: variável própria, senão o domínio de produção informado pela Vercel. */
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000")).replace(/\/$/, "");
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
 
 /** Instante atual em ms (isolado para uso em Server Components). */
 export const nowMs = () => Date.now();

@@ -1,4 +1,8 @@
 import type { NextConfig } from "next";
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+
+// Bindings do Cloudflare disponíveis também no `next dev`.
+initOpenNextCloudflareForDev();
 
 // Fotos do site enviadas pelo painel ficam no Storage público do Supabase.
 const supabaseHost = (() => {
@@ -37,6 +41,8 @@ const noReferrer = [{ key: "Referrer-Policy", value: "no-referrer" }];
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Versão publicada (o painel avisa quando há deploy novo): commit do GitHub Actions ou hora do build.
+  env: { APP_BUILD_ID: process.env.GITHUB_SHA || String(Date.now()) },
   // Endereço único do site: www → sem www.
   async redirects() {
     return [{ source: "/:path*", has: [{ type: "host", value: "www.deborasilvaestetica.com.br" }], destination: "https://deborasilvaestetica.com.br/:path*", permanent: true }];

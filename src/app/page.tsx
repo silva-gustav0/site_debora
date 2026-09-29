@@ -15,8 +15,8 @@ import { getPublicConfig } from "@/app/actions/public";
 import { DEFAULT_HOURS, hoursSummary } from "@/lib/hours";
 import { getActivePromotions, getBlogPosts, getHomeServices, getSiteContent } from "@/lib/site";
 
-// Conteúdo, serviços e horários vêm do banco; o painel revalida ao salvar, e isto é a rede de segurança.
-export const revalidate = 300;
+// Montada a cada acesso: edições do painel aparecem na hora (sem cache de páginas no Cloudflare).
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { seo } = await getSiteContent();

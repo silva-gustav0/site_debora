@@ -3,10 +3,10 @@ import { createHash } from "crypto";
 import { headers } from "next/headers";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-/** IP de quem chamou (a Vercel preenche x-forwarded-for; o primeiro item é o cliente). */
+/** IP de quem chamou (Cloudflare envia cf-connecting-ip; fora dele, o primeiro item de x-forwarded-for). */
 export async function clientIp() {
   const h = await headers();
-  return (h.get("x-forwarded-for")?.split(",")[0] ?? h.get("x-real-ip") ?? "").trim() || "desconhecido";
+  return (h.get("cf-connecting-ip") ?? h.get("x-forwarded-for")?.split(",")[0] ?? "").trim() || "desconhecido";
 }
 
 // O sal vem da chave secreta: o hash não pode ser revertido para o IP/telefone por quem só vê o banco.
