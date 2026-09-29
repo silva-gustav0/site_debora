@@ -1,0 +1,37 @@
+{
+  "expo": {
+    "name": "Débora Equipe",
+    "slug": "debora-equipe",
+    "version": "2.0.0",
+    "orientation": "default",
+    "icon": "./assets/images/icon.png",
+    "scheme": "deboraequipe",
+    "userInterfaceStyle": "light",
+    "android": {
+      "package": "br.com.clinicadeborasilva.equipe",
+      "versionCode": 3,
+      "allowBackup": false,
+      "adaptiveIcon": {
+        "backgroundColor": "#FBF7EE",
+        "foregroundImage": "./assets/images/icon.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FBF7EE",
+          "image": "./assets/images/icon.png",
+          "imageWidth": 120
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}
