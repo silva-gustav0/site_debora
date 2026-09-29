@@ -3,6 +3,23 @@
 Última atualização: 28/09/2026 (vistoria de segurança). Produção: https://clinica-talissa-eta.vercel.app (Vercel, projeto `clinica-talissa`).
 Todo push no `master` publica em produção.
 
+## App Android nativo (offline) — `mobile/` (29/09/2026)
+
+Substitui o app antigo (TWA que só abria o site). Guia técnico: `mobile/APP-GUIDE.md`.
+- Expo SDK 57 + PowerSync (SQLite criptografado, chave no Keystore). Todo o painel funciona offline e sincroniza
+  em tempo real (envio em até 100 ms). Regras de negócio ficam no banco (gatilhos + `apply_changes`, migração
+  `20261001120000`), valendo para site, painel web e app. Recusas do servidor aparecem em "Conflitos".
+- PowerSync Cloud: instância `6abb2c938453e7cf833af506` (config em `mobile/powersync/`; publicar com
+  `npx powersync deploy` e `PS_ADMIN_TOKEN`). Usuário de replicação `powersync_role` (senha em `.env.local`).
+- Build: EAS (`npx eas-cli build -p android --profile preview`), conta Expo `gustavoramalho`, projeto `debora-equipe`,
+  chave de assinatura gerada pelo EAS. Mesmo pacote do app antigo: **desinstalar o app antigo antes** de instalar.
+- Código compartilhado com o site: `mobile` importa `../src/lib` puro via `@shared/*` (não importar arquivos `server-only`).
+- Equipe (criar/remover acesso) pelo app usa `POST /api/app/equipe` (chave secreta só no servidor).
+- Máquina de desenvolvimento tem disco pequeno (live, ~7,7 GB): não compilar Android localmente.
+
+**Pendências do app:** testar no tablet (fotos/Storage, datas, tempo de sincronização medido), exportar CSV,
+"atendimentos sem pagamento", ticket médio/gráfico de 6 meses no Início, cronômetro do atendimento não sobrevive a fechar o app.
+
 ## Vistoria de segurança (28/09/2026)
 
 Feita com 4 agentes (site público, painel, banco, configuração). Correções aplicadas:
