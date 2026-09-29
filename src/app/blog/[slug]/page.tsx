@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { navHidden } from "@/lib/vouchers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navbar from "@/components/Navbar";
@@ -59,7 +60,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   return (
     <>
-      <Navbar logo={brand.logo} name={brand.full_name} hidden={content.layout.hidden} />
+      <Navbar logo={brand.logo} name={brand.full_name} hidden={navHidden(content.layout.hidden)} />
       <main>
         {/* Hero */}
         <section

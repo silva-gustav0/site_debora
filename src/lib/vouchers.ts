@@ -93,6 +93,11 @@ export async function findUsableVoucher(db: SupabaseClient, input: string): Prom
 const API = "https://api.checkout.infinitepay.io";
 export const infinitePayHandle = () => (process.env.INFINITEPAY_HANDLE ?? "").replace(/^\$/, "").trim();
 
+/** Venda online só aparece no site com a InfiniteTag configurada (INFINITEPAY_HANDLE). */
+export const vouchersOnSale = () => Boolean(infinitePayHandle());
+/** Seções ocultas do menu, incluindo "Vale-presente" enquanto a venda online não estiver ativa. */
+export const navHidden = (hidden: string[]) => (vouchersOnSale() ? hidden : [...hidden, "vouchers"]);
+
 /** Cria o link de pagamento; o preço vai em centavos. */
 export async function createCheckoutLink(input: {
   orderNsu: string; amount: number; description: string; redirectUrl: string; webhookUrl: string;

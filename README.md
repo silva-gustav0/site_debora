@@ -8,6 +8,7 @@ Site da clínica + painel de gestão da esteticista (Next.js 16 + Supabase).
 - Agendamento online com horários livres reais (respeita duração do serviço, horário de funcionamento, intervalo, bloqueios e antecedência mínima).
 - Link “Meu agendamento” para a cliente consultar, salvar na agenda do celular (.ics) ou cancelar dentro do prazo.
 - Formulário de contato que vira lead e tarefa no CRM.
+- Vale-presente (vouchers) pago pela InfinitePay, com código e QR code; o código pode ser usado no agendamento.
 
 **Painel (`/painel`, só equipe)**
 - **Início**: faturamento do mês, pedidos a confirmar, agenda do dia, alertas (estoque, contas, pacotes, aniversários), tarefas e retornos.
@@ -32,6 +33,9 @@ Site da clínica + painel de gestão da esteticista (Next.js 16 + Supabase).
 5. `npm run dev` e acesse `http://localhost:3000` e `/painel`.
 
 Na Vercel, cadastre as mesmas variáveis e `NEXT_PUBLIC_SITE_URL` com o domínio real (usado nos links enviados às clientes).
+Para vender vouchers online, cadastre `INFINITEPAY_HANDLE` (InfiniteTag da clínica).
+
+O andamento do projeto e as pendências estão em [`docs/ESTADO-ATUAL.md`](docs/ESTADO-ATUAL.md).
 
 ## Banco de dados
 

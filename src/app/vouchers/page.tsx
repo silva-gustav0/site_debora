@@ -7,7 +7,7 @@ import { getHomeServices, getSiteContent } from "@/lib/site";
 import { getPublicConfig } from "@/app/actions/public";
 import { getVoucherOffers } from "@/app/actions/vouchers";
 import { DEFAULT_HOURS, hoursSummary } from "@/lib/hours";
-import { VOUCHER_MAX, VOUCHER_MIN, VOUCHER_MONTHS } from "@/lib/vouchers";
+import { VOUCHER_MAX, VOUCHER_MIN, VOUCHER_MONTHS, navHidden, vouchersOnSale } from "@/lib/vouchers";
 import { CalendarHeart, CreditCard, Gift } from "lucide-react";
 
 export const revalidate = 300;
@@ -37,7 +37,7 @@ export default async function VouchersPage() {
 
   return (
     <>
-      <Navbar logo={brand.logo} name={brand.full_name} hidden={content.layout.hidden} />
+      <Navbar logo={brand.logo} name={brand.full_name} hidden={navHidden(content.layout.hidden)} />
       <main>
         {/* Header */}
         <section
@@ -105,7 +105,15 @@ export default async function VouchersPage() {
 
         <section className="py-16 sm:py-20 bg-[#FDFAF7]">
           <div className="max-w-6xl mx-auto px-6 lg:px-10">
-            <VoucherPurchase offers={offers} min={VOUCHER_MIN} max={VOUCHER_MAX} months={VOUCHER_MONTHS} />
+            {vouchersOnSale() ? (
+              <VoucherPurchase offers={offers} min={VOUCHER_MIN} max={VOUCHER_MAX} months={VOUCHER_MONTHS} />
+            ) : (
+              <div className="max-w-xl mx-auto text-center rounded-2xl px-8 py-12" style={{ background: "#FBF7EE", border: "1px solid #EEDFBF" }}>
+                <p className="section-label">Em breve</p>
+                <p className="text-3xl font-light text-bronze-800 mt-3 mb-3">A venda online de vale-presentes está chegando</p>
+                <p className="text-sm font-light text-text-secondary leading-7">Enquanto isso, fale com a gente pelo WhatsApp para comprar o seu.</p>
+              </div>
+            )}
           </div>
         </section>
       </main>

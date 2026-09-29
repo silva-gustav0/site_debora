@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { navHidden } from "@/lib/vouchers";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -27,7 +28,7 @@ export default async function BlogPage() {
 
   return (
     <>
-      <Navbar logo={brand.logo} name={brand.full_name} hidden={content.layout.hidden} />
+      <Navbar logo={brand.logo} name={brand.full_name} hidden={navHidden(content.layout.hidden)} />
       <main>
         {/* Header */}
         <section

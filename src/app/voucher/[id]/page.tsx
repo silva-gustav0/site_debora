@@ -11,7 +11,7 @@ import { DEFAULT_HOURS, hoursSummary } from "@/lib/hours";
 import { getSettings } from "@/lib/settings";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { brl, firstName, fmtDate, SITE_URL, whatsappLink } from "@/lib/format";
-import { openAppointmentFor, STATE_LABEL, voucherPath, voucherState, type VoucherRow, type VoucherState } from "@/lib/vouchers";
+import { openAppointmentFor, STATE_LABEL, voucherPath, voucherState, type VoucherRow, type VoucherState, navHidden } from "@/lib/vouchers";
 import { CopyCode, PaymentWatcher, PrintButton } from "./VoucherClient";
 
 // O status muda quando o pagamento é confirmado: sempre renderiza na hora.
@@ -60,7 +60,7 @@ export default async function VoucherPage({ params }: PageProps<"/voucher/[id]">
   const chrome = (children: React.ReactNode) => (
     <>
       <div className="print:hidden">
-        <Navbar logo={brand.logo} name={brand.full_name} hidden={content.layout.hidden} />
+        <Navbar logo={brand.logo} name={brand.full_name} hidden={navHidden(content.layout.hidden)} />
       </div>
       <main
         className="min-h-[70vh] pt-32 sm:pt-36 pb-20 px-4 sm:px-6 bg-linear-to-br from-[#FBF7EE] via-[#FDFAF7] to-[#FFF8E7] print:bg-none print:bg-white print:pt-6 print:pb-0"

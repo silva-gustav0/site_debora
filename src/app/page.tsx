@@ -1,4 +1,5 @@
 import { Fragment } from "react";
+import { navHidden } from "@/lib/vouchers";
 import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
@@ -49,7 +50,7 @@ export default async function Home() {
 
   return (
     <>
-      <Navbar logo={content.brand.logo} name={content.brand.full_name} hidden={hidden} extra={menu} />
+      <Navbar logo={content.brand.logo} name={content.brand.full_name} hidden={navHidden(hidden)} extra={menu} />
       <main>
         {(Object.keys(blocks) as (keyof typeof blocks)[]).map((k) => (
           <Fragment key={k}>
