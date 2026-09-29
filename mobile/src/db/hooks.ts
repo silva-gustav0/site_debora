@@ -14,7 +14,7 @@ export function asJson<T>(v: unknown, fallback: T): T {
 export const asList = (v: unknown) => asJson<string[]>(v, []);
 
 /** Endereço público do site (links "meu agendamento", anamnese, voucher enviados às clientes). */
-export const SITE_URL = (process.env.EXPO_PUBLIC_SITE_URL || "https://clinica-talissa-eta.vercel.app").replace(/\/$/, "");
+export const SITE_URL = (process.env.EXPO_PUBLIC_SITE_URL || "https://deborasilvaestetica.com.br").replace(/\/$/, "");
 
 type SettingsRow = Record<string, unknown>;
 
