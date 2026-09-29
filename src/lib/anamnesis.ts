@@ -19,9 +19,17 @@ function readAnswer(fd: FormData, q: ReturnType<typeof allQuestions>[number]): A
  * (usada pela equipe e pelo link do cliente). Respostas de perguntas que saíram do modelo são mantidas.
  */
 export function anamnesisUpdate(fd: FormData, filledBy: "equipe" | "cliente", form: AnamnesisFormDef, previous: Anamnesis | null) {
+  const answers = Object.fromEntries(allQuestions(form).map((q) => [q.id, readAnswer(fd, q)]));
+  return anamnesisFromAnswers(answers, filledBy, form, previous);
+}
+
+/** Monta a ficha e o resumo de saúde a partir das respostas já lidas (site e app). */
+export function anamnesisFromAnswers(
+  given: Record<string, AnswerValue>, filledBy: "equipe" | "cliente", form: AnamnesisFormDef, previous: Anamnesis | null,
+) {
   const questions = allQuestions(form);
   const answers: Record<string, AnswerValue> = { ...(previous ?? {}) };
-  for (const q of questions) answers[q.id] = readAnswer(fd, q);
+  for (const q of questions) answers[q.id] = given[q.id];
   const anamnesis = { ...answers, filled_by: filledBy, filled_at: new Date().toISOString() } as Anamnesis;
 
   const text = (id: string) => { const v = answers[id]; return typeof v === "string" && v ? v : null; };

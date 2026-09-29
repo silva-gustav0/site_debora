@@ -1,6 +1,8 @@
 import { addDays, dateSP, diffDays } from "./format";
 import type { ClientStats } from "./types";
-import type { Tone } from "@/components/painel/ui";
+
+/** Cores das etiquetas (as mesmas do painel). */
+type Tone = "red" | "gold" | "gray" | "blue" | "green";
 
 export type RecurrenceStatus = "agendada" | "atrasada" | "proxima" | "em_dia" | "inativa" | "sem_visita";
 

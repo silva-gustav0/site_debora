@@ -3,6 +3,7 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import { LoadingScreen, LockScreen, LoginScreen } from "@/components/auth-screens";
+import { ToastProvider } from "@/components/ui";
 import { openDatabase } from "@/db/database";
 import { SessionProvider, useSession } from "@/lib/session";
 
@@ -26,7 +27,9 @@ function Gate() {
   if (!db) return <LoadingScreen />;
   return (
     <PowerSyncContext.Provider value={db}>
-      <Stack screenOptions={{ headerShown: false }} />
+      <ToastProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+      </ToastProvider>
     </PowerSyncContext.Provider>
   );
 }

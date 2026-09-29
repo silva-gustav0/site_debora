@@ -2,11 +2,13 @@ import { useQuery, useStatus } from "@powersync/react-native";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Brand } from "@/constants/brand";
+import { useSettings } from "@/db/hooks";
 import { useSession } from "@/lib/session";
 
 /** Início provisório (fase 1): mostra a sincronização e os conflitos. As telas do painel entram na fase 2. */
 export default function Home() {
   const { session, signOut } = useSession();
+  const settings = useSettings();
   const sync = useStatus();
   const { data: counts } = useQuery<{ clients: number; appointments: number; pending: number }>(
     `select (select count(*) from clients) as clients,
@@ -25,7 +27,7 @@ export default function Home() {
   return (
     <SafeAreaView style={s.screen}>
       <ScrollView contentContainerStyle={s.content}>
-        <Text style={s.eyebrow}>Clínica Débora Silva</Text>
+        <Text style={s.eyebrow}>{settings.clinic_name}</Text>
         <Text style={s.title}>Olá!</Text>
         <Text style={s.muted}>{session?.user.email}</Text>
 
