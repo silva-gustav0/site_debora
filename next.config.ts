@@ -45,7 +45,11 @@ const nextConfig: NextConfig = {
   env: { APP_BUILD_ID: process.env.GITHUB_SHA || String(Date.now()) },
   // Endereço único do site: www → sem www.
   async redirects() {
-    return [{ source: "/:path*", has: [{ type: "host", value: "www.deborasilvaestetica.com.br" }], destination: "https://deborasilvaestetica.com.br/:path*", permanent: true }];
+    return [
+      { source: "/:path*", has: [{ type: "host", value: "www.deborasilvaestetica.com.br" }], destination: "https://deborasilvaestetica.com.br/:path*", permanent: true },
+      // Link antigo do APK: agora o app nativo fica nas Releases do GitHub.
+      { source: "/app/debora-equipe.apk", destination: "https://github.com/silva-gustav0/site_debora/releases/latest/download/debora-equipe.apk", permanent: false },
+    ];
   },
   async headers() {
     return [
@@ -54,8 +58,6 @@ const nextConfig: NextConfig = {
       { source: "/anamnese/:path*", headers: noReferrer },
       { source: "/voucher/:path*", headers: noReferrer },
       { source: "/sw.js", headers: [{ key: "Cache-Control", value: "no-cache" }] },
-      // O APK do app da equipe baixa como arquivo instalável no Android.
-      { source: "/app/debora-equipe.apk", headers: [{ key: "Content-Type", value: "application/vnd.android.package-archive" }, { key: "Content-Disposition", value: "attachment" }] },
     ];
   },
   experimental: {

@@ -46,7 +46,7 @@ export default function UpdateBanner({ version }: { version: string }) {
           <button onClick={() => setDismissed(true)} aria-label="Lembrar depois" className="absolute top-2 right-2 p-2 text-white/60"><X size={16} /></button>
           <p className="text-[10px] tracking-[0.24em] uppercase text-[#E8C882]">Atualização disponível</p>
           <p className="text-sm mt-1 pr-6 text-white/85">
-            {apkUpdate ? "Há uma nova versão do aplicativo. A instalação leva poucos segundos." : "Há uma nova versão do painel com melhorias. Seus dados continuam salvos."}
+            {apkUpdate ? "Novo app da equipe: funciona sem internet. Antes de instalar, desinstale este app (seus dados ficam salvos no painel)." : "Há uma nova versão do painel com melhorias. Seus dados continuam salvos."}
           </p>
           <button onClick={update} className="p-btn p-btn-gold mt-3 w-full">
             {apkUpdate ? <Download size={15} /> : <RefreshCw size={15} />} {apkUpdate ? "Instalar atualização" : "Atualizar agora"}
@@ -59,7 +59,7 @@ export default function UpdateBanner({ version }: { version: string }) {
           <img src="/app/icon-192.png" alt="" width={96} height={96} className="w-24 h-24 rounded-3xl update-pulse" />
           <div className="w-52 h-1 rounded-full bg-white/10 overflow-hidden"><div className="h-full update-bar" style={{ background: "linear-gradient(90deg,#C9973A,#F3DDA6)" }} /></div>
           <p className="p-display text-2xl">Atualizando…</p>
-          <p className="text-xs text-white/50">{apkUpdate ? "Toque em Instalar quando o Android pedir." : "O painel vai reabrir em instantes."}</p>
+          <p className="text-xs text-white/50">{apkUpdate ? "Desinstale o app antigo e abra o arquivo baixado para instalar." : "O painel vai reabrir em instantes."}</p>
         </div>
       )}
     </>

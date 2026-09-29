@@ -15,7 +15,10 @@
         "backgroundColor": "#FBF7EE",
         "foregroundImage": "./assets/images/icon.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "plugins": [
       "expo-router",
@@ -51,6 +54,13 @@
         "projectId": "2591fd05-8003-4854-b608-fc0922517240"
       }
     },
-    "owner": "gustavoramalho"
+    "owner": "gustavoramalho",
+    "updates": {
+      "url": "https://u.expo.dev/2591fd05-8003-4854-b608-fc0922517240"
+    },
+    "ios": {},
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    }
   }
 }
