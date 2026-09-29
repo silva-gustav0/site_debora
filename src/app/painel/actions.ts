@@ -28,7 +28,9 @@ const KINDS = ["nota", "whatsapp", "ligacao", "followup"];
 const STATUSES = ["solicitado", "confirmado", "cancelado", "faltou"];
 const method = (fd: FormData) => (METHODS.includes(str(fd, "method")) ? str(fd, "method") : "pix");
 
-function dbError(code: string | undefined, fallback: string) {
+/** Mensagem para a equipe; regras do banco (P0001) já vêm com o texto certo. */
+function dbError(code: string | undefined, fallback: string, message?: string) {
+  if (code === "P0001" && message) return message;
   if (code === "23505") return "Já existe um cadastro com esses dados (telefone ou nome repetido).";
   if (code === "23P01") return "Conflito de horário: já existe um atendimento nesse período.";
   if (code === "23503") return "Este item está em uso e não pode ser removido.";
@@ -221,16 +223,8 @@ export async function createAppointment(_prev: ActionState, fd: FormData): Promi
     clientId = created.id;
   }
 
-  // Sessão de pacote: valida que o pacote é da cliente, do serviço e tem saldo.
+  // Sessão de pacote: o banco confere se o pacote é da cliente, do serviço e tem saldo.
   const packageId = opt(fd, "client_package_id");
-  if (packageId) {
-    const { data: pkg } = await supabase
-      .from("client_package_usage").select("client_id, service_id, status, sessions_remaining, sessions_scheduled")
-      .eq("id", packageId).maybeSingle();
-    if (!pkg || pkg.client_id !== clientId || pkg.status !== "ativo") return fail("Pacote inválido para esta cliente.");
-    if (pkg.service_id !== service.id) return fail("O pacote escolhido é de outro serviço.");
-    if (Number(pkg.sessions_remaining) - Number(pkg.sessions_scheduled) <= 0) return fail("Este pacote não tem sessões disponíveis.");
-  }
 
   const duration = int(fd, "duration") || service.duration_min;
   const price = money(fd, "price");
@@ -250,9 +244,7 @@ export async function createAppointment(_prev: ActionState, fd: FormData): Promi
     client_package_id: packageId,
     source: "painel",
   });
-  if (error) return fail(dbError(error.code, "Não foi possível criar o agendamento."));
-
-  await supabase.from("clients").update({ stage: "em_contato" }).eq("id", clientId).eq("stage", "lead");
+  if (error) return fail(dbError(error.code, "Não foi possível criar o agendamento.", error.message));
   return done("Agendamento criado.");
 }
 
@@ -285,7 +277,7 @@ export async function completeAppointment(_prev: ActionState, fd: FormData): Pro
   if (!appt) return fail("Atendimento não encontrado.");
   const serviceName = (appt.services as unknown as { name: string } | null)?.name ?? "Atendimento";
 
-  // Voucher: a venda já entrou no financeiro. Aqui só se desconta o saldo (uma vez) e se cobra a diferença, se houver.
+  // Voucher: a venda já entrou no financeiro. O banco desconta o saldo (uma vez) ao concluir; aqui só se cobra a diferença.
   const voucher = appt.vouchers as unknown as { id: string; code: string; kind: "servico" | "valor"; balance: number } | null;
   const price = Number(appt.price);
   const covered = !voucher ? 0
@@ -297,23 +289,14 @@ export async function completeAppointment(_prev: ActionState, fd: FormData): Pro
   const amount = money(fd, "amount");
   if (register && (!Number.isFinite(amount) || amount <= 0)) return fail("Informe o valor recebido.");
 
+  // O banco cuida do resto ao concluir: saldo do voucher, estágio da cliente e pacote encerrado.
+  // Só conclui o que ainda está aberto (dois cliques ou dois aparelhos não registram o pagamento duas vezes).
   const patch: Record<string, unknown> = { status: "concluido" };
   if (register && !voucher) patch.price = amount;
-  if (voucher && appt.voucher_amount === null) patch.voucher_amount = covered;
-  // Com voucher, só a primeira conclusão desconta (dois cliques ou dois aparelhos ao mesmo tempo não descontam duas vezes).
-  const firstVoucherUse = Boolean(voucher && appt.voucher_amount === null);
-  let upd = supabase.from("appointments").update(patch).eq("id", id);
-  if (firstVoucherUse) upd = upd.is("voucher_amount", null);
-  const { data: updated, error } = await upd.select("id");
-  if (error) return fail("Não foi possível concluir o atendimento.");
-  if (firstVoucherUse && !updated?.length) return fail("Este atendimento acabou de ser concluído em outro aparelho.");
-
-  if (voucher && firstVoucherUse) {
-    const balance = voucher.kind === "servico" ? 0 : Math.max(0, Math.round((Number(voucher.balance) - covered) * 100) / 100);
-    await supabase.from("vouchers").update({
-      balance, ...(balance === 0 ? { status: "usado", used_at: new Date().toISOString() } : {}),
-    }).eq("id", voucher.id).eq("balance", voucher.balance);
-  }
+  const { data: updated, error } = await supabase.from("appointments").update(patch)
+    .eq("id", id).neq("status", "concluido").select("id");
+  if (error) return fail(dbError(error.code, "Não foi possível concluir o atendimento.", error.message));
+  if (!updated?.length) return fail("Este atendimento já foi concluído.");
 
   if (register) {
     const settings = await getSettings(supabase);
@@ -337,15 +320,6 @@ export async function completeAppointment(_prev: ActionState, fd: FormData): Pro
     });
   }
 
-  if (appt.client_package_id) {
-    const { data: pkg } = await supabase
-      .from("client_package_usage").select("sessions_remaining").eq("id", appt.client_package_id).maybeSingle();
-    if (pkg && Number(pkg.sessions_remaining) <= 0) {
-      await supabase.from("client_packages").update({ status: "concluido" }).eq("id", appt.client_package_id);
-    }
-  }
-
-  await supabase.from("clients").update({ stage: "cliente" }).eq("id", appt.client_id).in("stage", ["lead", "em_contato", "inativa"]);
   if (voucher && !register) return done(`Atendimento concluído. Pago com o voucher ${voucher.code}.`);
   return done(register ? "Atendimento concluído e pagamento registrado." : "Atendimento concluído.");
 }
@@ -460,7 +434,6 @@ export async function sellPackage(_prev: ActionState, fd: FormData): Promise<Act
     if (txErr) return fail("Pacote registrado, mas os lançamentos financeiros falharam.");
   }
 
-  await supabase.from("clients").update({ stage: "cliente" }).eq("id", clientId).in("stage", ["lead", "em_contato", "inativa"]);
   return done("Pacote vendido.");
 }
 

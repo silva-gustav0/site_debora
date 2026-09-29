@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { requireStaff } from "@/lib/dal";
 import { digits, METHOD_LABEL, todaySP } from "@/lib/format";
 import { bool, fail, isUuid, money, opt, str } from "@/lib/form";
-import { newVoucherCode, openAppointmentFor, voucherExpiry, VOUCHER_MAX, VOUCHER_MIN } from "@/lib/vouchers";
+import { newVoucherCode, voucherExpiry, VOUCHER_MAX, VOUCHER_MIN } from "@/lib/vouchers";
 import type { ActionState } from "@/lib/types";
 
 /** Voucher vendido no balcão ou dado de cortesia (não passa pela InfinitePay). */
@@ -91,9 +91,7 @@ export async function cancelVoucher(fd: FormData) {
   const { supabase } = await requireStaff();
   const id = str(fd, "id");
   if (!isUuid(id)) return;
-  const { data: v } = await supabase.from("vouchers").select("id, status").eq("id", id).maybeSingle();
-  if (!v || !["ativo", "pendente"].includes(v.status)) return;
-  if (await openAppointmentFor(supabase, id)) return;
+  // O banco recusa cancelar voucher usado ou reservado por um agendamento em aberto.
   await supabase.from("vouchers").update({ status: "cancelado" }).eq("id", id);
   revalidatePath("/painel/vouchers");
 }
