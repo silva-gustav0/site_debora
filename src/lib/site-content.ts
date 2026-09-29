@@ -231,13 +231,29 @@ export type CustomSection = {
 export type SiteLayout = { hidden: BuiltinSection[]; custom: CustomSection[] };
 export type FullContent = SiteContent & { layout: SiteLayout };
 
+// Imagens do site: arquivo do próprio site ("/..."), Storage do Supabase do projeto ou Unsplash (fotos padrão).
+const IMAGE_HOSTS = ["images.unsplash.com", "plus.unsplash.com"];
+export function safeImage(v: string) {
+  if (/^\/(?!\/)/.test(v) && !v.includes("\\")) return v;
+  try {
+    const u = new URL(v);
+    const supabase = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://x").hostname;
+    return u.protocol === "https:" && (u.hostname === supabase || IMAGE_HOSTS.includes(u.hostname)) ? v : "";
+  } catch {
+    return "";
+  }
+}
+
+/** Link externo digitado pela equipe (ex.: Google Maps): só https. */
+export const safeHttps = (v: string) => (/^https:\/\/[^\s]+$/i.test(v) ? v : "");
+
 const pick = <T extends object>(obj: T, v: unknown, def: keyof T) => (typeof v === "string" && v in obj ? v : def) as keyof T;
 const txt = (v: unknown, max: number) => (typeof v === "string" ? v.slice(0, max) : "");
 
 /** Valida uma seção criada (vinda do banco ou do formulário), descartando o que não for esperado. */
 export const toCustomSection = (r: Json): CustomSection => ({
   id: txt(r.id, 12).replace(/[^a-z0-9]/g, ""), eyebrow: txt(r.eyebrow, 120), title: txt(r.title, 200), title_highlight: txt(r.title_highlight, 200),
-  text: txt(r.text, 8000), image: /^(\/|https:\/\/)/.test(txt(r.image, 1000)) ? txt(r.image, 1000) : "", menu_label: txt(r.menu_label, 30),
+  text: txt(r.text, 8000), image: safeImage(txt(r.image, 1000)), menu_label: txt(r.menu_label, 30),
   image_position: pick(IMAGE_POSITIONS, r.image_position, "left"), after: pick(BUILTIN_SECTIONS, r.after, "about"), bg: pick(SECTION_BGS, r.bg, "cream"),
 });
 

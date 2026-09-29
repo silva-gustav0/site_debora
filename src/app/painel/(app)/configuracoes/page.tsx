@@ -6,8 +6,9 @@ import ActionForm from "@/components/painel/ActionForm";
 import SubmitButton from "@/components/painel/SubmitButton";
 import AnamnesisEditor from "@/components/painel/AnamnesisEditor";
 import { consentOrDefault, formOrDefault } from "@/lib/anamnesis-schema";
-import { Avatar, Card, PageHeader, Tabs } from "@/components/painel/ui";
-import { changeOwnPassword, createStaffMember, saveSettings, saveTemplates } from "../../actions";
+import ConfirmButton from "@/components/painel/ConfirmButton";
+import { Avatar, Badge, Card, PageHeader, Tabs } from "@/components/painel/ui";
+import { changeOwnPassword, createStaffMember, removeStaffMember, saveSettings, saveTemplates, setStaffAdmin } from "../../actions";
 import type { BusinessHours, TemplateKey } from "@/lib/types";
 
 export const metadata = { title: "Configurações" };
@@ -23,11 +24,11 @@ const TEMPLATE_INFO: Record<TemplateKey, { title: string; when: string }> = {
 
 export default async function SettingsPage({ searchParams }: PageProps<"/painel/configuracoes">) {
   const sp = await searchParams;
-  const { supabase } = await requireStaff();
+  const { supabase, userId, staff: me } = await requireStaff();
   const tab = ["clinica", "mensagens", "anamnese", "equipe"].includes(String(sp.tab)) ? String(sp.tab) : "clinica";
   const [settings, staffRes] = await Promise.all([
     getSettings(supabase),
-    supabase.from("staff").select("user_id, name, created_at").order("created_at"),
+    supabase.from("staff").select("user_id, name, is_admin, created_at").order("created_at"),
   ]);
   const hours = settings.business_hours;
 
@@ -125,29 +126,48 @@ export default async function SettingsPage({ searchParams }: PageProps<"/painel/
           <Card title="Pessoas com acesso">
             <ul className="flex flex-col gap-2">
               {(staffRes.data ?? []).map((s) => (
-                <li key={s.user_id} className="flex items-center gap-3 rounded-xl border border-[#F0E8DB] px-3 py-2.5">
+                <li key={s.user_id} className="flex flex-wrap items-center gap-3 rounded-xl border border-[#F0E8DB] px-3 py-2.5">
                   <Avatar name={s.name} size={34} />
-                  <span className="flex-1">{s.name}</span>
+                  <span className="flex-1">
+                    {s.name} {s.user_id === userId && <span className="text-xs text-[#857566]">(você)</span>}
+                    {s.is_admin && <span className="ml-2"><Badge tone="gold">Administradora</Badge></span>}
+                  </span>
                   <span className="text-xs text-[#857566]">desde {fmtDate(s.created_at)}</span>
+                  {me.is_admin && s.user_id !== userId && (
+                    <span className="inline-flex gap-1.5">
+                      <form action={setStaffAdmin}>
+                        <input type="hidden" name="user_id" value={s.user_id} /><input type="hidden" name="is_admin" value={s.is_admin ? "0" : "1"} />
+                        <SubmitButton className="p-btn-ghost p-btn-sm">{s.is_admin ? "Tirar administração" : "Tornar administradora"}</SubmitButton>
+                      </form>
+                      <form action={removeStaffMember}>
+                        <input type="hidden" name="user_id" value={s.user_id} />
+                        <ConfirmButton confirmText="Remover acesso">Remover</ConfirmButton>
+                      </form>
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
           </Card>
           <Card title="Minha senha" eyebrow="Sua conta">
             <ActionForm action={changeOwnPassword} resetOnSuccess className="grid gap-3">
-              <label><span className="p-label">Nova senha</span><input name="password" type="password" minLength={8} required autoComplete="new-password" className="p-input" /></label>
-              <label><span className="p-label">Repita a nova senha</span><input name="confirm" type="password" minLength={8} required autoComplete="new-password" className="p-input" /></label>
+              <label><span className="p-label">Senha atual</span><input name="current" type="password" required autoComplete="current-password" className="p-input" /></label>
+              <label><span className="p-label">Nova senha (mín. 10)</span><input name="password" type="password" minLength={10} required autoComplete="new-password" className="p-input" /></label>
+              <label><span className="p-label">Repita a nova senha</span><input name="confirm" type="password" minLength={10} required autoComplete="new-password" className="p-input" /></label>
               <div><SubmitButton>Alterar senha</SubmitButton></div>
             </ActionForm>
           </Card>
-          <Card title="Adicionar pessoa" eyebrow="Recepção, sócia ou outra profissional">
-            <ActionForm action={createStaffMember} resetOnSuccess className="grid gap-3">
-              <label><span className="p-label">Nome</span><input name="name" required className="p-input" /></label>
-              <label><span className="p-label">E-mail</span><input name="email" type="email" required className="p-input" /></label>
-              <label><span className="p-label">Senha inicial (mín. 8)</span><input name="password" type="password" minLength={8} required autoComplete="new-password" className="p-input" /></label>
-              <div><SubmitButton>Criar acesso</SubmitButton></div>
-            </ActionForm>
-          </Card>
+          {me.is_admin && (
+            <Card title="Adicionar pessoa" eyebrow="Recepção, sócia ou outra profissional">
+              <ActionForm action={createStaffMember} resetOnSuccess className="grid gap-3">
+                <label><span className="p-label">Nome</span><input name="name" required className="p-input" /></label>
+                <label><span className="p-label">E-mail</span><input name="email" type="email" required className="p-input" /></label>
+                <label><span className="p-label">Senha inicial (mín. 10)</span><input name="password" type="password" minLength={10} required autoComplete="new-password" className="p-input" /></label>
+                <label className="flex items-center gap-2 text-sm"><input type="checkbox" name="is_admin" className="accent-[#82590F] w-4 h-4" /> Administradora (pode dar e tirar acessos)</label>
+                <div><SubmitButton>Criar acesso</SubmitButton></div>
+              </ActionForm>
+            </Card>
+          )}
         </div>
       )}
     </>

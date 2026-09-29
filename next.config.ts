@@ -9,10 +9,44 @@ const supabaseHost = (() => {
   }
 })();
 
+const supabaseOrigins = supabaseHost ? `https://${supabaseHost} wss://${supabaseHost}` : "";
+
+// Cabeçalhos de segurança de todas as páginas. O Next precisa de scripts inline; em desenvolvimento, também de eval.
+const csp = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === "production" ? "" : " 'unsafe-eval'"}`,
+  "style-src 'self' 'unsafe-inline'",
+  `img-src 'self' data: blob: ${supabaseHost ? `https://${supabaseHost}` : ""} https://images.unsplash.com https://plus.unsplash.com`,
+  `connect-src 'self' ${supabaseOrigins}`,
+  "font-src 'self' data:",
+  "frame-ancestors 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "object-src 'none'",
+].join("; ");
+
+const securityHeaders = [
+  { key: "Content-Security-Policy", value: csp },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: "camera=(self), microphone=(), geolocation=(), payment=()" },
+];
+// Páginas com token na URL não repassam o endereço para outros sites.
+const noReferrer = [{ key: "Referrer-Policy", value: "no-referrer" }];
+
 const nextConfig: NextConfig = {
-  // O APK do app da equipe baixa como arquivo instalável no Android.
+  poweredByHeader: false,
   async headers() {
-    return [{ source: "/sw.js", headers: [{ key: "Cache-Control", value: "no-cache" }] }, { source: "/app/debora-equipe.apk", headers: [{ key: "Content-Type", value: "application/vnd.android.package-archive" }, { key: "Content-Disposition", value: "attachment" }] }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      { source: "/meu-agendamento/:path*", headers: noReferrer },
+      { source: "/anamnese/:path*", headers: noReferrer },
+      { source: "/voucher/:path*", headers: noReferrer },
+      { source: "/sw.js", headers: [{ key: "Cache-Control", value: "no-cache" }] },
+      // O APK do app da equipe baixa como arquivo instalável no Android.
+      { source: "/app/debora-equipe.apk", headers: [{ key: "Content-Type", value: "application/vnd.android.package-archive" }, { key: "Content-Disposition", value: "attachment" }] },
+    ];
   },
   experimental: {
     // Fotos do prontuário são comprimidas no navegador; o limite da Vercel é 4,5 MB.
@@ -30,14 +64,8 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "plus.unsplash.com",
       },
-      {
-        protocol: "https",
-        hostname: "*.supabase.co",
-        pathname: "/storage/v1/object/public/**",
-      },
-      ...(supabaseHost && !supabaseHost.endsWith(".supabase.co")
-        ? [{ protocol: "https" as const, hostname: supabaseHost, pathname: "/storage/v1/object/public/**" }]
-        : []),
+      // Só o Storage deste projeto (e não o de qualquer projeto Supabase).
+      ...(supabaseHost ? [{ protocol: "https" as const, hostname: supabaseHost, pathname: "/storage/v1/object/public/**" }] : []),
     ],
   },
 };

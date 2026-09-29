@@ -28,7 +28,7 @@ export default async function MyBookingPage({ params }: PageProps<"/meu-agendame
   const day = dateSP(b.startsAt);
   const st = STATUS_TEXT[b.status] ?? STATUS_TEXT.solicitado;
   const upcoming = ["solicitado", "confirmado"].includes(b.status);
-  const wa = whatsappLink(b.whatsapp, `Olá! Sou ${b.clientFirstName} e tenho um agendamento de ${b.serviceName} em ${fmtDate(day)} às ${fmtTime(b.startsAt)}.`);
+  const wa = whatsappLink(b.whatsapp, `Olá! Tenho um agendamento de ${b.serviceName} em ${fmtDate(day)} às ${fmtTime(b.startsAt)}.`);
 
   return (
     <main
@@ -43,7 +43,7 @@ export default async function MyBookingPage({ params }: PageProps<"/meu-agendame
         <article className="rounded-3xl bg-white overflow-hidden shadow-[0_20px_70px_rgba(107,74,16,0.12)] border border-[#EEDFBF]">
           <div className="px-7 pt-7 pb-6" style={{ background: "linear-gradient(135deg, #2B221B 0%, #48392B 100%)" }}>
             <p className="text-[10.5px] tracking-[0.28em] uppercase" style={{ color: "#E8C882" }}>
-              {b.clientFirstName ? `Olá, ${b.clientFirstName}` : "Seu horário"}
+              Seu horário
             </p>
             <h1 className="text-4xl font-light text-white mt-2 leading-tight">{b.serviceName}</h1>
             <span

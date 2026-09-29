@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireStaff } from "@/lib/dal";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { requireAdmin, requireStaff } from "@/lib/dal";
 import { addDays, digits, SITE_URL, todaySP } from "@/lib/format";
 import { anamnesisUpdate } from "@/lib/anamnesis";
 import { DEFAULT_CONSENT, formOrDefault, sanitizeForm, type AnamnesisFormDef } from "@/lib/anamnesis-schema";
@@ -104,7 +105,7 @@ export async function createAnamnesisLink(appointmentId: string): Promise<Anamne
   const { data: appt } = await supabase.from("appointments").select("id, client_id").eq("id", appointmentId).maybeSingle();
   if (!appt?.client_id) return { ok: false, message: "Agendamento sem cliente." };
   await supabase.from("anamnesis_links").update({ revoked_at: new Date().toISOString() })
-    .eq("appointment_id", appt.id).is("revoked_at", null).is("submitted_at", null);
+    .eq("appointment_id", appt.id).is("revoked_at", null);
   const { data, error } = await supabase.from("anamnesis_links")
     .insert({ appointment_id: appt.id, client_id: appt.client_id }).select("token, expires_at").single();
   if (error) return { ok: false, message: "Não foi possível gerar o link. A migração do banco já foi aplicada?" };
@@ -299,14 +300,19 @@ export async function completeAppointment(_prev: ActionState, fd: FormData): Pro
   const patch: Record<string, unknown> = { status: "concluido" };
   if (register && !voucher) patch.price = amount;
   if (voucher && appt.voucher_amount === null) patch.voucher_amount = covered;
-  const { error } = await supabase.from("appointments").update(patch).eq("id", id);
+  // Com voucher, só a primeira conclusão desconta (dois cliques ou dois aparelhos ao mesmo tempo não descontam duas vezes).
+  const firstVoucherUse = Boolean(voucher && appt.voucher_amount === null);
+  let upd = supabase.from("appointments").update(patch).eq("id", id);
+  if (firstVoucherUse) upd = upd.is("voucher_amount", null);
+  const { data: updated, error } = await upd.select("id");
   if (error) return fail("Não foi possível concluir o atendimento.");
+  if (firstVoucherUse && !updated?.length) return fail("Este atendimento acabou de ser concluído em outro aparelho.");
 
-  if (voucher && appt.voucher_amount === null) {
+  if (voucher && firstVoucherUse) {
     const balance = voucher.kind === "servico" ? 0 : Math.max(0, Math.round((Number(voucher.balance) - covered) * 100) / 100);
     await supabase.from("vouchers").update({
       balance, ...(balance === 0 ? { status: "usado", used_at: new Date().toISOString() } : {}),
-    }).eq("id", voucher.id);
+    }).eq("id", voucher.id).eq("balance", voucher.balance);
   }
 
   if (register) {
@@ -748,28 +754,63 @@ export async function saveTemplates(_prev: ActionState, fd: FormData): Promise<A
 
 /** Cria o login de uma nova pessoa da equipe (usa a chave secreta no servidor). */
 export async function createStaffMember(_prev: ActionState, fd: FormData): Promise<ActionState> {
-  await requireStaff();
+  if (!(await requireAdmin())) return fail("Só administradoras podem dar acesso ao painel.");
   const admin = createAdminClient();
   if (!admin) return fail("Configure SUPABASE_SECRET_KEY para cadastrar a equipe.");
   const name = str(fd, "name", 80);
   const email = str(fd, "email", 160).toLowerCase();
   const password = String(fd.get("password") ?? "");
   if (name.length < 2 || !email.includes("@")) return fail("Informe nome e e-mail.");
-  if (password.length < 8) return fail("A senha precisa ter ao menos 8 caracteres.");
+  if (password.length < 10) return fail("A senha precisa ter ao menos 10 caracteres.");
 
   const { data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
   if (error) return fail(error.message.includes("already") ? "Já existe uma conta com esse e-mail." : "Não foi possível criar a conta.");
-  const { error: staffErr } = await admin.from("staff").insert({ user_id: data.user.id, name });
-  if (staffErr) return fail("Conta criada, mas não foi possível liberar o acesso.");
+  const { error: staffErr } = await admin.from("staff").insert({ user_id: data.user.id, name, is_admin: bool(fd, "is_admin") });
+  if (staffErr) {
+    await admin.auth.admin.deleteUser(data.user.id);
+    return fail("Não foi possível liberar o acesso. Tente novamente.");
+  }
+  refresh();
   return done(`${name} já pode entrar no painel.`);
 }
 
+/** Tira o acesso de alguém da equipe (apaga a conta; a sessão aberta perde a permissão na hora). */
+export async function removeStaffMember(fd: FormData) {
+  const me = await requireAdmin();
+  const admin = createAdminClient();
+  const userId = str(fd, "user_id");
+  if (!me || !admin || !userId || userId === me.userId) return;
+  await admin.auth.admin.deleteUser(userId);
+  refresh();
+}
+
+/** Dá ou tira o papel de administradora (sem mexer no próprio papel, para nunca ficar sem nenhuma). */
+export async function setStaffAdmin(fd: FormData) {
+  const me = await requireAdmin();
+  const admin = createAdminClient();
+  const userId = str(fd, "user_id");
+  if (!me || !admin || !userId || userId === me.userId) return;
+  await admin.from("staff").update({ is_admin: str(fd, "is_admin") === "1" }).eq("user_id", userId);
+  refresh();
+}
+
 export async function changeOwnPassword(_prev: ActionState, fd: FormData): Promise<ActionState> {
-  const { supabase } = await requireStaff();
+  const { supabase, userId } = await requireStaff();
   const password = String(fd.get("password") ?? "");
-  if (password.length < 8) return fail("A senha precisa ter ao menos 8 caracteres.");
+  if (password.length < 10) return fail("A nova senha precisa ter ao menos 10 caracteres.");
   if (password !== String(fd.get("confirm") ?? "")) return fail("As senhas não conferem.");
+
+  // Confirma a senha atual (quem pegar uma sessão aberta não consegue trocar a senha e tomar a conta).
+  const { data: user } = await supabase.auth.getUser();
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  if (!user.user?.email || !url || !key) return fail("Não foi possível alterar a senha.");
+  const check = createSupabaseClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { data: signed, error: wrong } = await check.auth.signInWithPassword({ email: user.user.email, password: String(fd.get("current") ?? "") });
+  if (wrong || signed.user?.id !== userId) return fail("A senha atual está incorreta.");
+  await check.auth.signOut({ scope: "local" });
+
   const { error } = await supabase.auth.updateUser({ password });
-  if (error) return fail("Não foi possível alterar a senha.");
+  if (error) return fail(error.message.includes("weak") || error.message.includes("pwned") ? "Essa senha é fraca ou já apareceu em vazamentos. Escolha outra." : "Não foi possível alterar a senha.");
   return { ok: true, message: "Senha alterada." };
 }

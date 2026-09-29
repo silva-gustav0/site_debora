@@ -5,9 +5,11 @@ import { digits, SITE_URL } from "@/lib/format";
 import {
   createCheckoutLink, findUsableVoucher, infinitePayHandle, newVoucherCode, VOUCHER_MAX, VOUCHER_MIN,
 } from "@/lib/vouchers";
+import { clientIp, TOO_MANY, withinLimits } from "@/lib/rate-limit";
 
 const clean = (s: unknown, max: number) => (typeof s === "string" ? s.trim().slice(0, max) : "");
-const isEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+// Sem curingas (% * etc.): o e-mail também é usado em buscas.
+const isEmail = (s: string) => /^[a-z0-9._+'-]+@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/i.test(s);
 
 export type VoucherOffer = { id: string; name: string; description: string | null; price: number };
 
@@ -50,6 +52,10 @@ export async function startVoucherPurchase(input: VoucherPurchaseInput): Promise
 
   const db = createAdminClient();
   if (!db || !infinitePayHandle()) return { ok: false, message: "A venda de vouchers está indisponível no momento. Fale conosco pelo WhatsApp." };
+  if (!(await withinLimits(db, [
+    { bucket: "voucher-ip-h", key: await clientIp(), max: 5, windowSec: 3600 },
+    { bucket: "voucher-phone-d", key: buyerPhone, max: 6, windowSec: 86_400 },
+  ]))) return { ok: false, message: TOO_MANY };
 
   let row: { kind: "servico" | "valor"; service_id: string | null; service_name: string | null; amount: number };
   if (input.kind === "servico") {
@@ -100,6 +106,9 @@ export type VoucherCheck =
 export async function checkVoucherCode(code: string): Promise<VoucherCheck> {
   const db = createAdminClient();
   if (!db) return { ok: false, message: "Não foi possível conferir agora." };
+  if (!(await withinLimits(db, [{ bucket: "voucher-check-ip-h", key: await clientIp(), max: 20, windowSec: 3600 }]))) {
+    return { ok: false, message: TOO_MANY };
+  }
   const r = await findUsableVoucher(db, clean(code, 30));
   if (!r.ok) return r;
   const v = r.voucher;

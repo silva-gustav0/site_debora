@@ -9,6 +9,7 @@ import { addDays, digits, todaySP } from "@/lib/format";
 import { dayHours, freeSlots, toTimestamp, SP_OFFSET } from "@/lib/hours";
 import { getSettings } from "@/lib/settings";
 import { findUsableVoucher } from "@/lib/vouchers";
+import { clientIp, TOO_MANY, withinLimits } from "@/lib/rate-limit";
 import type { ActionState, BusinessHours, ServiceRow, Settings } from "@/lib/types";
 
 type Admin = NonNullable<ReturnType<typeof createAdminClient>>;
@@ -19,7 +20,8 @@ const isDate = (s: unknown): s is string => typeof s === "string" && /^\d{4}-\d{
 const isTime = (s: unknown): s is string => typeof s === "string" && /^\d{2}:\d{2}$/.test(s);
 const isUuid = (s: unknown): s is string => typeof s === "string" && /^[0-9a-f-]{36}$/i.test(s);
 const clean = (s: unknown, max: number) => (typeof s === "string" ? s.trim().slice(0, max) : "");
-const isEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+// Sem curingas (% * etc.): o e-mail também é usado em buscas.
+const isEmail = (s: string) => /^[a-z0-9._+'-]+@[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/i.test(s);
 
 export type PublicConfig = {
   services: ServiceRow[];
@@ -111,6 +113,21 @@ export async function createBooking(input: BookingInput): Promise<BookingResult>
 
   const db = createAdminClient();
   if (!db) return { ok: false, message: "Agendamento online indisponível no momento. Fale conosco pelo WhatsApp." };
+  const ip = await clientIp();
+  if (!(await withinLimits(db, [
+    { bucket: "booking-ip-h", key: ip, max: 8, windowSec: 3600 },
+    { bucket: "booking-ip-d", key: ip, max: 20, windowSec: 86_400 },
+    { bucket: "booking-phone-d", key: phone, max: 8, windowSec: 86_400 },
+  ]))) return { ok: false, message: TOO_MANY };
+
+  // Cada WhatsApp pode ter no máximo 2 pedidos do site aguardando confirmação.
+  const { count: openRequests } = await db.from("appointments")
+    .select("id, clients!inner(phone)", { count: "exact", head: true })
+    .eq("clients.phone", phone).eq("source", "site").eq("status", "solicitado").gte("starts_at", new Date().toISOString());
+  if ((openRequests ?? 0) >= 2) {
+    return { ok: false, message: "Você já tem pedidos aguardando confirmação. Fale conosco pelo WhatsApp para agendar mais horários." };
+  }
+
   const settings = await getSettings(db);
   if (!validDay(input.date, settings)) return { ok: false, message: "Data indisponível para agendamento." };
 
@@ -171,7 +188,6 @@ export type PublicBooking = {
   endsAt: string;
   serviceName: string;
   price: number;
-  clientFirstName: string;
   canCancel: boolean;
   cancelMinHours: number;
   whatsapp: string;
@@ -185,13 +201,12 @@ export async function getBookingByToken(token: string): Promise<PublicBooking | 
   if (!db) return null;
   const [{ data }, settings] = await Promise.all([
     db.from("appointments")
-      .select("public_token, status, starts_at, ends_at, price, services(name), clients(name)")
+      .select("public_token, status, starts_at, ends_at, price, services(name)")
       .eq("public_token", token).maybeSingle(),
     getSettings(db),
   ]);
   if (!data) return null;
   const svc = data.services as unknown as { name: string } | null;
-  const cli = data.clients as unknown as { name: string } | null;
   const hoursLeft = (Date.parse(data.starts_at) - Date.now()) / 3_600_000;
   return {
     token: data.public_token,
@@ -200,7 +215,6 @@ export async function getBookingByToken(token: string): Promise<PublicBooking | 
     endsAt: data.ends_at,
     serviceName: svc?.name ?? "Atendimento",
     price: Number(data.price),
-    clientFirstName: (cli?.name ?? "").split(" ")[0],
     canCancel: ["solicitado", "confirmado"].includes(data.status) && hoursLeft >= settings.cancel_min_hours,
     cancelMinHours: settings.cancel_min_hours,
     whatsapp: settings.whatsapp,
@@ -231,6 +245,9 @@ export async function submitAnamnesisByToken(_prev: ActionState, fd: FormData): 
   const link = await getAnamnesisLink(clean(fd.get("token"), 40));
   if (link.state !== "ok") return { ok: false, message: "Este link expirou ou não é mais válido. Peça um novo à clínica." };
   const db = createAdminClient()!;
+  if (!(await withinLimits(db, [{ bucket: "anamnesis-ip-h", key: await clientIp(), max: 20, windowSec: 3600 }]))) {
+    return { ok: false, message: TOO_MANY };
+  }
   const settings = await getSettings(db);
   const { error } = await db.from("clients")
     .update(anamnesisUpdate(fd, "cliente", formOrDefault(settings.anamnesis_form), link.anamnesis)).eq("id", link.clientId);
@@ -260,6 +277,10 @@ export async function sendContactMessage(input: ContactInput): Promise<{ ok: boo
 
   const db = createAdminClient();
   if (!db) return { ok: false, message: "Envio indisponível no momento. Fale conosco pelo WhatsApp." };
+  if (!(await withinLimits(db, [
+    { bucket: "contact-ip-h", key: await clientIp(), max: 4, windowSec: 3600 },
+    { bucket: "contact-email-d", key: email, max: 4, windowSec: 86_400 },
+  ]))) return { ok: false, message: TOO_MANY };
 
   const clientId = await upsertClient(db, { name, phone: phone.length >= 10 ? phone : "", email });
   if (!clientId) return { ok: false, message: "Não foi possível enviar. Tente novamente." };
@@ -274,25 +295,42 @@ export async function sendContactMessage(input: ContactInput): Promise<{ ok: boo
   return { ok: true, message: "Mensagem enviada." };
 }
 
-/** Encontra a cliente pelo telefone (ou e-mail) e completa dados vazios; senão cria como lead. */
+/** Escapa curingas do ILIKE (% _ \\) para a busca por e-mail ser exata, sem diferenciar maiúsculas. */
+const likeExact = (s: string) => s.replace(/[\\%_]/g, (c) => `\\${c}`);
+
+/**
+ * Encontra a cliente pelo telefone (ou e-mail exato); senão cria como lead.
+ * Formulário público não altera ficha existente: dados diferentes viram nota para a equipe conferir.
+ */
 async function upsertClient(db: Admin, c: { name: string; phone: string; email: string }) {
-  let existing: { id: string; email: string | null; phone: string | null } | null = null;
+  type Found = { id: string; name: string; email: string | null; phone: string | null };
+  let existing: Found | null = null;
 
   if (c.phone) {
-    const { data } = await db.from("clients").select("id, email, phone").eq("phone", c.phone).maybeSingle();
+    const { data } = await db.from("clients").select("id, name, email, phone").eq("phone", c.phone).maybeSingle();
     existing = data;
   }
   if (!existing && c.email) {
     const { data } = await db
-      .from("clients").select("id, email, phone").ilike("email", c.email).order("created_at").limit(1).maybeSingle();
+      .from("clients").select("id, name, email, phone").ilike("email", likeExact(c.email)).order("created_at").limit(1).maybeSingle();
     existing = data;
   }
 
   if (existing) {
-    const patch: Record<string, string> = {};
-    if (!existing.email && c.email) patch.email = c.email;
-    if (!existing.phone && c.phone) patch.phone = c.phone;
-    if (Object.keys(patch).length) await db.from("clients").update(patch).eq("id", existing.id);
+    // Achou pelo telefone: pode completar o e-mail que faltava. Achou só pelo e-mail: não mexe no telefone da ficha.
+    const byPhone = Boolean(c.phone) && existing.phone === c.phone;
+    if (byPhone && !existing.email && c.email) await db.from("clients").update({ email: c.email }).eq("id", existing.id);
+    const diffs = [
+      firstName(existing.name) !== firstName(c.name) && `nome "${c.name}"`,
+      c.phone && !byPhone && `WhatsApp ${c.phone}`,
+      c.email && existing.email && existing.email.toLowerCase() !== c.email && `e-mail ${c.email}`,
+    ].filter(Boolean);
+    if (diffs.length) {
+      await db.from("interactions").insert({
+        client_id: existing.id, kind: "nota", due_on: todaySP(),
+        content: `Pedido pelo site com dados diferentes da ficha (${diffs.join(", ")}). Confira se é a mesma pessoa antes de confirmar ou enviar links.`,
+      });
+    }
     return existing.id;
   }
 
@@ -305,3 +343,4 @@ async function upsertClient(db: Admin, c: { name: string; phone: string; email: 
   return data.id as string;
 }
 
+const firstName = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().split(/\s+/)[0];

@@ -2,7 +2,8 @@
 export function toCsv(header: string[], rows: (string | number | null | undefined)[][]) {
   const cell = (v: string | number | null | undefined) => {
     if (v === null || v === undefined) return "";
-    const s = typeof v === "number" ? String(v).replace(".", ",") : v;
+    // Texto que começa com = + - @ vira fórmula no Excel: o apóstrofo força a leitura como texto.
+    const s = typeof v === "number" ? String(v).replace(".", ",") : /^[=+\-@\t\r]/.test(v) ? `'${v}` : v;
     return /[;"\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   return "\uFEFF" + [header, ...rows].map((r) => r.map(cell).join(";")).join("\r\n");

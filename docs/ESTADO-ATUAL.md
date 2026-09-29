@@ -1,7 +1,34 @@
 # Estado atual do projeto
 
-Última atualização: 28/09/2026. Produção: https://clinica-talissa-eta.vercel.app (Vercel, projeto `clinica-talissa`).
+Última atualização: 28/09/2026 (vistoria de segurança). Produção: https://clinica-talissa-eta.vercel.app (Vercel, projeto `clinica-talissa`).
 Todo push no `master` publica em produção.
+
+## Vistoria de segurança (28/09/2026)
+
+Feita com 4 agentes (site público, painel, banco, configuração). Correções aplicadas:
+
+- Next.js 16.2.6 → 16.3.6 (falhas críticas/altas, incluindo bypass do `proxy.ts`).
+- Site público (`src/app/actions/public.ts`): e-mail validado sem curingas e buscado de forma exata; formulário público
+  não altera ficha existente (dados diferentes viram tarefa "Pedido pelo site com dados diferentes da ficha");
+  "Meu agendamento" não mostra mais o nome da ficha.
+- Limite de envios (`src/lib/rate-limit.ts`, tabela `rate_events`, só hash de IP/telefone): agendamento, contato,
+  anamnese, compra e consulta de voucher e login do painel. Máx. 2 pedidos do site aguardando confirmação por WhatsApp.
+- Vouchers: um pagamento libera um único voucher (índice único em `payment->>transaction_nsu`), confere `order_nsu`
+  quando a InfinitePay devolver, `balance <= amount`, voucher de serviço excluído não vira crédito livre,
+  conclusão com voucher não desconta duas vezes.
+- Anamnese: gerar link novo revoga todos os anteriores; agendamento cancelado/falta invalida o link.
+- Painel: CSV sem fórmulas; equipe com papel **administradora** (`staff.is_admin`; as 3 contas existentes viraram
+  administradoras), remover acesso e trocar papel em Configurações → Equipe; trocar senha pede a senha atual; senhas ≥ 10.
+- Imagens do site só do próprio site, do Storage do projeto ou do Unsplash; link do Maps só https.
+- Cabeçalhos: CSP, X-Frame-Options, nosniff, Referrer-Policy (no-referrer em páginas com token), sem `x-powered-by`.
+- Banco: privilégios padrão do `anon` revogados, `stock_movements` sem UPDATE, pedido do site não cai em horário bloqueado.
+- Android: `allowBackup="false"` (vale no próximo build do APK).
+
+**Pendências da vistoria (fazer no painel do Supabase → Authentication):**
+- Desativar "Allow new users to sign up" (está **ativo** em produção; o `config.toml` só vale localmente).
+- Ativar proteção contra senhas vazadas e senha mínima de 10 caracteres.
+- Opcional: MFA (TOTP) para a equipe, CAPTCHA (Turnstile) nos formulários públicos.
+- Guardar backup offline do keystore do Android (`equipe.keystore`).
 
 ## Onde paramos: vouchers (vale-presente) com InfinitePay
 

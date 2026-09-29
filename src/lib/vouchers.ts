@@ -85,6 +85,8 @@ export async function findUsableVoucher(db: SupabaseClient, input: string): Prom
   if (v.status === "cancelado") return { ok: false, message: "Este voucher foi cancelado. Fale com a clínica." };
   if (v.status === "usado" || Number(v.balance) <= 0) return { ok: false, message: "Este voucher já foi usado." };
   if (v.expires_on && v.expires_on < todaySP()) return { ok: false, message: "Este voucher expirou. Fale com a clínica pelo WhatsApp." };
+  // Voucher de serviço cujo serviço foi excluído não vira crédito para qualquer serviço.
+  if (v.kind === "servico" && !v.service_id) return { ok: false, message: "O serviço deste voucher não está mais disponível. Fale com a clínica pelo WhatsApp." };
   if (await openAppointmentFor(db, v.id)) return { ok: false, message: "Este voucher já está reservado para um agendamento." };
   return { ok: true, voucher: { ...v, amount: Number(v.amount), balance: Number(v.balance) } };
 }
@@ -132,7 +134,7 @@ export async function createCheckoutLink(input: {
   return typeof url === "string" && url.startsWith("https://") ? url : null;
 }
 
-export type PaymentCheck = { paid: boolean; amount: number; paid_amount: number; installments: number; capture_method: string };
+export type PaymentCheck = { paid: boolean; amount: number; paid_amount: number; installments: number; capture_method: string; order_nsu: string | null };
 
 /** Pergunta à InfinitePay se o pedido foi pago (o aviso por webhook não é assinado, então sempre confirmamos aqui). */
 export async function checkPayment(input: { orderNsu: string; transactionNsu: string; slug: string }): Promise<PaymentCheck | null> {
@@ -153,6 +155,7 @@ export async function checkPayment(input: { orderNsu: string; transactionNsu: st
     paid_amount: Number(d.paid_amount ?? 0),
     installments: Number(d.installments ?? 1),
     capture_method: String(d.capture_method ?? ""),
+    order_nsu: typeof d.order_nsu === "string" ? d.order_nsu : null,
   };
 }
 
@@ -169,8 +172,13 @@ export async function activatePaidVoucher(
   if (!v) return null;
   if (v.status !== "pendente") return v;
 
+  // Um pagamento libera um único voucher: a transação de outra compra não serve (também garantido por índice único).
+  const { data: reused } = await db.from("vouchers").select("id").eq("payment->>transaction_nsu", input.transactionNsu).neq("id", v.id).limit(1);
+  if (reused?.length) return v;
+
   const check = await checkPayment(input);
   if (!check?.paid || check.amount < Math.round(Number(v.amount) * 100)) return v;
+  if (check.order_nsu && check.order_nsu.toLowerCase() !== v.order_nsu.toLowerCase()) return v;
 
   const today = todaySP();
   const { data: updated } = await db.from("vouchers").update({
@@ -178,7 +186,7 @@ export async function activatePaidVoucher(
     paid_at: new Date().toISOString(),
     expires_on: voucherExpiry(today),
     payment: {
-      transaction_nsu: input.transactionNsu, slug: input.slug, receipt_url: input.receiptUrl ?? undefined,
+      transaction_nsu: input.transactionNsu, slug: input.slug, receipt_url: safeReceiptUrl(input.receiptUrl),
       capture_method: check.capture_method, paid_amount: check.paid_amount / 100, installments: check.installments,
     },
   }).eq("id", v.id).eq("status", "pendente").select("*").maybeSingle();
@@ -190,6 +198,16 @@ export async function activatePaidVoucher(
     amount: Number(v.amount), method: check.capture_method === "pix" ? "pix" : "credito",
   });
   return updated as VoucherRow;
+}
+
+/** Guarda o comprovante só se for um link https (o valor vem do aviso/retorno, que não são assinados). */
+function safeReceiptUrl(url?: string | null) {
+  try {
+    const u = new URL(url ?? "");
+    return u.protocol === "https:" ? u.toString().slice(0, 500) : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 /** Link público do voucher (página com código e QR). O order_nsu é um UUID impossível de adivinhar. */

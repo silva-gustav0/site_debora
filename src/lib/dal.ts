@@ -15,11 +15,11 @@ export const getStaff = cache(async () => {
 
   const { data: staff } = await supabase
     .from("staff")
-    .select("name")
+    .select("name, is_admin")
     .eq("user_id", userId)
     .maybeSingle();
 
-  return { supabase, userId, staff: staff as { name: string } | null } as const;
+  return { supabase, userId, staff: staff as { name: string; is_admin: boolean } | null } as const;
 });
 
 /** Use em toda página e action do painel. */
@@ -28,4 +28,10 @@ export async function requireStaff() {
   if (!s.userId) redirect("/painel/login");
   if (!s.staff) redirect("/painel/sem-acesso");
   return { supabase: s.supabase, userId: s.userId, staff: s.staff };
+}
+
+/** Ações que mexem em acessos da equipe: só administradoras. */
+export async function requireAdmin() {
+  const s = await requireStaff();
+  return s.staff.is_admin ? s : null;
 }

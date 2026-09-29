@@ -5,7 +5,7 @@ import AnimateIn from "./AnimateIn";
 import { MapPin, Phone, Mail, Clock, AtSign, Send, CheckCircle2, AlertCircle } from "lucide-react";
 import { sendContactMessage } from "@/app/actions/public";
 import { maskPhone } from "@/lib/format";
-import { instagramUrl, telHref, type SiteContent } from "@/lib/site-content";
+import { instagramUrl, safeHttps, telHref, type SiteContent } from "@/lib/site-content";
 
 export default function Contact({ content: c, hours }: { content: SiteContent["contact"]; hours: string }) {
   const contactInfo = [
@@ -125,7 +125,7 @@ export default function Contact({ content: c, hours }: { content: SiteContent["c
                     {c.address}
                   </p>
                   {c.maps_url && <a
-                    href={c.maps_url}
+                    href={safeHttps(c.maps_url) || undefined}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[10px] tracking-widest uppercase hover:opacity-70 mt-1 block"

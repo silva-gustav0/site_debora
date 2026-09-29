@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { requireStaff } from "@/lib/dal";
 import { bool, fail, int, isDate, isUuid, money, opt, str } from "@/lib/form";
 import {
-  BUILTIN_SECTIONS, DEFAULT_CONTENT, parseLayout, SECTION_FIELDS, TEXT_MAX, toCustomSection,
+  BUILTIN_SECTIONS, DEFAULT_CONTENT, parseLayout, safeHttps, safeImage, SECTION_FIELDS, TEXT_MAX, toCustomSection,
   type BuiltinSection, type SectionKey, type SiteLayout,
 } from "@/lib/site-content";
 import type { ActionState } from "@/lib/types";
@@ -22,10 +22,7 @@ const IMAGE_TYPES: Record<string, string> = {
 const FOLDERS = ["marca", "inicio", "sobre", "promocoes", "blog", "secoes"];
 
 /** Aceita caminho local (/images/...) ou URL https. */
-const imageUrl = (fd: FormData, key: string) => {
-  const v = str(fd, key, 1000);
-  return v.startsWith("/") || v.startsWith("https://") ? v : "";
-};
+const imageUrl = (fd: FormData, key: string) => safeImage(str(fd, key, 1000));
 
 export type UploadResult = { ok: true; url: string } | { ok: false; message: string };
 
@@ -57,7 +54,7 @@ export async function saveSection(_prev: ActionState, fd: FormData): Promise<Act
   const content: Record<string, unknown> = {};
   for (const f of fields) {
     switch (f.type) {
-      case "text": content[f.key] = str(fd, f.key, TEXT_MAX); break;
+      case "text": content[f.key] = f.key === "maps_url" ? safeHttps(str(fd, f.key, TEXT_MAX)) : str(fd, f.key, TEXT_MAX); break;
       case "textarea": content[f.key] = str(fd, f.key, 5000); break;
       case "image": content[f.key] = imageUrl(fd, f.key); break;
       case "toggle": content[f.key] = bool(fd, f.key); break;
