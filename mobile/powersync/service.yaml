@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://unpkg.com/@powersync/cli-schemas@latest/json-schema/service-config.json
+# Instância PowerSync Cloud do app da equipe. Publicar: `npx powersync deploy` (nesta pasta, com PS_ADMIN_TOKEN).
+# A senha do banco vem da variável POWERSYNC_DATABASE_PASSWORD (guardada no .env.local, nunca no repositório).
+_type: cloud
+name: Production
+region: us
+
+replication:
+  connections:
+    - type: postgresql
+      # Conexão direta do Supabase (replicação lógica não passa pelo pooler).
+      hostname: db.mztzvrwqvsinleglsbdo.supabase.co
+      port: 5432
+      database: postgres
+      username: powersync_role
+      password:
+        secret: !env POWERSYNC_DATABASE_PASSWORD
+      sslmode: verify-full
+
+client_auth:
+  # Aceita o login do Supabase (chaves de assinatura do projeto).
+  supabase: true
