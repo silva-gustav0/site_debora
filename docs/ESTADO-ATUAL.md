@@ -1,7 +1,21 @@
 # Estado atual do projeto
 
-Última atualização: 28/09/2026 (vistoria de segurança). Produção: https://clinica-talissa-eta.vercel.app (Vercel, projeto `clinica-talissa`).
-Todo push no `master` publica em produção.
+Última atualização: 29/09/2026. Produção: **Cloudflare Workers** (`clinica-debora`), domínio `deborasilvaestetica.com.br`
+(DNS no Cloudflare; migrando da Vercel — ver seção abaixo). Todo push no `master` publica em produção (GitHub Actions).
+
+## Hospedagem no Cloudflare (29/09/2026)
+
+- Site Next.js roda em Cloudflare Workers via OpenNext (`wrangler.jsonc`, `open-next.config.ts`). Sem cache de páginas:
+  as páginas públicas que leem o banco são `force-dynamic`. Imagens pelo binding `IMAGES`.
+- Deploy: `.github/workflows/deploy-cloudflare.yml` a cada push no `master` (secrets `CLOUDFLARE_API_TOKEN`,
+  `CLOUDFLARE_ACCOUNT_ID`, `NEXT_PUBLIC_SUPABASE_*`). Manual: `npm run deploy` (sem `.env.local` no build, para a chave
+  secreta não entrar no código; ela é o secret `SUPABASE_SECRET_KEY` do Worker: `npx wrangler secret put`).
+- Teste local no motor do Cloudflare: `npx opennextjs-cloudflare build && npx wrangler dev`.
+- O `proxy.ts` (middleware Node) é suportado pelo OpenNext como **experimental**: testar login/painel após atualizar pacotes.
+- Plano gratuito: 10 ms de CPU por acesso (rajada de 60 acessos passou). Se aparecer "Error 1102", assinar Workers Paid.
+- App Android: `.github/workflows/app-update.yml` publica atualização pela internet (EAS Update, canal `preview`) a cada
+  push em `mobile/**` ou `src/lib/**` (secret `EXPO_TOKEN`). APK novo só quando mudar algo nativo (`eas build`).
+- APK publicado nas Releases do GitHub; `/app/debora-equipe.apk` redireciona para a mais nova.
 
 ## App Android nativo (offline) — `mobile/` (29/09/2026)
 
@@ -106,4 +120,4 @@ Está tudo construído, testado localmente e publicado. **Falta ativar a venda o
 - Testes de ponta a ponta: build local (`npx next build && npx next start -p 3123`) + Playwright (`playwright-core` com o Chrome
   instalado), usando um usuário e dados **temporários** no banco de produção, sempre apagados no final.
 - Textos do site em português, com linguagem inclusiva.
-- Commit direto no `master` (publica na Vercel).
+- Commit direto no `master` (publica no Cloudflare).
