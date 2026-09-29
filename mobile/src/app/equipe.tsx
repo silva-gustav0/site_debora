@@ -45,8 +45,8 @@ export default function Equipe() {
   };
 
   return (
-    <Screen title="Equipe" back>
-      <Card title="Pessoas com acesso">
+    <Screen eyebrow="Ajustes" title="Equipe" subtitle="Pessoas com acesso ao painel e sua senha">
+      <Card title="Pessoas com acesso" right={<Badge>{data.length}</Badge>} bodyStyle={{ gap: 8 }}>
         {data.map((p) => (
           <Fragment key={p.id}>
             <ListItem

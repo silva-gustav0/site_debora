@@ -2,7 +2,9 @@ import { useQuery } from "@powersync/react-native";
 import { brl } from "@shared/format";
 import { SERVICE_ICONS, type ServiceIcon } from "@shared/site-content";
 import { useState } from "react";
+import { Text, View } from "react-native";
 import { Badge, Button, Card, ConfirmButton, Empty, Field, ListItem, MoneyField, moneyText, parseMoney, Screen, Select, Sheet, Toggle, useToast } from "@/components/ui";
+import { Font } from "@/constants/brand";
 import { asBool } from "@/db/hooks";
 import { write } from "@/db/write";
 
@@ -16,6 +18,7 @@ export default function Servicos() {
   const toast = useToast();
   const { data } = useQuery<Svc>("select * from services order by active desc, sort_order, name");
   const [f, setF] = useState<typeof EMPTY | null>(null);
+  const unpriced = data.filter((s) => !s.price);
   const set = (p: Partial<typeof EMPTY>) => setF((cur) => cur && { ...cur, ...p });
 
   const edit = (s: Svc) => setF({
@@ -56,9 +59,16 @@ export default function Servicos() {
   };
 
   return (
-    <Screen title="Serviços" back right={<Button small icon="add" onPress={() => setF(EMPTY)}>Novo</Button>}>
-      {data.length === 0 && <Empty text="Nenhum serviço cadastrado." />}
-      <Card>
+    <Screen title="Serviços" subtitle="Preço, duração e retorno sugerido de cada tratamento. A duração define os horários livres no site." right={<Button icon="add" onPress={() => setF(EMPTY)}>Novo serviço</Button>}>
+      {unpriced.length > 0 && (
+        <View style={{ backgroundColor: "#FFF6DD", borderColor: "#EED9A0", borderWidth: 1, borderRadius: 14, padding: 16 }}>
+          <Text style={{ fontFamily: Font.body, fontSize: 14, color: "#7A5510", lineHeight: 21 }}>
+            <Text style={{ fontFamily: Font.bold }}>Defina os preços: </Text>{unpriced.map((s) => s.name).join(", ")} ainda estão com valor R$ 0,00. No site, o valor aparece como “a combinar” até você preencher.
+          </Text>
+        </View>
+      )}
+      <Card title="Serviços" right={<Badge tone="gold">{data.length}</Badge>}>
+        {data.length === 0 && <Empty text="Nenhum serviço cadastrado." />}
         {data.map((s) => (
           <ListItem key={s.id} title={s.name} subtitle={`${CATEGORIES[s.category as keyof typeof CATEGORIES] ?? s.category} · ${brl(s.price)} · ${s.duration_min} min${s.return_days ? ` · retorno em ${s.return_days} dias` : ""}`}
             right={asBool(s.active) ? undefined : <Badge>Inativo</Badge>} onPress={() => edit(s)} />

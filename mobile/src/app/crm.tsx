@@ -3,13 +3,21 @@ import { fillTemplate, firstName, fmtDate, INTERACTION_LABEL, STAGE_LABEL, today
 import type { ClientStage, InteractionKind, TemplateKey } from "@shared/types";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
-import { Linking } from "react-native";
-import { Avatar, Badge, Button, Card, Chip, ConfirmButton, Empty, Field, ListItem, Row, Screen, Segmented, Select, Stat, Txt, useToast } from "@/components/ui";
+import { Linking, Text, View } from "react-native";
+import { Cake, ClipboardCheck, TrendingUp, UserPlus } from "lucide-react-native";
+import { Avatar, Badge, Button, Card, Chip, ConfirmButton, Empty, Field, ListItem, Row, Screen, Select, Stat, Tabs, Txt, useToast, useWide } from "@/components/ui";
+import { Brand, Font } from "@/constants/brand";
 import { type Client, logContact, TEMPLATE_INFO, useClients } from "@/lib/reports";
 import { useSettings } from "@/db/hooks";
 import { write } from "@/db/write";
 
-const STAGES = Object.keys(STAGE_LABEL) as ClientStage[];
+const COLUMNS: { stage: ClientStage; hint: string; color: string }[] = [
+  { stage: "lead", hint: "Pediram informação ou agendaram pelo site", color: "#D4A73C" },
+  { stage: "em_contato", hint: "Conversa em andamento / 1º horário", color: "#5B6FC9" },
+  { stage: "cliente", hint: "Já foram atendidas", color: "#3F9A5E" },
+  { stage: "vip", hint: "Frequentes ou de alto valor", color: "#8E4BA0" },
+  { stage: "inativa", hint: "Pararam de vir", color: "#B8AFA2" },
+];
 const SEGMENTS = {
   aniversariantes: { label: "Aniversariantes do mês", template: "aniversario" },
   retorno: { label: "Retorno vencendo", template: "retorno" },
@@ -33,6 +41,7 @@ type Contact = { client_id: string; last: string; recent: number };
 /** CRM: funil por estágio, tarefas de acompanhamento e campanhas segmentadas pelo WhatsApp. */
 export default function Crm() {
   const toast = useToast();
+  const wide = useWide();
   const settings = useSettings();
   const clients = useClients();
   const today = todaySP();
@@ -70,28 +79,34 @@ export default function Crm() {
   };
 
   return (
-    <Screen title="CRM e campanhas" subtitle="Funil, tarefas e mensagens pelo WhatsApp" back>
+    <Screen eyebrow="Relacionamento" title="CRM & Campanhas" subtitle="Funil de clientes, tarefas de acompanhamento e mensagens em massa pelo WhatsApp">
       <Row wrap>
-        <Stat label="Novos contatos no mês" value={String(created.length)} />
-        <Stat label="Conversão no mês" value={created.length ? `${Math.round((converted / created.length) * 100)}%` : "—"} hint={`${converted} já atendidas`} />
-        <Stat label="Tarefas abertas" value={String(tasks.length)} tone={overdue ? "red" : "bronze"} hint={overdue ? `${overdue} atrasadas` : "em dia"} />
-        <Stat label="Aniversariantes do mês" value={String(clients.filter(inSegment("aniversariantes", month)).length)} />
+        <Stat label="Novos contatos no mês" value={String(created.length)} icon={UserPlus} />
+        <Stat label="Conversão no mês" value={created.length ? `${Math.round((converted / created.length) * 100)}%` : "—"} hint={`${converted} já atendidas`} icon={TrendingUp} />
+        <Stat label="Tarefas abertas" value={String(tasks.length)} tone={overdue ? "red" : "bronze"} hint={overdue ? `${overdue} atrasadas` : "em dia"} icon={ClipboardCheck} />
+        <Stat label="Aniversariantes do mês" value={String(clients.filter(inSegment("aniversariantes", month)).length)} icon={Cake} />
       </Row>
-      <Segmented value={tab} onChange={setTab} options={[{ value: "funil", label: "Funil" }, { value: "tarefas", label: `Tarefas · ${tasks.length}` }, { value: "campanhas", label: "Campanhas" }]} />
+      <Tabs value={tab} onChange={setTab} options={[{ value: "funil", label: "Funil" }, { value: "tarefas", label: `Tarefas · ${tasks.length}` }, { value: "campanhas", label: "Campanhas" }]} />
 
-      {tab === "funil" && STAGES.map((stage) => {
-        const list = clients.filter((c) => c.stage === stage).sort((a, b) => (contact.get(b.id)?.last ?? b.created_at).localeCompare(contact.get(a.id)?.last ?? a.created_at));
-        return (
-          <Card key={stage} title={`${STAGE_LABEL[stage]} · ${list.length}`}>
-            {list.length === 0 && <Txt.muted>Vazio</Txt.muted>}
-            {list.slice(0, 30).map((c) => {
-              const last = contact.get(c.id)?.last;
-              return <ListItem key={c.id} left={<Avatar name={c.name} size={30} />} title={c.name} subtitle={`${c.visits} visitas · ${last ? `último contato ${fmtDate(last, { year: undefined })}` : `cadastro ${fmtDate(c.created_at, { year: undefined })}`}`} onPress={() => router.push(`/clientes/${c.id}`)} />;
-            })}
-            {list.length > 30 && <Txt.muted>e mais {list.length - 30}. Use a busca em Clientes.</Txt.muted>}
-          </Card>
-        );
-      })}
+      {tab === "funil" && (
+        <View style={{ flexDirection: wide ? "row" : "column", gap: 14, alignItems: "flex-start" }}>
+          {COLUMNS.map(({ stage, hint, color }) => {
+            const list = clients.filter((c) => c.stage === stage).sort((a, b) => (contact.get(b.id)?.last ?? b.created_at).localeCompare(contact.get(a.id)?.last ?? a.created_at));
+            return (
+              <Card key={stage} style={{ flex: wide ? 1 : undefined, width: wide ? undefined : "100%", borderTopWidth: 3, borderTopColor: color, backgroundColor: "#FAF7F2" }} bodyStyle={{ padding: 10 }}
+                title={<Text style={{ fontFamily: Font.displayRegular, fontSize: 21, color: Brand.ink }}>{STAGE_LABEL[stage]}  <Text style={{ fontFamily: Font.body, fontSize: 15, color: Brand.muted }}>{list.length}</Text></Text>}>
+                <Text style={{ fontFamily: Font.body, fontSize: 12, color: Brand.muted }}>{hint}</Text>
+                {list.length === 0 && <Text style={{ fontFamily: Font.body, fontSize: 13, color: Brand.placeholder, textAlign: "center", paddingVertical: 10 }}>Vazio</Text>}
+                {list.slice(0, 30).map((c) => {
+                  const last = contact.get(c.id)?.last;
+                  return <ListItem key={c.id} left={<Avatar name={c.name} size={26} />} title={c.name} subtitle={`${c.visits} visitas · ${last ? `último contato ${fmtDate(last, { year: undefined })}` : `cadastro ${fmtDate(c.created_at, { year: undefined })}`}`} onPress={() => router.push(`/clientes/${c.id}`)} />;
+                })}
+                {list.length > 30 && <Txt.muted>e mais {list.length - 30}. Use a busca em Clientes.</Txt.muted>}
+              </Card>
+            );
+          })}
+        </View>
+      )}
 
       {tab === "tarefas" && (tasks.length === 0 ? <Empty icon="checkmark-circle-outline" text="Nenhuma tarefa aberta." /> : tasks.map((t) => (
         <Card key={t.id} title={t.name} eyebrow={INTERACTION_LABEL[t.kind]} onPress={() => router.push(`/clientes/${t.client_id}`)}

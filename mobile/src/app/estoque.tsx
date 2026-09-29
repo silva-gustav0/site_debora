@@ -1,8 +1,12 @@
 import { useQuery } from "@powersync/react-native";
 import { brl, fmtDate, fmtTime, todaySP } from "@shared/format";
 import { cardFee } from "@shared/settings-core";
+import { AlertTriangle, ArrowDownToLine, Boxes, Plus, ShoppingBag } from "lucide-react-native";
 import { useState } from "react";
-import { Badge, Button, Chip, ConfirmButton, Empty, Field, ListItem, MoneyField, moneyText, parseMoney, Row, Screen, Section, Segmented, Select, Sheet, Stat, Toggle, useToast } from "@/components/ui";
+import { Text, View } from "react-native";
+import { DataTable, Progress, Split } from "@/components/charts";
+import { Badge, Button, Card, ConfirmButton, Empty, Field, ListItem, MoneyField, moneyText, parseMoney, Row, Screen, Segmented, Select, Sheet, Stat, Toggle, useToast, useWide } from "@/components/ui";
+import { Brand, Font } from "@/constants/brand";
 import { asBool, useSettings } from "@/db/hooks";
 import { newId, write } from "@/db/write";
 import { METHOD_OPTIONS, qtyFmt, sum } from "@/lib/finance";
@@ -11,13 +15,14 @@ type Product = { id: string; name: string; brand: string | null; category: strin
 type Mov = { id: string; product_id: string; kind: string; qty: number; unit_cost: number | null; note: string | null; created_at: string; product_name: string | null; unit: string | null; client_name: string | null };
 const MOV_LABEL = { entrada: "Entrada", saida: "Uso / saída", venda: "Venda", ajuste: "Ajuste" } as const;
 type Kind = keyof typeof MOV_LABEL;
-const FILTERS = [{ value: "todos", label: "Todos" }, { value: "baixo", label: "Estoque baixo" }, { value: "cabine", label: "Cabine" }, { value: "home", label: "Home care" }];
+const FILTERS = [{ value: "todos", label: "Todos" }, { value: "baixo", label: "Repor" }, { value: "cabine", label: "Cabine" }, { value: "home", label: "Home care" }];
 const NEW_PRODUCT = { id: "", name: "", brand: "", category: "uso_cabine", unit: "un", min: "1", cost: "", sale: "", initial: "", active: true };
 const NEW_MOV = { product: null as Product | null, kind: "entrada" as Kind, qty: "", cost: "", price: "", note: "", expense: false, method: "pix", client: null as string | null };
 
 /** Estoque: produtos, alerta de mínimo, movimentações e histórico. */
 export default function Estoque() {
   const toast = useToast();
+  const wide = useWide();
   const settings = useSettings();
   const [filter, setFilter] = useState("todos");
   const [prod, setProd] = useState<typeof NEW_PRODUCT | null>(null);
@@ -86,31 +91,65 @@ export default function Estoque() {
 
   const editProduct = (p: Product) => open(setProd, { id: p.id, name: p.name, brand: p.brand ?? "", category: p.category, unit: p.unit, min: qtyFmt(p.min_qty), cost: moneyText(p.cost_price), sale: moneyText(p.sale_price), initial: "", active: asBool(p.active) });
 
+  const t = (size: number, color: string, bold?: boolean) => ({ fontSize: size, color, fontFamily: bold ? Font.bold : Font.body });
+  const move = (p: Product) => open(setMov, { ...NEW_MOV, product: p, price: moneyText(p.sale_price), cost: moneyText(p.cost_price) });
+  const lowCount = products.filter(low).length;
+
   return (
-    <Screen title="Estoque" back right={<Button small icon="add" onPress={() => open(setProd, { ...NEW_PRODUCT })}>Produto</Button>}>
-      <Row wrap>
-        <Stat label="Produtos ativos" value={String(products.filter((p) => asBool(p.active)).length)} />
-        <Stat label="Abaixo do mínimo" value={String(products.filter(low).length)} tone={products.some(low) ? "red" : "green"} />
-        <Stat label="Valor em estoque" value={brl(sum(products, (p) => p.stock_qty * p.cost_price))} tone="gray" />
+    <Screen
+      eyebrow="Gestão" title="Estoque" subtitle="Produtos de cabine e home care, com alerta de reposição e vendas." back
+      right={<Button small icon={Plus} onPress={() => open(setProd, { ...NEW_PRODUCT })}>Novo produto</Button>}
+    >
+      <Row wrap gap={12}>
+        <Stat icon={Boxes} label="Produtos ativos" value={String(products.filter((p) => asBool(p.active)).length)} />
+        <Stat icon={AlertTriangle} label="Abaixo do mínimo" value={String(lowCount)} tone={lowCount ? "red" : "bronze"} />
+        <Stat label="Valor em estoque" value={brl(sum(products, (p) => Math.max(p.stock_qty, 0) * p.cost_price))} hint="a preço de custo" />
+        <Stat icon={ShoppingBag} label="Potencial de revenda" value={brl(sum(products.filter((p) => p.category === "home_care"), (p) => Math.max(p.stock_qty, 0) * p.sale_price))} hint="home care a preço de venda" />
       </Row>
-      <Row wrap>{FILTERS.map((f) => <Chip key={f.value} label={f.label} on={filter === f.value} onPress={() => setFilter(f.value)} />)}</Row>
-      {shown.length === 0 ? <Empty icon="cube-outline" text="Nenhum produto por aqui." /> : shown.map((p) => (
-        <ListItem
-          key={p.id} title={p.name} onPress={() => editProduct(p)}
-          subtitle={`${[p.brand, p.category === "home_care" ? "Home care" : "Cabine"].filter(Boolean).join(" · ")} · mínimo ${qtyFmt(p.min_qty)} ${p.unit}`}
-          right={<Row><Badge tone={low(p) ? "red" : "green"}>{`${qtyFmt(p.stock_qty)} ${p.unit}`}</Badge><Button small variant="outline" onPress={() => open(setMov, { ...NEW_MOV, product: p, price: moneyText(p.sale_price), cost: moneyText(p.cost_price) })}>Movimentar</Button></Row>}
-        />
-      ))}
-      <Section title="Últimas movimentações">
-        {moves.length === 0 ? <Empty text="Nenhuma movimentação ainda." /> : moves.map((m) => (
-          <ListItem
-            key={m.id}
-            title={`${MOV_LABEL[m.kind as Kind] ?? m.kind} · ${m.qty > 0 ? "+" : ""}${qtyFmt(m.qty)} ${m.unit ?? ""} · ${m.product_name ?? "—"}`}
-            subtitle={[`${fmtDate(m.created_at, { year: undefined })} ${fmtTime(m.created_at)}`, m.client_name, m.note].filter(Boolean).join(" · ")}
-            right={<ConfirmButton onConfirm={() => removeMove(m)} />}
-          />
-        ))}
-      </Section>
+      <Split
+        ratio={2}
+        left={
+          <Card bodyStyle={{ padding: 0, gap: 0 }}>
+            <View style={{ padding: 16 }}><Segmented value={filter} options={FILTERS.map((f) => ({ ...f, label: f.value === "baixo" ? `Repor · ${lowCount}` : f.label }))} onChange={setFilter} /></View>
+            {shown.length === 0 ? <Empty icon={Boxes} text="Nenhum produto aqui." /> : wide ? (
+              <DataTable
+                cols={[{ label: "Produto", flex: 2 }, { label: "Uso" }, { label: "Estoque", right: true }, { label: "Nível", flex: 1.2 }, { label: "Custo", right: true }, { label: "Venda", right: true }, { label: "", flex: 1.3, right: true }]}
+                rows={shown.map((p) => ({
+                  key: p.id, onPress: () => editProduct(p), dim: !asBool(p.active),
+                  cells: [
+                    <View key="n"><Text style={t(14, Brand.ink, true)} numberOfLines={1}>{p.name}</Text>{!!p.brand && <Text style={t(12, Brand.muted)}>{p.brand}</Text>}</View>,
+                    <Badge key="u" tone={p.category === "home_care" ? "plum" : "gray"}>{p.category === "home_care" ? "home care" : "cabine"}</Badge>,
+                    <Text key="q" style={t(14, low(p) ? Brand.danger : Brand.ink, true)}>{`${qtyFmt(p.stock_qty)} ${p.unit}`}</Text>,
+                    <View key="l" style={{ width: "100%", gap: 2 }}><Progress value={p.stock_qty} max={Math.max(p.min_qty * 3, p.stock_qty, 1)} color={low(p) ? "#C0504D" : "#3F9A5E"} /><Text style={t(10.5, Brand.muted)}>{`mín. ${qtyFmt(p.min_qty)}`}</Text></View>,
+                    brl(p.cost_price), p.sale_price ? brl(p.sale_price) : "—",
+                    <Button key="m" small variant="ghost" onPress={() => move(p)}>Movimentar</Button>,
+                  ],
+                }))}
+              />
+            ) : shown.map((p) => (
+              <ListItem
+                key={p.id} title={p.name} onPress={() => editProduct(p)}
+                subtitle={`${[p.brand, p.category === "home_care" ? "Home care" : "Cabine"].filter(Boolean).join(" · ")} · mínimo ${qtyFmt(p.min_qty)} ${p.unit}`}
+                right={<Row><Badge tone={low(p) ? "red" : "green"}>{`${qtyFmt(p.stock_qty)} ${p.unit}`}</Badge><Button small variant="outline" onPress={() => move(p)}>Movimentar</Button></Row>}
+              />
+            ))}
+          </Card>
+        }
+        right={
+          <Card title="Últimas movimentações" bodyStyle={{ padding: 12, gap: 0 }}>
+            {moves.length === 0 ? <Empty icon={ArrowDownToLine} text="Sem movimentações." /> : moves.map((m) => (
+              <Row key={m.id} style={{ paddingVertical: 8, paddingHorizontal: 4, borderBottomWidth: 1, borderBottomColor: Brand.lineSoft }}>
+                <Text style={[t(14, m.qty > 0 ? "#1F6B3A" : Brand.danger, true), { width: 56, textAlign: "right", fontVariant: ["tabular-nums"] }]}>{`${m.qty > 0 ? "+" : ""}${qtyFmt(m.qty)}`}</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={t(14, Brand.ink)} numberOfLines={1}>{m.product_name ?? "—"}</Text>
+                  <Text style={t(12, Brand.muted)} numberOfLines={1}>{[MOV_LABEL[m.kind as Kind] ?? m.kind, `${fmtDate(m.created_at, { year: undefined })} ${fmtTime(m.created_at)}`, m.client_name, m.note].filter(Boolean).join(" · ")}</Text>
+                </View>
+                <ConfirmButton onConfirm={() => removeMove(m)} />
+              </Row>
+            ))}
+          </Card>
+        }
+      />
 
       <Sheet visible={!!prod} onClose={() => setProd(null)} title={prod?.id ? "Editar produto" : "Novo produto"}>
         {prod && (

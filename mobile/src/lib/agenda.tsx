@@ -3,9 +3,15 @@ import { addDays, brl, dateSP, fmtDate, fmtTime, METHOD_LABEL, STATUS_LABEL, tod
 import { toTimestamp } from "@shared/hours";
 import { cardFee } from "@shared/settings-core";
 import type { AppointmentStatus, PaymentMethod } from "@shared/types";
-import { router } from "expo-router";
-import { useState } from "react";
-import { Badge, Button, Field, ListItem, MoneyField, moneyText, parseMoney, Segmented, Toggle, type Tone, Txt, useToast } from "@/components/ui";
+import { router, Stack } from "expo-router";
+import { CheckCircle2, ChevronRight, Gift, Package, X } from "lucide-react-native";
+import { type ReactNode, useState } from "react";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  Avatar, Badge, Button, Field, MoneyField, moneyText, parseMoney, Row, Screen, Select, Toggle, type Tone, Txt, ui, useToast, useWide,
+} from "@/components/ui";
+import { Brand, Font } from "@/constants/brand";
 import { useMe, useSettings } from "@/db/hooks";
 import { write } from "@/db/write";
 
@@ -49,18 +55,66 @@ export const PKG_SQL = `select cp.*, c.name as client_name,
 export type Pkg = { id: string; client_id: string; service_id: string; name: string; sessions_total: number; expires_on: string | null; client_name: string | null; used: number; scheduled: number };
 
 export const STATUS_TONE: Record<AppointmentStatus, Tone> = { solicitado: "gold", confirmado: "blue", concluido: "green", cancelado: "gray", faltou: "red" };
+/** Cores dos eventos na grade (STATUS_STYLE do painel). */
+export const STATUS_STYLE: Record<AppointmentStatus, { bg: string; bd: string; fg: string }> = {
+  solicitado: { bg: "#FFF4D6", bd: "#D4A73C", fg: "#5C4010" },
+  confirmado: { bg: "#EEF1FB", bd: "#6A7BC9", fg: "#34459A" },
+  concluido: { bg: "#E3F2E7", bd: "#3F9A5E", fg: "#1D4D2E" },
+  cancelado: { bg: "#F1EEE8", bd: "#B8AFA2", fg: "#6E665C" },
+  faltou: { bg: "#FBE3E1", bd: "#C0504D", fg: "#7A1F1F" },
+};
 export const isOpen = (s: string) => s === "solicitado" || s === "confirmado";
 export const METHOD_OPTIONS = (Object.keys(METHOD_LABEL) as PaymentMethod[]).map((value) => ({ value, label: METHOD_LABEL[value] }));
 
-/** Linha de atendimento que abre o detalhe. */
+/** Linha de atendimento do painel (AppointmentItem): hora, avatar, cliente/serviço e status; abre o detalhe. */
 export function ApptItem({ a, showDate }: { a: Appt; showDate?: boolean }) {
+  const faded = a.status === "cancelado" || a.status === "faltou";
   return (
-    <ListItem
-      title={`${showDate ? `${fmtDate(dateSP(a.starts_at), { year: undefined })} ` : ""}${fmtTime(a.starts_at)} · ${a.client_name ?? "Cliente removido"}`}
-      subtitle={[a.client_package_id && "Pacote", a.voucher_id && "Voucher", a.service_name].filter(Boolean).join(" · ")}
-      right={<Badge tone={STATUS_TONE[a.status]}>{STATUS_LABEL[a.status]}</Badge>}
+    <Pressable
       onPress={() => router.push(`/agendamento/${a.id}`)}
-    />
+      style={({ pressed }) => [st.item, { borderLeftColor: STATUS_STYLE[a.status].bd }, faded && { opacity: 0.6 }, pressed && { opacity: 0.75 }]}
+    >
+      <View style={{ width: 56 }}>
+        {showDate && <Text style={st.small}>{fmtDate(dateSP(a.starts_at), { year: undefined })}</Text>}
+        <Text style={st.time}>{fmtTime(a.starts_at)}</Text>
+      </View>
+      {a.client_name && <Avatar name={a.client_name} size={32} />}
+      <View style={{ flex: 1 }}>
+        <Text style={st.name} numberOfLines={1}>{a.client_name ?? "Cliente removido"}</Text>
+        <Row gap={4}>
+          {a.client_package_id && <Package size={11} color={Brand.gold} />}
+          {a.voucher_id && <Gift size={11} color="#1F6B3A" />}
+          <Text style={[st.small, { flexShrink: 1 }]} numberOfLines={1}>{a.service_name}</Text>
+        </Row>
+      </View>
+      <Badge tone={STATUS_TONE[a.status]}>{STATUS_LABEL[a.status]}</Badge>
+      <ChevronRight size={15} color="#CFC3AE" />
+    </Pressable>
+  );
+}
+
+/** Rótulo pequeno em caixa alta (.p-label). */
+export const Label = ({ children }: { children: string }) => <Text style={[ui.label, { marginBottom: 6 }]}>{children.toUpperCase()}</Text>;
+
+/** Gaveta à direita no tablet (Drawer do painel, sobre a tela anterior); no celular, tela comum com "Voltar". */
+export function DrawerScreen({ title, eyebrow, children }: { title: string; eyebrow?: string; children: ReactNode }) {
+  const wide = useWide();
+  if (!wide) return <Screen title={title} eyebrow={eyebrow} back>{children}</Screen>;
+  return (
+    <View style={st.root}>
+      <Stack.Screen options={{ presentation: "transparentModal", animation: "fade" }} />
+      <Pressable style={st.backdrop} onPress={() => router.back()} accessibilityLabel="Fechar" />
+      <SafeAreaView edges={["top", "bottom", "right"]} style={st.drawer}>
+        <View style={st.head}>
+          <View style={{ flex: 1, gap: 2 }}>
+            {eyebrow && <Txt.eyebrow>{eyebrow}</Txt.eyebrow>}
+            <Text style={st.title}>{title}</Text>
+          </View>
+          <Pressable onPress={() => router.back()} style={st.close} hitSlop={8} accessibilityLabel="Fechar"><X size={16} color={Brand.body} /></Pressable>
+        </View>
+        <ScrollView contentContainerStyle={{ padding: 24, gap: 20, paddingBottom: 48 }} keyboardShouldPersistTaps="handled">{children}</ScrollView>
+      </SafeAreaView>
+    </View>
   );
 }
 
@@ -122,9 +176,11 @@ export function CompleteForm({ a, record, onDone }: { a: Appt; record?: SessionN
           <Toggle label="Registrar pagamento" value={pay} onChange={setPay} hint={a.client_package_id ? "Sessão de pacote já paga" : undefined} />
           {pay && (
             <>
-              <MoneyField label={a.v_code ? "Diferença recebida" : "Valor recebido"} value={amount} onChangeText={setAmount} />
-              <Segmented value={method} options={METHOD_OPTIONS} onChange={setMethod} />
-              <Txt.muted>Taxas da maquininha: crédito {settings.fee_credit}% · débito {settings.fee_debit}% (lançadas automaticamente).</Txt.muted>
+              <Row gap={12} style={{ alignItems: "flex-start" }}>
+                <MoneyField label={a.v_code ? "Diferença recebida" : "Valor recebido"} value={amount} onChangeText={setAmount} />
+                <Select label="Forma" value={method} options={METHOD_OPTIONS} onChange={setMethod} />
+              </Row>
+              <Txt.muted style={{ fontSize: 11.5 }}>Taxas da maquininha: crédito {settings.fee_credit}% · débito {settings.fee_debit}% (lançadas automaticamente).</Txt.muted>
             </>
           )}
         </>
@@ -133,7 +189,26 @@ export function CompleteForm({ a, record, onDone }: { a: Appt; record?: SessionN
         <Field label="Evolução da sessão (vai para o prontuário)" multiline value={note} onChangeText={setNote}
           placeholder="Como foi a sessão, produtos usados, reação da pele, orientações…" />
       )}
-      <Button icon="checkmark-circle" onPress={submit}>{record ? "Concluir e salvar no prontuário" : "Concluir"}</Button>
+      <Button icon={CheckCircle2} onPress={submit} style={{ alignSelf: record ? "stretch" : "flex-start", minHeight: record ? 56 : 42 }}>{record ? "Concluir e salvar no prontuário" : "Concluir"}</Button>
     </>
   );
 }
+
+const st = StyleSheet.create({
+  item: {
+    flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: Brand.white, borderWidth: 1, borderColor: "#F0E8DB",
+    borderLeftWidth: 3, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10,
+  },
+  time: { fontFamily: Font.bold, fontSize: 15, color: Brand.ink },
+  name: { fontFamily: Font.body, fontSize: 14, color: Brand.ink },
+  small: { fontFamily: Font.body, fontSize: 12, color: Brand.muted },
+  root: { flex: 1, flexDirection: "row" },
+  backdrop: { flex: 1, backgroundColor: "rgba(41,32,26,0.35)" },
+  drawer: {
+    width: 540, maxWidth: "100%", backgroundColor: "#FFFCFB",
+    shadowColor: "#29201A", shadowOpacity: 0.35, shadowRadius: 30, shadowOffset: { width: -24, height: 0 }, elevation: 16,
+  },
+  head: { flexDirection: "row", alignItems: "flex-start", gap: 12, paddingHorizontal: 24, paddingTop: 22, paddingBottom: 18, borderBottomWidth: 1, borderBottomColor: Brand.lineSoft },
+  title: { fontFamily: Font.displayRegular, fontSize: 30, lineHeight: 34, color: Brand.ink },
+  close: { width: 38, height: 30, borderRadius: 8, borderWidth: 1, borderColor: Brand.inputLine, alignItems: "center", justifyContent: "center", backgroundColor: Brand.white },
+});

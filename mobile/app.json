@@ -2,14 +2,14 @@
   "expo": {
     "name": "Débora Equipe",
     "slug": "debora-equipe",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "deboraequipe",
     "userInterfaceStyle": "light",
     "android": {
       "package": "br.com.clinicadeborasilva.equipe",
-      "versionCode": 3,
+      "versionCode": 4,
       "allowBackup": false,
       "adaptiveIcon": {
         "backgroundColor": "#FBF7EE",

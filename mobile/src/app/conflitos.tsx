@@ -14,8 +14,8 @@ export default function Conflitos() {
   const dismiss = (ids: string[]) => write(async (w) => { for (const id of ids) await w.remove("sync_conflicts", id); });
 
   return (
-    <Screen title="Sincronização" back>
-      <Card title={state}>
+    <Screen eyebrow="Sistema" title="Sincronização" subtitle="Estado da sincronização e alterações recusadas pelo servidor">
+      <Card title={state} right={<Badge tone={sync.connected ? "green" : "gray"}>{sync.connected ? "Online" : "Offline"}</Badge>}>
         {sync.lastSyncedAt && <Txt.muted>Última sincronização: {fmtDate(sync.lastSyncedAt)} às {fmtTime(sync.lastSyncedAt.toISOString())}</Txt.muted>}
         {!!pending?.n && <Txt.muted>{pending.n} alterações aguardando envio.</Txt.muted>}
       </Card>

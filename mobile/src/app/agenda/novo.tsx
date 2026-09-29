@@ -2,12 +2,15 @@ import { brl, digits, formatPhone, maskPhone, todaySP } from "@shared/format";
 import { toTimestamp } from "@shared/hours";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { Button, Card, DateField, Field, MoneyField, moneyText, parseMoney, Row, Screen, Segmented, Select, TimeField, useToast } from "@/components/ui";
+import { CalendarPlus } from "lucide-react-native";
+import { View } from "react-native";
+import { Button, DateField, Field, MoneyField, moneyText, parseMoney, Row, Segmented, Select, TimeField, useToast } from "@/components/ui";
 import { useServices } from "@/db/hooks";
 import { write } from "@/db/write";
-import { PKG_SQL, type Pkg, useRows } from "@/lib/agenda";
+import { DrawerScreen, Label, PKG_SQL, type Pkg, useRows } from "@/lib/agenda";
 
 const NEW = "__novo";
+const box = { borderRadius: 12, borderWidth: 1, borderColor: "#F0E6D6", backgroundColor: "#FDFAF5", padding: 12 };
 
 /** Novo agendamento: cliente existente ou nova, serviço, horário, valor, situação e sessão de pacote. */
 export default function NewAppointment() {
@@ -61,40 +64,43 @@ export default function NewAppointment() {
   };
 
   return (
-    <Screen title="Novo agendamento" back>
+    <DrawerScreen title="Novo agendamento" eyebrow="Agenda">
       <Select
         label="Cliente" searchable value={clientId || null} onChange={(v) => { setClientId(v); setPackageId(""); }}
         options={[{ value: NEW, label: "+ Nova cliente" }, ...clients.map((c) => ({ value: c.id, label: c.name, hint: c.phone ? formatPhone(c.phone) : undefined }))]}
       />
       {clientId === NEW && (
-        <Row wrap>
+        <Row wrap gap={12} style={box}>
           <Field label="Nome" value={name} onChangeText={setName} autoCapitalize="words" />
           <Field label="WhatsApp" value={phone} onChangeText={(v) => setPhone(maskPhone(v))} keyboardType="phone-pad" placeholder="(11) 99999-9999" />
         </Row>
       )}
       {pkgs.length > 0 && (
-        <Card eyebrow="Usar sessão de pacote?">
+        <View style={box}>
+          <Label>Usar sessão de pacote?</Label>
           <Segmented
             value={packageId} onChange={(v) => { const k = pkgs.find((x) => x.id === v); if (k) pickService(k.service_id); setPackageId(v); }}
             options={[{ value: "", label: "Não, cobrar avulso" }, ...pkgs.map((k) => ({ value: k.id, label: `${k.name} · restam ${k.sessions_total - k.used - k.scheduled} de ${k.sessions_total}` }))]}
           />
-        </Card>
+        </View>
       )}
       <Select
         label="Serviço" value={service?.id ?? null} onChange={pickService}
         options={services.map((s) => ({ value: s.id, label: `${s.name}${s.active ? "" : " (inativo)"}`, hint: `${s.duration_min} min · ${brl(s.price)}` }))}
       />
-      <Row wrap>
+      <Row wrap gap={12}>
         <DateField label="Data" value={date} onChange={setDate} />
         <TimeField label="Horário" value={time} onChange={setTime} />
       </Row>
-      <Row wrap>
+      <Row wrap gap={12}>
         <Field label="Duração (min)" keyboardType="number-pad" value={duration || String(service?.duration_min ?? "")} onChangeText={setDuration} />
         {packageId ? <Field label="Valor (R$)" value="Pacote" editable={false} /> : <MoneyField label="Valor (R$)" value={price || moneyText(service?.price)} onChangeText={setPrice} />}
       </Row>
-      <Segmented value={status} onChange={setStatus} options={[{ value: "confirmado", label: "Confirmado" }, { value: "solicitado", label: "A confirmar" }]} />
-      <Field label="Observações" value={notes} onChangeText={setNotes} placeholder="Opcional" />
-      <Button icon="calendar" onPress={save}>Agendar</Button>
-    </Screen>
+      <Row wrap gap={12} style={{ alignItems: "flex-start" }}>
+        <Select label="Situação" value={status} onChange={setStatus} options={[{ value: "confirmado", label: "Confirmado" }, { value: "solicitado", label: "A confirmar" }]} />
+        <Field label="Observações" value={notes} onChangeText={setNotes} placeholder="Opcional" />
+      </Row>
+      <Button icon={CalendarPlus} onPress={save} style={{ alignSelf: "flex-start" }}>Agendar</Button>
+    </DrawerScreen>
   );
 }

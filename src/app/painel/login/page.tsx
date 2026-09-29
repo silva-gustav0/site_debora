@@ -39,7 +39,7 @@ export default function LoginPage() {
           <div className="flex justify-center mb-8 lg:hidden">
             <Image src="/images/clinica/logo.png" alt="Clínica Débora Silva" width={1052} height={577} priority className="h-20 w-auto" />
           </div>
-          <p className="p-eyebrow mb-2">Bem-vinda de volta</p>
+          <p className="p-eyebrow mb-2">Boas-vindas</p>
           <h2 className="p-display text-5xl font-light text-[#2B221B] mb-2">Entrar</h2>
           <p className="text-sm text-[#857566] mb-8">Use o e-mail e a senha cadastrados pela clínica.</p>
           <LoginForm />

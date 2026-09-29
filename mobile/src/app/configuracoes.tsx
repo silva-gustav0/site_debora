@@ -3,8 +3,11 @@ import { digits } from "@shared/format";
 import { toMinutes, WEEKDAY_NAMES } from "@shared/hours";
 import { type AnamnesisFormDef, type AnamnesisQuestion, consentOrDefault, DEFAULT_CONSENT, formOrDefault, QUESTION_TYPES, sanitizeForm } from "@shared/anamnesis-schema";
 import type { BusinessHours, DayHours, Settings, TemplateKey } from "@shared/types";
+import { router } from "expo-router";
 import { useState } from "react";
-import { Button, Card, ConfirmButton, Field, Row, Screen, Segmented, Select, TimeField, Toggle, Txt, useToast } from "@/components/ui";
+import { Text, View } from "react-native";
+import { Button, Card, ConfirmButton, Field, Row, Screen, Select, Tabs, TimeField, Toggle, Txt, useToast, useWide } from "@/components/ui";
+import { Brand, Font } from "@/constants/brand";
 import { useSettings } from "@/db/hooks";
 import { write } from "@/db/write";
 import { TEMPLATE_INFO } from "@/lib/reports";
@@ -18,6 +21,7 @@ const num = (v: string) => Number(v.replace(",", ".")) || 0;
 /** Aba Clínica e agenda: dados, regras do agendamento online, taxas e horário de funcionamento. */
 function ClinicTab({ s }: { s: Settings }) {
   const toast = useToast();
+  const wide = useWide();
   const [f, setF] = useState({
     clinic_name: s.clinic_name, whatsapp: s.whatsapp, address: s.address, slot_step_min: String(s.slot_step_min), min_lead_min: String(s.min_lead_min),
     max_days_ahead: String(s.max_days_ahead), cancel_min_hours: String(s.cancel_min_hours), fee_credit: String(s.fee_credit).replace(".", ","), fee_debit: String(s.fee_debit).replace(".", ","),
@@ -40,35 +44,47 @@ function ClinicTab({ s }: { s: Settings }) {
 
   return (
     <>
-      <Card title="Dados da clínica">
-        {text("clinic_name", "Nome")}
-        {text("whatsapp", "WhatsApp (com DDI e DDD)", { keyboardType: "phone-pad", placeholder: "5511999999999" })}
-        {text("address", "Endereço")}
-      </Card>
-      <Card title="Regras do agendamento online">
-        <Select label="Intervalo entre horários" value={f.slot_step_min} onChange={(v) => setF({ ...f, slot_step_min: v })} options={["15", "20", "30", "60"].map((v) => ({ value: v, label: `${v} min` }))} />
-        {text("min_lead_min", "Antecedência mínima (min)", { keyboardType: "number-pad" })}
-        {text("max_days_ahead", "Agendar até (dias à frente)", { keyboardType: "number-pad" })}
-        {text("cancel_min_hours", "Cancelar pelo site até (horas antes)", { keyboardType: "number-pad" })}
-        {text("fee_credit", "Taxa crédito (%)", { keyboardType: "decimal-pad" })}
-        {text("fee_debit", "Taxa débito (%)", { keyboardType: "decimal-pad" })}
-      </Card>
-      <Card title="Horário de funcionamento">
+      <View style={{ flexDirection: wide ? "row" : "column", gap: 16, alignItems: "flex-start" }}>
+        <Card title="Dados da clínica" style={{ flex: wide ? 1 : undefined, width: wide ? undefined : "100%" }} bodyStyle={{ gap: 14 }}>
+          {text("clinic_name", "Nome")}
+          {text("whatsapp", "WhatsApp (com DDI e DDD)", { keyboardType: "phone-pad", placeholder: "5511999999999" })}
+          {text("address", "Endereço")}
+        </Card>
+        <Card title="Regras do agendamento online" style={{ flex: wide ? 1 : undefined, width: wide ? undefined : "100%" }} bodyStyle={{ gap: 14 }}>
+          <Row wrap gap={14} style={{ alignItems: "flex-start" }}>
+            <Select label="Intervalo entre horários" value={f.slot_step_min} onChange={(v) => setF({ ...f, slot_step_min: v })} options={["15", "20", "30", "60"].map((v) => ({ value: v, label: `${v} min` }))} />
+            {text("min_lead_min", "Antecedência mínima (min)", { keyboardType: "number-pad" })}
+            {text("max_days_ahead", "Agendar até (dias à frente)", { keyboardType: "number-pad" })}
+            {text("cancel_min_hours", "Cancelar pelo site até (horas antes)", { keyboardType: "number-pad" })}
+            {text("fee_credit", "Taxa crédito (%)", { keyboardType: "decimal-pad" })}
+            {text("fee_debit", "Taxa débito (%)", { keyboardType: "decimal-pad" })}
+          </Row>
+        </Card>
+      </View>
+      <Card title="Horário de funcionamento" bodyStyle={{ gap: 0 }}>
         {DAYS.map((d) => {
           const h = hours[String(d) as "0"];
           return (
-            <Card key={d} title={WEEKDAY_NAMES[d]} right={<Toggle label="Aberto" value={!!h} onChange={(on) => setDay(d, on ? { open: "09:00", close: "18:00", break_start: null, break_end: null } : null)} />}>
+            <Row key={d} wrap gap={14} style={{ paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: Brand.lineSoft }}>
+              <Text style={{ width: 84, fontFamily: Font.bold, fontSize: 14, color: Brand.ink }}>{WEEKDAY_NAMES[d]}</Text>
+              <View style={{ width: 110 }}><Toggle label="Aberto" value={!!h} onChange={(on) => setDay(d, on ? { open: "09:00", close: "18:00", break_start: null, break_end: null } : null)} /></View>
               {h && (
                 <>
-                  <Row><TimeField label="Abre" value={h.open} onChange={(open) => setDay(d, { ...h, open })} /><TimeField label="Fecha" value={h.close} onChange={(close) => setDay(d, { ...h, close })} /></Row>
-                  <Toggle label="Intervalo" value={!!h.break_start} onChange={(on) => setDay(d, { ...h, break_start: on ? "12:00" : null, break_end: on ? "13:00" : null })} />
-                  {h.break_start && h.break_end && <Row><TimeField label="Intervalo de" value={h.break_start} onChange={(break_start) => setDay(d, { ...h, break_start })} /><TimeField label="até" value={h.break_end} onChange={(break_end) => setDay(d, { ...h, break_end })} /></Row>}
+                  <TimeField label="Abre" value={h.open} onChange={(open) => setDay(d, { ...h, open })} />
+                  <TimeField label="Fecha" value={h.close} onChange={(close) => setDay(d, { ...h, close })} />
+                  <View style={{ width: 120 }}><Toggle label="Intervalo" value={!!h.break_start} onChange={(on) => setDay(d, { ...h, break_start: on ? "12:00" : null, break_end: on ? "13:00" : null })} /></View>
+                  {h.break_start && h.break_end && (
+                    <>
+                      <TimeField label="Intervalo de" value={h.break_start} onChange={(break_start) => setDay(d, { ...h, break_start })} />
+                      <TimeField label="até" value={h.break_end} onChange={(break_end) => setDay(d, { ...h, break_end })} />
+                    </>
+                  )}
                 </>
               )}
-            </Card>
+            </Row>
           );
         })}
-        <Txt.muted>Os horários valem para o site e para a grade da agenda. Para folgas pontuais, use “Bloquear” na agenda.</Txt.muted>
+        <Txt.muted style={{ paddingTop: 12 }}>Os horários valem para o site e para a grade da agenda. Para folgas pontuais, use “Bloquear” na agenda.</Txt.muted>
       </Card>
       <Button onPress={save}>Salvar configurações</Button>
     </>
@@ -144,10 +160,11 @@ function AnamnesisTab({ s }: { s: Settings }) {
 export default function Configuracoes() {
   const settings = useSettings();
   const { isLoading } = useQuery("select id from settings limit 1");
-  const [tab, setTab] = useState<"clinica" | "mensagens" | "anamnese">("clinica");
+  const [tab, setTab] = useState<"clinica" | "mensagens" | "anamnese" | "equipe">("clinica");
   return (
-    <Screen title="Configurações" back>
-      <Segmented value={tab} onChange={setTab} options={[{ value: "clinica", label: "Clínica" }, { value: "mensagens", label: "Mensagens" }, { value: "anamnese", label: "Anamnese" }]} />
+    <Screen eyebrow="Ajustes" title="Configurações" subtitle="Dados da clínica, horários, mensagens de WhatsApp e ficha de anamnese">
+      <Tabs value={tab} onChange={(v) => (v === "equipe" ? router.push("/equipe") : setTab(v))}
+        options={[{ value: "clinica", label: "Clínica e agenda" }, { value: "mensagens", label: "Mensagens de WhatsApp" }, { value: "anamnese", label: "Anamnese e termo" }, { value: "equipe", label: "Equipe" }]} />
       {!isLoading && (tab === "clinica" ? <ClinicTab s={settings} /> : tab === "mensagens" ? <MessagesTab s={settings} /> : <AnamnesisTab s={settings} />)}
     </Screen>
   );

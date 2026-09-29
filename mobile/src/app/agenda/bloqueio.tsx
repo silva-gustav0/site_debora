@@ -2,8 +2,10 @@ import { addDays, diffDays, todaySP } from "@shared/format";
 import { toTimestamp } from "@shared/hours";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { Button, DateField, Field, Row, Screen, TimeField, Toggle, Txt, useToast } from "@/components/ui";
+import { Lock } from "lucide-react-native";
+import { Button, DateField, Field, Row, TimeField, Toggle, Txt, useToast } from "@/components/ui";
 import { write } from "@/db/write";
+import { DrawerScreen } from "@/lib/agenda";
 
 /** Bloqueia um horário ou dias inteiros (até 60 dias) na agenda e no site. */
 export default function BlockTime() {
@@ -33,21 +35,21 @@ export default function BlockTime() {
   };
 
   return (
-    <Screen title="Bloquear agenda" subtitle="Folga, curso, compromisso" back>
+    <DrawerScreen title="Bloquear agenda" eyebrow="Folga, curso, compromisso">
       <Field label="Motivo" value={reason} onChangeText={setReason} placeholder="Ex.: Curso, médico, folga" />
-      <Row wrap>
+      <Row wrap gap={12}>
         <DateField label="De" value={from} onChange={setFrom} />
         <DateField label="Até" value={to ?? from} onChange={setTo} optional />
       </Row>
       <Toggle label="Dia inteiro" value={allDay} onChange={setAllDay} />
       {!allDay && (
-        <Row wrap>
+        <Row wrap gap={12}>
           <TimeField label="Início" value={start} onChange={setStart} />
           <TimeField label="Fim" value={end} onChange={setEnd} />
         </Row>
       )}
-      <Txt.muted>O site deixa de oferecer esses horários para agendamento.</Txt.muted>
-      <Button icon="lock-closed" onPress={save}>Bloquear</Button>
-    </Screen>
+      <Txt.muted style={{ fontSize: 12 }}>O site deixa de oferecer esses horários para agendamento.</Txt.muted>
+      <Button icon={Lock} onPress={save} style={{ alignSelf: "flex-start" }}>Bloquear</Button>
+    </DrawerScreen>
   );
 }

@@ -3,7 +3,8 @@ import { RECURRENCE_META, type RecurrenceStatus } from "@shared/recurrence";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Linking } from "react-native";
-import { Avatar, Badge, Button, Card, Chip, Empty, Row, Screen, Stat, Txt, useToast } from "@/components/ui";
+import { Clock, Repeat, TimerReset, UserX } from "lucide-react-native";
+import { Avatar, Badge, Button, Card, Empty, Row, Screen, Segmented, Stat, Txt, useToast } from "@/components/ui";
 import { useServices, useSettings } from "@/db/hooks";
 import { logContact, useClients } from "@/lib/reports";
 
@@ -27,15 +28,15 @@ export default function Recorrencia() {
     .sort((a, b) => RECURRENCE_META[a.recurrence.status].order - RECURRENCE_META[b.recurrence.status].order || (a.recurrence.daysUntilDue ?? 0) - (b.recurrence.daysUntilDue ?? 0));
 
   return (
-    <Screen title="Recorrência" subtitle="Quem deveria estar voltando, pela frequência real de cada cliente" back>
+    <Screen eyebrow="Relacionamento" title="Recorrência" subtitle="Quem deveria estar voltando, pela frequência real de cada cliente">
       <Row wrap>
-        <Stat label="Taxa de retorno" value={withVisits.length ? `${Math.round((recurring / withVisits.length) * 100)}%` : "—"} hint={`${recurring} de ${withVisits.length} voltaram`} />
-        <Stat label="Frequência média" value={learned.length ? `${Math.round(learned.reduce((s, c) => s + c.recurrence.interval, 0) / learned.length)} dias` : "—"} hint="entre visitas" />
-        <Stat label="Retorno atrasado" value={String(count("atrasada"))} tone={count("atrasada") ? "red" : "bronze"} hint={`${count("proxima")} vencem em 7 dias`} />
-        <Stat label="Inativos" value={String(count("inativa"))} hint="reative com campanha" />
+        <Stat dark icon={Repeat} label="Taxa de retorno" value={withVisits.length ? `${Math.round((recurring / withVisits.length) * 100)}%` : "—"} hint={`${recurring} de ${withVisits.length} voltaram`} />
+        <Stat icon={Clock} label="Frequência média" value={learned.length ? `${Math.round(learned.reduce((s, c) => s + c.recurrence.interval, 0) / learned.length)} dias` : "—"} hint="entre visitas" />
+        <Stat icon={TimerReset} label="Retorno atrasado" value={String(count("atrasada"))} tone={count("atrasada") ? "red" : "bronze"} hint={`${count("proxima")} vencem em 7 dias`} />
+        <Stat icon={UserX} label="Inativos" value={String(count("inativa"))} hint="reative com campanha" />
       </Row>
-      <Row wrap>{FILTERS.map((f) => <Chip key={f.key} label={f.label} on={filter === f.key} onPress={() => setFilter(f.key)} />)}</Row>
-      {list.length === 0 && <Empty text="Nenhum cliente nesta lista." />}
+      <Segmented value={filter} onChange={setFilter} options={FILTERS.map((f) => ({ value: f.key, label: f.label }))} />
+      {list.length === 0 && <Card><Empty icon={Repeat} text="Nenhum cliente nesta lista." /></Card>}
       {list.map((c) => {
         const r = c.recurrence;
         const svc = c.last_service_id ? serviceName.get(c.last_service_id) : null;
@@ -57,6 +58,7 @@ export default function Recorrencia() {
           </Card>
         );
       })}
+      <Txt.muted style={{ fontSize: 12 }}>A frequência usa o intervalo médio real entre as visitas concluídas. Com menos de duas visitas, usa o retorno sugerido do serviço (ajustável em Serviços).</Txt.muted>
     </Screen>
   );
 }
