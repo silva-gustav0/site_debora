@@ -16,7 +16,7 @@ export default function LiveSync() {
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
     const db = createClient();
     let timer: ReturnType<typeof setTimeout> | undefined, poll: ReturnType<typeof setInterval> | undefined, hiddenAt = 0, subscribedOnce = false;
-    const sync = () => { clearTimeout(timer); timer = setTimeout(() => syncPanel().then(() => startTransition(() => router.refresh())), 300); };
+    const sync = () => { clearTimeout(timer); timer = setTimeout(() => syncPanel().then(() => startTransition(() => router.refresh())), 100); };
     let channel: ReturnType<typeof db.channel> | undefined;
     db.auth.getSession().then(async ({ data }) => {
       if (data.session) await db.realtime.setAuth(data.session.access_token);

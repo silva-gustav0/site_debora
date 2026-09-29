@@ -1,0 +1,31 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "local"
+  },
+  "build": {
+    "preview": {
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://mztzvrwqvsinleglsbdo.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_b0jpqqaO6yqasKJ0Tu7Qjg_DHNCLyjH",
+        "EXPO_PUBLIC_POWERSYNC_URL": "https://6abb2c938453e7cf833af506.powersync.journeyapps.com",
+        "EXPO_PUBLIC_SITE_URL": "https://clinica-talissa-eta.vercel.app"
+      }
+    },
+    "production": {
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://mztzvrwqvsinleglsbdo.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_b0jpqqaO6yqasKJ0Tu7Qjg_DHNCLyjH",
+        "EXPO_PUBLIC_POWERSYNC_URL": "https://6abb2c938453e7cf833af506.powersync.journeyapps.com",
+        "EXPO_PUBLIC_SITE_URL": "https://clinica-talissa-eta.vercel.app"
+      }
+    }
+  }
+}

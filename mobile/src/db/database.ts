@@ -1,4 +1,4 @@
-import { PowerSyncDatabase } from "@powersync/react-native";
+import { FetchStrategy, PowerSyncDatabase } from "@powersync/react-native";
 import * as Crypto from "expo-crypto";
 import * as SecureStore from "expo-secure-store";
 import { SupabaseConnector } from "./connector";
@@ -31,10 +31,12 @@ export async function openDatabase() {
 
 export const connector = new SupabaseConnector();
 
-/** Começa a sincronizar com o servidor (depois do login). */
+/** Conecta para sincronizar em tempo real (envia em até 100 ms e processa cada mudança assim que chega). */
 export async function startSync() {
   const d = await openDatabase();
-  await d.connect(connector);
+  if (!d.connected && !d.currentStatus.connecting) {
+    await d.connect(connector, { crudUploadThrottleMs: 100, retryDelayMs: 2000, fetchStrategy: FetchStrategy.Sequential });
+  }
   return d;
 }
 

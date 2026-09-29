@@ -1,7 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { router } from "expo-router";
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import {
   ActivityIndicator, Animated, FlatList, Modal, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput,
   type TextInputProps, View, type ViewStyle,
@@ -156,7 +156,7 @@ export function Avatar({ name, size = 36 }: { name: string; size?: number }) {
 /** Número grande com rótulo (Início, Financeiro, Relatórios). */
 export function Stat({ label, value, tone = "bronze", hint }: { label: string; value: string; tone?: Tone; hint?: string }) {
   return (
-    <View style={[s.card, { flex: 1, minWidth: 140, gap: 2 }]}>
+    <View style={[s.card, { flexGrow: 1, flexShrink: 1, minWidth: 140, gap: 2 }]}>
       <Text style={s.eyebrow}>{label}</Text>
       <Text style={[s.stat, { color: TONES[tone].fg }]}>{value}</Text>
       {hint && <Text style={s.muted}>{hint}</Text>}
@@ -206,7 +206,7 @@ export function ConfirmButton({ children = "Excluir", confirmText = "Confirmar e
     return () => clearTimeout(t);
   }, [armed]);
   return armed
-    ? <Button variant="danger" small={small} icon="trash" onPress={async () => { await onConfirm(); setArmed(false); }}>{confirmText}</Button>
+    ? <Button variant="danger" small={small} icon="trash" onPress={async () => { try { await onConfirm(); } finally { setArmed(false); } }}>{confirmText}</Button>
     : <Button variant="ghost" small={small} icon="trash-outline" onPress={() => setArmed(true)}>{children}</Button>;
 }
 
@@ -236,7 +236,7 @@ export function Chip({ label, on, onPress }: { label: string; on?: boolean; onPr
 // ─── Campos ────────────────────────────────────────────────────────────
 export function Field({ label, hint, error, ...props }: TextInputProps & { label: string; hint?: string; error?: string | null }) {
   return (
-    <View style={{ gap: 4, flex: props.style ? undefined : 1, minWidth: 140 }}>
+    <View style={{ gap: 4, flexGrow: 1, flexShrink: 1, minWidth: 140 }}>
       <Text style={s.label}>{label}</Text>
       <TextInput
         placeholderTextColor={Brand.muted} {...props}
@@ -272,7 +272,7 @@ export function Select<T extends string>({ label, value, options, onChange, plac
   const norm = (t: string) => t.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
   const list = q ? options.filter((o) => norm(o.label).includes(norm(q))) : options;
   return (
-    <View style={{ gap: 4, flex: 1, minWidth: 140 }}>
+    <View style={{ gap: 4, flexGrow: 1, flexShrink: 1, minWidth: 140 }}>
       <Text style={s.label}>{label}</Text>
       <Pressable onPress={() => setOpen(true)} style={[s.input, s.selectBox]}>
         <Text style={{ flex: 1, color: current ? Brand.text : Brand.muted, fontSize: 16 }} numberOfLines={1}>{current?.label ?? placeholder}</Text>
@@ -307,7 +307,7 @@ export function DateField({ label, value, onChange, optional }: { label: string;
   const [open, setOpen] = useState(false);
   const d = value ? new Date(`${value}T12:00:00`) : new Date();
   return (
-    <View style={{ gap: 4, flex: 1, minWidth: 140 }}>
+    <View style={{ gap: 4, flexGrow: 1, flexShrink: 1, minWidth: 140 }}>
       <Text style={s.label}>{label}</Text>
       <Row>
         <Pressable onPress={() => setOpen(true)} style={[s.input, s.selectBox, { flex: 1 }]}>
@@ -332,7 +332,7 @@ export function TimeField({ label, value, onChange }: { label: string; value: st
   const [h, m] = (value ?? "09:00").split(":").map(Number);
   const d = new Date(); d.setHours(h, m, 0, 0);
   return (
-    <View style={{ gap: 4, flex: 1, minWidth: 110 }}>
+    <View style={{ gap: 4, flexGrow: 1, flexShrink: 1, minWidth: 110 }}>
       <Text style={s.label}>{label}</Text>
       <Pressable onPress={() => setOpen(true)} style={[s.input, s.selectBox]}>
         <Text style={{ flex: 1, color: value ? Brand.text : Brand.muted, fontSize: 16 }}>{value ?? "Horário"}</Text>
@@ -385,7 +385,7 @@ export const useToast = () => useContext(ToastCtx);
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [msg, setMsg] = useState<ToastMsg | null>(null);
-  const opacity = useRef(new Animated.Value(0)).current;
+  const [opacity] = useState(() => new Animated.Value(0));
   const insets = useSafeAreaInsets();
   const show = useCallback((text: string, tone: ToastMsg["tone"] = "ok") => {
     setMsg({ text, tone });

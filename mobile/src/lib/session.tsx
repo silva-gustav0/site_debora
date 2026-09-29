@@ -86,6 +86,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const sub = AppState.addEventListener("change", (s) => {
       if (s !== "active") { backgroundAt.current = Date.now(); return; }
+      startSync().catch(() => {}); // o Android corta a conexão em segundo plano: reconecta na hora ao voltar
       if (backgroundAt.current && Date.now() - backgroundAt.current > LOCK_AFTER_MS) {
         setStatus((cur) => (cur === "ready" ? "locked" : cur));
       }
