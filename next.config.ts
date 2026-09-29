@@ -37,6 +37,10 @@ const noReferrer = [{ key: "Referrer-Policy", value: "no-referrer" }];
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Endereço único do site: www → sem www.
+  async redirects() {
+    return [{ source: "/:path*", has: [{ type: "host", value: "www.deborasilvaestetica.com.br" }], destination: "https://deborasilvaestetica.com.br/:path*", permanent: true }];
+  },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
