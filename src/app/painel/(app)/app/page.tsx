@@ -1,5 +1,5 @@
 import { Download, ShieldCheck, Smartphone } from "lucide-react";
-import { APK_URL } from "@/lib/version";
+import { APK_URL, APK_VERSION_NAME } from "@/lib/version";
 import { Card, PageHeader } from "@/components/painel/ui";
 
 export const metadata = { title: "App da equipe" };
@@ -18,7 +18,7 @@ export default function AppPage() {
     <>
       <PageHeader eyebrow="Celular" title="App da equipe" subtitle="O painel completo no celular e no tablet, funcionando mesmo sem internet e sincronizando na hora com o painel e o site." />
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-5 items-start">
-        <Card title="Instalar no Android" eyebrow="Versão 2.0 · Android">
+        <Card title="Instalar no Android" eyebrow={`Versão ${APK_VERSION_NAME} · Android`}>
           <ol className="flex flex-col gap-3 mb-5">
             {STEPS.map((s, i) => (
               <li key={i} className="flex gap-3 text-sm text-[#4A3C30]">
