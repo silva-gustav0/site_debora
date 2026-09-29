@@ -1,7 +1,7 @@
 # Estado atual do projeto
 
 Última atualização: 29/09/2026. Produção: **Cloudflare Workers** (`clinica-debora`), domínio `deborasilvaestetica.com.br`
-(DNS no Cloudflare; migrando da Vercel — ver seção abaixo). Todo push no `master` publica em produção (GitHub Actions).
+(DNS e hospedagem no Cloudflare desde 29/09/2026; a Vercel não publica mais — ver seção abaixo). Todo push no `master` publica em produção (GitHub Actions).
 
 ## Hospedagem no Cloudflare (29/09/2026)
 
@@ -16,6 +16,12 @@
 - App Android: `.github/workflows/app-update.yml` publica atualização pela internet (EAS Update, canal `preview`) a cada
   push em `mobile/**` ou `src/lib/**` (secret `EXPO_TOKEN`). APK novo só quando mudar algo nativo (`eas build`).
 - APK publicado nas Releases do GitHub; `/app/debora-equipe.apk` redireciona para a mais nova.
+- Domínio `deborasilvaestetica.com.br` (e `www` → sem www) ligado ao Worker como domínio personalizado (`routes` no
+  `wrangler.jsonc`). Zona Cloudflare `d92a2c2ec619c23fec195d8db8b46c58`. HSTS no `next.config.ts`.
+- Vercel: Git desconectado e domínio removido. A última versão continua em `clinica-talissa-eta.vercel.app` só para
+  links antigos já enviados às clientes (mesmo banco); pode ser apagada quando não houver mais links antigos em uso.
+- Pendências: DNSSEC (ativar no Cloudflare e depois no Registro.br); refazer as auditorias de banco/sincronização e de
+  site/infra interrompidas pelo limite de uso; aplicar os achados da auditoria do app e de qualidade (29/09).
 
 ## App Android nativo (offline) — `mobile/` (29/09/2026)
 
