@@ -1,11 +1,13 @@
 import { useStatus } from "@powersync/react-native";
 import {
-  addDays, brl, diffDays, fillTemplate, firstName, fmtDate, fmtWeekday, INTERACTION_LABEL, monthName, todaySP, whatsappLink,
+  addDays, brl, diffDays, fillTemplate, firstName, fmtDate, fmtWeekday, INTERACTION_LABEL, monthName, shiftMonth, todaySP, whatsappLink,
 } from "@shared/format";
 import type { InteractionKind } from "@shared/types";
 import { router } from "expo-router";
-import { Linking } from "react-native";
+import { toTimestamp } from "@shared/hours";
+import { Linking, View } from "react-native";
 import { Badge, Button, Card, Empty, ListItem, Row, Screen, Section, Stat, Txt } from "@/components/ui";
+import { Brand } from "@/constants/brand";
 import { useMe, useSettings } from "@/db/hooks";
 import { write } from "@/db/write";
 import { ApptItem, between, PKG_SQL, type Pkg, useAppts, useRows } from "@/lib/agenda";
@@ -14,6 +16,22 @@ import { useSession } from "@/lib/session";
 type Bill = { id: string; kind: string; amount: number; description: string | null; category: string; due_on: string };
 type Task = { id: string; kind: InteractionKind; content: string; due_on: string; client_id: string; client_name: string | null };
 type Named = { id: string; name: string; phone?: string | null; stock_qty?: number; unit?: string | null };
+
+/** Barras simples do faturamento líquido por mês. */
+function RevenueChart({ months }: { months: { label: string; value: number }[] }) {
+  const max = Math.max(1, ...months.map((m) => m.value));
+  return (
+    <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 8 }}>
+      {months.map((m) => (
+        <View key={m.label} style={{ flex: 1, alignItems: "center", gap: 2 }}>
+          <Txt.muted style={{ fontSize: 10 }}>{brl(m.value)}</Txt.muted>
+          <View style={{ width: "60%", height: Math.max(2, (m.value / max) * 90), backgroundColor: Brand.bronze, borderRadius: 3 }} />
+          <Txt.muted style={{ fontSize: 10 }}>{m.label}</Txt.muted>
+        </View>
+      ))}
+    </View>
+  );
+}
 
 /** Início: faturamento, pedidos, agenda do dia, alertas, tarefas e estado da sincronização. */
 export default function Home() {
@@ -27,6 +45,18 @@ export default function Home() {
     "select coalesce(sum(amount - coalesce(fee, 0)), 0) as v from transactions where kind = 'receita' and status = 'pago' and occurred_on between ? and ?",
     [`${ym}-01`, today],
   )[0]?.v ?? 0;
+  const since = toTimestamp(`${ym}-01`, "00:00");
+  const done = useRows<{ v: number; n: number }>("select coalesce(sum(price), 0) as v, count(*) as n from appointments where status = 'concluido' and datetime(starts_at) >= datetime(?)", [since])[0];
+  const newClients = useRows<{ n: number }>("select count(*) as n from clients where datetime(created_at) >= datetime(?)", [since])[0]?.n ?? 0;
+  const byMonth = useRows<{ m: string; v: number }>(
+    "select substr(occurred_on, 1, 7) as m, sum(amount - coalesce(fee, 0)) as v from transactions where kind = 'receita' and status = 'pago' and occurred_on between ? and ? group by 1",
+    [`${shiftMonth(ym, -5)}-01`, today],
+  );
+  const months = Array.from({ length: 6 }, (_, i) => {
+    const m = shiftMonth(ym, i - 5);
+    return { label: monthName(m, "short"), value: Number(byMonth.find((b) => b.m === m)?.v ?? 0) };
+  });
+  const ticket = done?.n ? done.v / done.n : 0;
   const pending = useAppts("a.status = 'solicitado' and datetime(a.starts_at) >= datetime('now')", [], 8);
   const [inDay, ...dayParams] = between(today, today);
   const todayAppts = useAppts(inDay, dayParams);
@@ -83,7 +113,11 @@ export default function Home() {
         <Stat label={`Faturamento · ${monthName(ym, "short")}`} value={brl(income)} hint="líquido" />
         <Stat label="Hoje" value={String(active.length)} hint={`${active.filter((a) => a.status === "concluido").length} concluídos`} tone="blue" />
         <Stat label="A confirmar" value={String(pending.length)} hint="pedidos do site" tone={pending.length ? "gold" : "gray"} />
+        <Stat label="Ticket médio" value={brl(ticket)} hint={`${done?.n ?? 0} atendimentos concluídos no mês`} tone="green" />
+        <Stat label="Novas clientes" value={String(newClients)} hint="neste mês" tone="plum" />
       </Row>
+
+      <Card title="Faturamento" eyebrow="Últimos 6 meses (líquido)"><RevenueChart months={months} /></Card>
 
       {pending.length > 0 && (
         <Section title="Pedidos do site" right={<Badge tone="gold">{pending.length}</Badge>}>

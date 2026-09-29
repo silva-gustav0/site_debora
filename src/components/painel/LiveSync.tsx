@@ -2,7 +2,6 @@
 
 import { startTransition, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { CalendarPlus, X } from "lucide-react";
 import { syncPanel } from "@/app/painel/actions";
 import { createClient } from "@/lib/supabase/client";
@@ -10,13 +9,13 @@ import { createClient } from "@/lib/supabase/client";
 /** Mantém o painel igual ao banco em tempo real (Supabase Realtime) e guarda os arquivos do app no aparelho. */
 export default function LiveSync() {
   const [booking, setBooking] = useState<{ id: string } | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
     const db = createClient();
     let timer: ReturnType<typeof setTimeout> | undefined, poll: ReturnType<typeof setInterval> | undefined, hiddenAt = 0, subscribedOnce = false;
-    const sync = () => { clearTimeout(timer); timer = setTimeout(() => syncPanel().then(() => startTransition(() => router.refresh())), 100); };
+    // A própria action revalida o painel e já devolve a tela atualizada (uma ida ao servidor só).
+    const sync = () => { clearTimeout(timer); timer = setTimeout(() => startTransition(() => { syncPanel(); }), 100); };
     let channel: ReturnType<typeof db.channel> | undefined;
     db.auth.getSession().then(async ({ data }) => {
       if (data.session) await db.realtime.setAuth(data.session.access_token);
@@ -34,7 +33,7 @@ export default function LiveSync() {
     const onVisible = () => { if (document.hidden) hiddenAt = Date.now(); else if (hiddenAt && Date.now() - hiddenAt > 15_000) sync(); };
     document.addEventListener("visibilitychange", onVisible);
     return () => { clearTimeout(timer); clearInterval(poll); document.removeEventListener("visibilitychange", onVisible); if (channel) db.removeChannel(channel); };
-  }, [router]);
+  }, []);
 
   if (!booking) return null;
   return (

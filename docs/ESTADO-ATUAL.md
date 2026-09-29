@@ -17,8 +17,9 @@ Substitui o app antigo (TWA que só abria o site). Guia técnico: `mobile/APP-GU
 - Equipe (criar/remover acesso) pelo app usa `POST /api/app/equipe` (chave secreta só no servidor).
 - Máquina de desenvolvimento tem disco pequeno (live, ~7,7 GB): não compilar Android localmente.
 
-**Pendências do app:** testar no tablet (fotos/Storage, datas, tempo de sincronização medido), exportar CSV,
-"atendimentos sem pagamento", ticket médio/gráfico de 6 meses no Início, cronômetro do atendimento não sobrevive a fechar o app.
+**Pendências do app:** testar no tablet (fotos/Storage, compartilhar CSV, datas, tempo de sincronização medido).
+Feitos em 29/09: exportar CSV (clientes e financeiro), atendimentos sem pagamento, ticket médio/novas clientes/6 meses
+no Início, cronômetro e anotações do atendimento salvos no aparelho. Painel web: tempo real com uma ida ao servidor só.
 
 ## Vistoria de segurança (28/09/2026)
 

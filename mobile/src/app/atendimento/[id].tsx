@@ -2,17 +2,16 @@ import { themeFor } from "@shared/attendance-themes";
 import { firstName, fmtDate } from "@shared/format";
 import { useKeepAwake } from "expo-keep-awake";
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Animated, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, Vibration, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Chip, Empty, Field, type IconName, Ionicons, Row, Screen, Segmented, Sheet, Txt } from "@/components/ui";
 import { Brand } from "@/constants/brand";
 import { CompleteForm, isOpen, useAppts, useRows } from "@/lib/agenda";
+import { type Clock, clearAttendance, loadAttendance, type Notes, saveAttendance } from "@/lib/attendance-store";
 
-type Clock = { startedAt: number; pausedAt: number | null; pausedTotal: number; extraMin: number; alerted: boolean };
-type Notes = { chips: Record<string, string[]>; text: string };
-const clocks = new Map<string, Clock>();
-const notesById = new Map<string, Notes>();
+/** Hora atual em ms (para eventos, fora da renderização). */
+const nowMs = () => Date.now();
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /** Cronômetro mm:ss (ou h:mm:ss). */
@@ -32,26 +31,29 @@ export default function Attendance() {
     "select record_date, procedure, observations, next_steps from session_records where client_id = ? order by record_date desc, created_at desc limit 1", [a?.client_id ?? ""])[0];
   const wide = useWindowDimensions().width >= 900;
   const open = !!a && isOpen(a.status);
-  const [clock, setClockState] = useState<Clock | null>(clocks.get(id) ?? null);
-  const [notes, setNotesState] = useState<Notes>(notesById.get(id) ?? { chips: {}, text: "" });
+  const [saved] = useState(() => loadAttendance(id));
+  const [clock, setClockState] = useState<Clock | null>(saved?.clock ?? null);
+  const [notes, setNotesState] = useState<Notes>(saved?.notes ?? { chips: {}, text: "" });
+  const ref = useRef({ clock, notes });
   const [now, setNow] = useState(Date.now);
   const [tab, setTab] = useState("0");
   const [finishing, setFinishing] = useState(false);
   const [breath] = useState(() => new Animated.Value(0));
-  const setClock = (c: Clock) => { clocks.set(id, c); setClockState(c); };
-  const setNotes = (n: Notes) => { notesById.set(id, n); setNotesState(n); };
+  const persist = (next: Partial<typeof ref.current>) => { ref.current = { ...ref.current, ...next }; saveAttendance(id, ref.current); };
+  const setClock = (c: Clock) => { persist({ clock: c }); setClockState(c); };
+  const setNotes = (n: Notes) => { persist({ notes: n }); setNotesState(n); };
   const minutes = a ? (a.duration_min ?? Math.max(15, Math.round((Date.parse(a.ends_at) - Date.parse(a.starts_at)) / 60_000))) : 60;
 
   useEffect(() => {
     const tick = () => {
       const t = Date.now();
-      let c = clocks.get(id) ?? (open ? { startedAt: t, pausedAt: null, pausedTotal: 0, extraMin: 0, alerted: false } : null);
+      const old = ref.current.clock;
+      let c = old ?? (open ? { startedAt: t, pausedAt: null, pausedTotal: 0, extraMin: 0, alerted: false } : null);
       if (c && !c.alerted && !c.pausedAt && t - c.startedAt - c.pausedTotal >= (minutes + c.extraMin) * 60_000) {
         Vibration.vibrate([0, 220, 120, 220]);
         c = { ...c, alerted: true };
       }
-      if (c) clocks.set(id, c);
-      setClockState(c);
+      if (c && c !== old) { ref.current = { ...ref.current, clock: c }; saveAttendance(id, ref.current); setClockState(c); }
       setNow(t);
     };
     const first = setTimeout(tick, 0), every = setInterval(tick, 500);
@@ -72,7 +74,7 @@ export default function Attendance() {
   const elapsed = clock ? Math.max(0, (clock.pausedAt ?? now) - clock.startedAt - clock.pausedTotal) : 0;
   const remaining = total - elapsed;
   const overtime = !!clock && remaining <= 0;
-  const togglePause = () => clock && setClock(clock.pausedAt ? { ...clock, pausedAt: null, pausedTotal: clock.pausedTotal + Date.now() - clock.pausedAt } : { ...clock, pausedAt: Date.now() });
+  const togglePause = () => clock && setClock(clock.pausedAt ? { ...clock, pausedAt: null, pausedTotal: clock.pausedTotal + nowMs() - clock.pausedAt } : { ...clock, pausedAt: nowMs() });
 
   if (!a) return <Screen title="Atendimento" back><Empty text="Atendimento não encontrado." /></Screen>;
   const theme = themeFor(a.service_name ?? "", a.service_category);
@@ -136,7 +138,7 @@ export default function Attendance() {
             {!!record.next && <Txt.muted>Orientações: {record.next}</Txt.muted>}
           </>
         ) : <Txt.muted>Só a duração. Volte e toque nas observações se quiser registrar mais.</Txt.muted>}
-        <CompleteForm a={a} record={record} onDone={() => { clocks.delete(id); notesById.delete(id); setFinishing(false); router.replace(`/agendamento/${id}`); }} />
+        <CompleteForm a={a} record={record} onDone={() => { clearAttendance(id); setFinishing(false); router.replace(`/agendamento/${id}`); }} />
       </Sheet>
     </SafeAreaView>
   );

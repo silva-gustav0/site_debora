@@ -1,5 +1,5 @@
 import { useQuery } from "@powersync/react-native";
-import { brl, fmtDate, lastDayOfMonth, METHOD_LABEL, monthName, shiftMonth, todaySP } from "@shared/format";
+import { brl, dateSP, fmtDate, lastDayOfMonth, METHOD_LABEL, monthName, shiftMonth, todaySP } from "@shared/format";
 import { cardFee } from "@shared/settings-core";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -8,6 +8,8 @@ import { Badge, Button, Card, ConfirmButton, Empty, ListItem, Row, Screen, Secti
 import { Brand } from "@/constants/brand";
 import { useSettings } from "@/db/hooks";
 import { write } from "@/db/write";
+import { ts } from "@/lib/agenda";
+import { shareCsv } from "@/lib/export";
 import { group, sum } from "@/lib/finance";
 
 type Tx = { id: string; kind: string; category: string; description: string | null; amount: number; method: string; occurred_on: string; status: string; due_on: string | null; fee: number; client_name: string | null };
@@ -49,6 +51,14 @@ export default function Financeiro() {
     [`${shiftMonth(ym, -11)}-01`, last],
   );
 
+  const { data: unpaid } = useQuery<{ id: string; price: number; starts_at: string; client_name: string | null; service_name: string | null }>(
+    `select a.id, a.price, ${ts("a.starts_at")} as starts_at, c.name as client_name, s.name as service_name from appointments a
+     left join clients c on c.id = a.client_id left join services s on s.id = a.service_id
+     where a.status = 'concluido' and a.client_package_id is null and a.price > 0 and coalesce(a.voucher_amount, 0) < a.price
+     and date(a.starts_at, '-3 hours') between ? and ? and not exists (select 1 from transactions t where t.appointment_id = a.id) order by a.starts_at`,
+    [`${ym}-01`, last],
+  );
+
   const paid = txs.filter((t) => t.status === "pago");
   const income = paid.filter((t) => t.kind === "receita");
   const expenses = paid.filter((t) => t.kind === "despesa");
@@ -71,6 +81,12 @@ export default function Financeiro() {
     await w.update("transactions", t.id, { status: "pago", occurred_on: today, fee: t.kind === "receita" ? cardFee(settings, t.method, t.amount) : 0 });
     toast(t.kind === "receita" ? "Recebimento registrado." : "Pagamento registrado.");
   });
+  /** Exporta os lançamentos do mês (mesmas colunas do painel). */
+  const exportCsv = () => shareCsv(`financeiro-${ym}.csv`,
+    ["Data", "Tipo", "Situação", "Categoria", "Descrição", "Cliente", "Forma", "Valor", "Taxa", "Líquido", "Vencimento"],
+    [...txs].reverse().map((t) => [fmtDate(t.occurred_on), t.kind === "receita" ? "Receita" : "Despesa", t.status === "pago" ? "Pago" : "Pendente", t.category, t.description, t.client_name,
+      METHOD_LABEL[t.method as keyof typeof METHOD_LABEL], Number(t.amount), Number(t.fee), Number(t.amount) - Number(t.fee), t.due_on ? fmtDate(t.due_on) : ""]),
+  ).catch(() => toast("Não foi possível exportar.", "error"));
   const remove = (id: string) => write((w) => w.remove("transactions", id));
 
   return (
@@ -90,6 +106,13 @@ export default function Financeiro() {
 
       {tab === "visao" && (
         <>
+          {unpaid.length > 0 && (
+            <Section title={`Atendimentos sem pagamento registrado · ${unpaid.length}`}>
+              {unpaid.map((a) => (
+                <ListItem key={a.id} title={`${a.client_name ?? "Cliente"} · ${a.service_name ?? "Atendimento"}`} subtitle={`${fmtDate(dateSP(a.starts_at), { year: undefined })} · ${brl(a.price)}`} onPress={() => router.push(`/agendamento/${a.id}`)} />
+              ))}
+            </Section>
+          )}
           <Card title="Últimos 12 meses" eyebrow="Líquido x despesas"><MonthlyChart months={months} /></Card>
           <Card title="Demonstrativo do mês" eyebrow="DRE simplificado">
             {dre.map(([label, value, strong], i) => (
@@ -102,6 +125,7 @@ export default function Financeiro() {
         </>
       )}
 
+      {tab === "lancamentos" && <Button small variant="outline" icon="download-outline" onPress={exportCsv}>Exportar CSV</Button>}
       {tab === "lancamentos" && (txs.length === 0 ? <Empty icon="wallet-outline" text="Nenhum lançamento neste mês." /> : txs.map((t) => (
         <ListItem
           key={t.id}
