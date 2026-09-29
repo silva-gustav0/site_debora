@@ -1,0 +1,25 @@
+# Sync Streams do PowerSync (colar no painel do PowerSync → Sync Streams).
+# Todas as tabelas vão só para quem está em `staff` (o cadastro do Supabase não basta).
+# Tabelas cujo id não se chama "id" ou não é texto são renomeadas/convertidas.
+config:
+  edition: 3
+
+streams:
+  painel:
+    auto_subscribe: true
+    queries:
+      - SELECT * FROM clients WHERE auth.user_id() IN (SELECT user_id FROM staff)
+      - SELECT * FROM appointments WHERE auth.user_id() IN (SELECT user_id FROM staff)
+      - SELECT * FROM services WHERE auth.user_id() IN (SELECT user_id FROM staff)
+      - SELECT * FROM time_blocks WHERE auth.user_id() IN (SELECT user_id FROM staff)
+      - SELECT * FROM session_records WHERE auth.user_id() IN (SELECT user_id FROM staff)
+      - SELECT * FROM client_photos WHERE auth.user_id() IN (SELECT user_id FROM staff)
+      - SELECT * FROM interactions WHERE auth.user_id() IN (SELECT user_id FROM staff)
+      - SELECT * FROM packages WHERE auth.user_id() IN (SELECT user_id FROM staff)
+      - SELECT * FROM client_packages WHERE auth.user_id() IN (SELECT user_id FROM staff)
+      - SELECT * FROM products WHERE auth.user_id() IN (SELECT user_id FROM staff)
+      - SELECT * FROM stock_movements WHERE auth.user_id() IN (SELECT user_id FROM staff)
+      - SELECT * FROM transactions WHERE auth.user_id() IN (SELECT user_id FROM staff)
+      - SELECT * FROM vouchers WHERE auth.user_id() IN (SELECT user_id FROM staff)
+      - SELECT CAST(id AS TEXT) AS id, clinic_name, whatsapp, address, business_hours, slot_step_min, min_lead_min, max_days_ahead, cancel_min_hours, fee_credit, fee_debit, templates, updated_at, anamnesis_form, consent_text FROM settings WHERE auth.user_id() IN (SELECT user_id FROM staff)
+      - SELECT user_id AS id, name, is_admin, created_at FROM staff WHERE auth.user_id() IN (SELECT user_id FROM staff)
