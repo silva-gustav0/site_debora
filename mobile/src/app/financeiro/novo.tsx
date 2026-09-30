@@ -5,7 +5,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { Button, Card, DateField, Field, MoneyField, parseMoney, Row, Screen, Segmented, Select, useToast } from "@/components/ui";
 import { useSettings } from "@/db/hooks";
-import { write } from "@/db/write";
+import { save, write } from "@/db/write";
 import { CATEGORIES, installmentsOf, METHOD_OPTIONS } from "@/lib/finance";
 
 /** Novo lançamento (receita ou despesa), à vista, pendente ou parcelado. */
@@ -25,12 +25,12 @@ export default function NovoLancamento() {
   const [clientId, setClientId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const save = async () => {
+  const submit = async () => {
     const total = parseMoney(amount);
     const n = Math.min(Math.max(parseInt(installments, 10) || 1, 1), 24);
     if (!Number.isFinite(total) || total <= 0) return setError("Informe um valor válido.");
     if (!date) return setError("Informe a data.");
-    await write(async (w) => {
+    if (!await save(toast, write(async (w) => {
       for (const [i, p] of installmentsOf(total, n, date).entries()) {
         const paid = pending === "pago" && i === 0;
         await w.insert("transactions", {
@@ -41,7 +41,7 @@ export default function NovoLancamento() {
           client_id: kind === "receita" ? clientId : null, created_at: new Date().toISOString(),
         });
       }
-    });
+    }))) return;
     toast(n > 1 ? `${n} parcelas lançadas.` : kind === "receita" ? "Receita registrada." : "Despesa registrada.");
     router.back();
   };
@@ -65,7 +65,7 @@ export default function NovoLancamento() {
           {kind === "receita" && <Select label="Cliente (opcional)" value={clientId} searchable options={clients.map((c) => ({ value: c.id, label: c.name }))} onChange={setClientId} />}
         </Row>
         <Field label="Descrição" value={description} onChangeText={setDescription} placeholder={kind === "despesa" ? "Ex.: Aluguel de outubro" : "Opcional"} hint="Com mais de 1 parcela, o valor é dividido em lançamentos mensais (as seguintes ficam pendentes)." />
-        <Button onPress={save}>Lançar</Button>
+        <Button onPress={submit}>Lançar</Button>
       </Card>
     </Screen>
   );

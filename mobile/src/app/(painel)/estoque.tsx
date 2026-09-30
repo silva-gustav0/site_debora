@@ -8,7 +8,8 @@ import { DataTable, Progress, Split } from "@/components/charts";
 import { Badge, Button, Card, ConfirmButton, Empty, Field, ListItem, MoneyField, moneyText, parseMoney, Row, Screen, Segmented, Select, Sheet, Stat, Toggle, useToast, useWide } from "@/components/ui";
 import { Brand, Font } from "@/constants/brand";
 import { asBool, useSettings } from "@/db/hooks";
-import { newId, write } from "@/db/write";
+import { ts } from "@/lib/agenda";
+import { newId, save, write } from "@/db/write";
 import { METHOD_OPTIONS, qtyFmt, sum } from "@/lib/finance";
 
 type Product = { id: string; name: string; brand: string | null; category: string; unit: string; stock_qty: number; min_qty: number; cost_price: number; sale_price: number; active: number };
@@ -30,7 +31,7 @@ export default function Estoque() {
   const [error, setError] = useState<string | null>(null);
   const { data: products } = useQuery<Product>("select * from products order by active desc, name");
   const { data: moves } = useQuery<Mov>(
-    "select m.*, p.name as product_name, p.unit, c.name as client_name from stock_movements m left join products p on p.id = m.product_id left join clients c on c.id = m.client_id order by m.created_at desc limit 30",
+    `select m.*, ${ts("m.created_at")} as created_at, p.name as product_name, p.unit, c.name as client_name from stock_movements m left join products p on p.id = m.product_id left join clients c on c.id = m.client_id order by datetime(m.created_at) desc limit 30`,
   );
   const { data: clients } = useQuery<{ id: string; name: string }>("select id, name from clients order by name");
   const low = (p: Product) => asBool(p.active) && p.stock_qty <= p.min_qty;
@@ -45,13 +46,13 @@ export default function Estoque() {
     const num = (v: string) => Math.max(parseMoney(v) || 0, 0);
     const row = { name: prod.name.trim(), brand: prod.brand.trim() || null, category: prod.category, unit: prod.unit.trim() || "un", min_qty: num(prod.min), cost_price: num(prod.cost), sale_price: num(prod.sale), active: prod.id ? prod.active : true };
     const initial = parseMoney(prod.initial);
-    await write(async (w) => {
+    if (!await save(toast, write(async (w) => {
       if (prod.id) return w.update("products", prod.id, row);
       const id = newId();
       const qty = Number.isFinite(initial) && initial > 0 ? initial : 0;
       await w.insert("products", { ...row, id, stock_qty: qty, created_at: new Date().toISOString() });
       if (qty) await w.insert("stock_movements", { product_id: id, kind: "entrada", qty, unit_cost: row.cost_price, note: "Estoque inicial", created_at: new Date().toISOString() });
-    });
+    }))) return;
     toast(prod.id ? "Produto atualizado." : "Produto cadastrado.");
     setProd(null);
   };
@@ -65,7 +66,7 @@ export default function Estoque() {
     if (delta === 0) return setError("O estoque já está com essa quantidade.");
     const unitCost = parseMoney(mov.cost);
     const now = new Date().toISOString();
-    await write(async (w) => {
+    if (!await save(toast, write(async (w) => {
       const id = await w.insert("stock_movements", { product_id: p.id, kind, qty: delta, unit_cost: Number.isFinite(unitCost) ? unitCost : null, note: mov.note.trim() || null, client_id: mov.client, created_at: now });
       const patch: Record<string, number> = { stock_qty: p.stock_qty + delta };
       const tx = { occurred_on: todaySP(), status: "pago", stock_movement_id: id, method: mov.method, created_at: now };
@@ -78,16 +79,16 @@ export default function Estoque() {
         await w.insert("transactions", { ...tx, kind: "receita", category: "Venda de produtos", description: `${qty}× ${p.name}`, amount, fee: cardFee(settings, mov.method, amount), client_id: mov.client });
       }
       await w.update("products", p.id, patch);
-    });
+    }))) return;
     toast("Movimentação registrada.");
     setMov(null);
   };
 
-  const removeMove = (m: Mov) => write(async (w) => {
+  const removeMove = (m: Mov) => save(toast, write(async (w) => {
     await w.remove("stock_movements", m.id);
     const p = await w.get<{ stock_qty: number }>("select stock_qty from products where id = ?", [m.product_id]);
     if (p) await w.update("products", m.product_id, { stock_qty: p.stock_qty - m.qty });
-  });
+  }));
 
   const editProduct = (p: Product) => open(setProd, { id: p.id, name: p.name, brand: p.brand ?? "", category: p.category, unit: p.unit, min: qtyFmt(p.min_qty), cost: moneyText(p.cost_price), sale: moneyText(p.sale_price), initial: "", active: asBool(p.active) });
 

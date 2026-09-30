@@ -5,6 +5,7 @@ import type { ClientSource, ClientStage, ClientStats, TemplateKey } from "@share
 import { useMemo } from "react";
 import { asBool, asList, useServices } from "@/db/hooks";
 import { write } from "@/db/write";
+import { ts } from "@/lib/agenda";
 
 /** Agregado SQL (min/max) de um campo de data dos atendimentos, como texto ISO em UTC. */
 const agg = (fn: string, cond: string) => `strftime('%Y-%m-%dT%H:%M:%SZ', ${fn}(case when ${cond} then julianday(a.starts_at) end))`;
@@ -12,7 +13,7 @@ const DONE = "a.status = 'concluido'";
 const dn = (fn: string) => `${fn}(case when ${DONE} then julianday(a.starts_at) end)`;
 
 /** Equivalente local da view client_stats (visitas, última visita, próximo agendamento, intervalo médio). */
-const CLIENTS_SQL = `select c.id, c.id as client_id, c.name, c.phone, c.stage, c.birth_date, c.tags, c.source, c.marketing_opt_in, c.created_at, 0 as total_spent,
+const CLIENTS_SQL = `select c.id, c.id as client_id, c.name, c.phone, c.stage, c.birth_date, c.tags, c.source, c.marketing_opt_in, ${ts("c.created_at")} as created_at, 0 as total_spent,
   count(case when ${DONE} then 1 end) as visits, ${agg("min", DONE)} as first_visit, ${agg("max", DONE)} as last_visit,
   ${agg("min", "a.status in ('solicitado','confirmado') and julianday(a.starts_at) > julianday('now')")} as next_appointment,
   count(case when a.status = 'faltou' then 1 end) as no_shows,

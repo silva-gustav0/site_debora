@@ -17,7 +17,7 @@ const appointments = new Table({
   client_id: text, service_id: text, starts_at: text, ends_at: text, status: text, price: real, notes: text,
   source: text, created_at: text, client_package_id: text, public_token: text, confirmed_at: text,
   reminder_sent_at: text, cancel_reason: text, voucher_id: text, voucher_amount: real, discount_pct: real,
-}, { indexes: { starts: ["starts_at"], client: ["client_id", "starts_at"] } });
+}, { indexes: { starts: ["starts_at"], client: ["client_id", "starts_at"], package: ["client_package_id"], voucher: ["voucher_id"] } });
 
 const services = new Table({
   name: text, category: text, description: text, duration_min: integer, price: real, return_days: integer,
@@ -60,7 +60,7 @@ const stock_movements = new Table({
 const transactions = new Table({
   kind: text, category: text, description: text, amount: real, method: text, occurred_on: text, client_id: text,
   appointment_id: text, created_at: text, status: text, due_on: text, fee: real, client_package_id: text, stock_movement_id: text,
-}, { indexes: { occurred: ["occurred_on"], client: ["client_id"] } });
+}, { indexes: { occurred: ["occurred_on"], client: ["client_id"], appointment: ["appointment_id"], package: ["client_package_id"], due: ["status", "due_on"] } });
 
 const vouchers = new Table({
   code: text, kind: text, service_id: text, service_name: text, amount: real, balance: real, buyer_name: text,

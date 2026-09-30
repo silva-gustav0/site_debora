@@ -63,6 +63,10 @@ export async function write<T>(fn: (w: Writer) => Promise<T>): Promise<T> {
   return db.writeTransaction((tx) => fn(new Writer(tx)));
 }
 
+/** Deixa o erro de uma gravação visível: mostra aviso em vez de falhar em silêncio (devolve false se falhou). */
+export const save = (toast: (text: string, tone?: "ok" | "error") => void, run: Promise<unknown>) =>
+  run.then(() => true, () => { toast("Não foi possível salvar. Tente de novo.", "error"); return false; });
+
 /** Leitura avulsa fora dos hooks (ex.: dentro de um handler). */
 export async function queryAll<T>(sql: string, params: unknown[] = []) {
   return (await openDatabase()).getAll<T>(sql, params);

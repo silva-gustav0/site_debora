@@ -1,12 +1,13 @@
 import { useQuery } from "@powersync/react-native";
-import { brl, digits, fmtDate, METHOD_LABEL, todaySP, whatsappLink } from "@shared/format";
+import { brl, dateSP, digits, fmtDate, METHOD_LABEL, todaySP, whatsappLink } from "@shared/format";
 import { Gift, Plus } from "lucide-react-native";
 import { Linking, Text, View } from "react-native";
 import { useState } from "react";
 import { Badge, Button, Card, ConfirmButton, Empty, Field, MoneyField, parseMoney, Row, Screen, Segmented, Select, Sheet, Tabs, Toggle, useToast, type Tone } from "@/components/ui";
 import { Brand, Font } from "@/constants/brand";
 import { asBool, asJson, SITE_URL, useServices, useSettings } from "@/db/hooks";
-import { newId, write } from "@/db/write";
+import { ts } from "@/lib/agenda";
+import { newId, save, write } from "@/db/write";
 import { METHOD_OPTIONS } from "@/lib/finance";
 import { newVoucherCode, STATE_LABEL, VOUCHER_MAX, VOUCHER_MIN, voucherExpiry, voucherState, type VoucherState } from "@/lib/vouchers";
 
@@ -21,7 +22,7 @@ export default function Vouchers() {
   const toast = useToast();
   const clinic = useSettings().clinic_name;
   const services = useServices(true).filter((s) => s.price > 0);
-  const { data: vouchers } = useQuery<V>("select * from vouchers order by created_at desc");
+  const { data: vouchers } = useQuery<V>(`select *, ${ts("created_at")} as created_at, ${ts("paid_at")} as paid_at from vouchers order by datetime(created_at) desc`);
   const { data: open } = useQuery<{ voucher_id: string }>("select voucher_id from appointments where voucher_id is not null and status in ('solicitado', 'confirmado')");
   const [q, setQ] = useState("");
   const [estado, setEstado] = useState<VoucherState | null>(null);
@@ -36,7 +37,7 @@ export default function Vouchers() {
     (!estado || state === estado) && (!q || [v.code, v.buyer_name, v.recipient_name ?? ""].some((t) => normalize(t).includes(normalize(q)))));
   const label = (v: V) => { const cm = asJson<{ capture_method?: string }>(v.payment, {}).capture_method; return cm === "cortesia" ? "Cortesia" : METHOD_LABEL[cm as keyof typeof METHOD_LABEL] ?? cm ?? "—"; };
 
-  const save = async () => {
+  const submit = async () => {
     if (!form) return;
     const buyer = form.buyer.trim();
     const svc = services.find((s) => s.id === form.service);
@@ -47,7 +48,7 @@ export default function Vouchers() {
     if (form.kind === "valor" && !(amount >= VOUCHER_MIN && amount <= VOUCHER_MAX)) return setError(`Informe um valor entre R$ ${VOUCHER_MIN} e R$ ${VOUCHER_MAX.toLocaleString("pt-BR")}.`);
     const now = new Date().toISOString();
     const code = newVoucherCode();
-    await write(async (w) => {
+    if (!await save(toast, write(async (w) => {
       await w.insert("vouchers", {
         kind: form.kind, service_id: svc?.id ?? null, service_name: svc?.name ?? null, amount, balance: amount, code, buyer_name: buyer,
         buyer_phone: digits(form.phone).slice(0, 13) || null, buyer_email: form.email.trim().toLowerCase() || null, for_self: form.self,
@@ -58,20 +59,20 @@ export default function Vouchers() {
       if (form.origem === "venda") {
         await w.insert("transactions", { kind: "receita", category: "Voucher", description: `Voucher ${code} · ${svc?.name ?? "vale-presente"}`, amount, method: form.method, fee: 0, occurred_on: today, status: "pago", created_at: now });
       }
-    });
+    }))) return;
     toast(`Voucher ${code} criado.`);
     setForm(null);
   };
 
   const cancel = async (v: V) => {
-    await write((w) => w.update("vouchers", v.id, { status: "cancelado" }));
+    if (!await save(toast, write((w) => w.update("vouchers", v.id, { status: "cancelado" })))) return;
     toast("Voucher cancelado. Se estiver reservado por um agendamento, o banco recusa e o aviso aparece nos conflitos.");
   };
   const share = (v: V) => Linking.openURL(whatsappLink(v.buyer_phone, `Olá, ${v.recipient_name ?? v.buyer_name}! Seu voucher da ${clinic} (${v.code}) está aqui: ${SITE_URL}/voucher/${v.order_nsu}`) ?? "");
 
   const counts = (st: VoucherState) => withState.filter((x) => x.state === st).length;
   const month = today.slice(0, 7);
-  const soldMonth = vouchers.filter((v) => v.status !== "pendente" && v.status !== "cancelado" && v.paid_at?.slice(0, 7) === month);
+  const soldMonth = vouchers.filter((v) => v.status !== "pendente" && v.status !== "cancelado" && !!v.paid_at && dateSP(v.paid_at).slice(0, 7) === month);
   const field = (l: string, v: string) => (
     <View key={l} style={{ flexGrow: 1, flexBasis: 150, gap: 2 }}>
       <Text style={{ fontFamily: Font.body, fontSize: 11, letterSpacing: 0.9, color: Brand.label }}>{l.toUpperCase()}</Text>
@@ -131,7 +132,7 @@ export default function Vouchers() {
                 <Field label="Mensagem (opcional)" value={form.message} onChangeText={(message) => set({ message })} />
               </>
             )}
-            <Button onPress={save}>Criar voucher</Button>
+            <Button onPress={submit}>Criar voucher</Button>
           </>
         )}
       </Sheet>

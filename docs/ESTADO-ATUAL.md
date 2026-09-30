@@ -1,6 +1,6 @@
 # Estado atual do projeto
 
-Última atualização: 29/09/2026 (noite). Produção: **Cloudflare Workers** (`clinica-debora`) em
+Última atualização: 30/09/2026. Produção: **Cloudflare Workers** (`clinica-debora`) em
 https://deborasilvaestetica.com.br (DNS e hospedagem no Cloudflare; a Vercel não publica mais).
 Todo push no `master` publica o site (GitHub Actions) e, se mexer em `mobile/**` ou `src/lib/**`, a atualização do app.
 
@@ -37,16 +37,14 @@ Todo push no `master` publica o site (GitHub Actions) e, se mexer em `mobile/**`
 
 ## Pendências (em ordem)
 
-- **App — segurança (auditoria 29/09):** trava por digital/PIN removida a pedido (29/09); fotos vistas ficam no cache de disco do `expo-image` sem criptografia
-  (usar `cachePolicy="memory"` e limpar no sair); fotos pendentes, `atendimento-*.json` e CSVs exportados ficam fora do
-  banco criptografado e não são apagados no `wipeDevice`; se a pessoa é removida com o app aberto (ou a sessão expira),
-  o app cai no login sem apagar os dados; sem `FLAG_SECURE` (miniatura nos apps recentes); conferir `PRAGMA cipher_version`
-  após abrir o banco; ativar assinatura de código do EAS Update.
-- **App — qualidade (auditoria 29/09):** timestamps exibidos sem `ts()` na ficha da cliente e em listas (`created_at`);
-  `order by` em texto com formatos misturados (usar `datetime()`); índices locais faltando (`appointments.client_package_id`,
-  `appointments.voucher_id`, `transactions.appointment_id`, `transactions.client_package_id`, `transactions(status, due_on)`);
-  erros de gravação sem aviso (helper `save()` com toast); configurações regravam todas as colunas (perde edição de outro aparelho);
-  `faltou` ainda bloqueia horário livre na agenda do app; CRM usa mês em UTC.
+- **App — segurança (auditoria 29/09), feito em 30/09:** fotos só no cache de memória; sair apaga fotos pendentes,
+  `atendimento-*.json`, CSVs (pasta `exportacoes` do cache) e cache de imagens; Sincronia mostra se o banco está
+  criptografado (`PRAGMA cipher_version`). **Falta:** decidir se o app apaga os dados sozinho quando a sessão acaba ou
+  o acesso é removido com o app aberto (hoje só confere ao abrir; risco: perder alterações offline não enviadas);
+  no próximo APK: `FLAG_SECURE` (`expo-screen-capture`) e assinatura de código do EAS Update.
+- **App — qualidade (auditoria 29/09), feito em 30/09:** `ts()` nas datas, `order by datetime()`, índices locais, `save()`
+  com aviso de erro (`src/db/write.ts`), Configurações gravam só o que mudou, `faltou` não bloqueia horário, CRM/Clientes/
+  Vouchers com mês local. Faltam `ts()`/`datetime()` em `client-prontuario.tsx` e `photo-sync.ts`. Conferir no tablet.
 - **App — funções:** "Vender pacote" na tela
   Pacotes; cartão "Chamar de volta" no Início; cenas animadas completas no atendimento.
 - **Refazer auditorias** de banco/sincronização e site/infra/GitHub Actions.

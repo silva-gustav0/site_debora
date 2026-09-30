@@ -9,7 +9,8 @@ import {
 } from "@/components/ui";
 import { Cols, cs, Progress, Table, T, Timeline, TimelineItem } from "@/components/client-ui";
 import { useMe, useSettings } from "@/db/hooks";
-import { write } from "@/db/write";
+import { ts } from "@/lib/agenda";
+import { save, write } from "@/db/write";
 import {
   type Appt, APPTS, clean, ClientForm, type CPkg, DeleteClientCard, nowIso, openWa, PKG_STATUS, PKGS_SQL, sellPackage, STATUS_TONE,
   type TabProps, toOptions, useForm,
@@ -29,10 +30,10 @@ export function Pacotes({ c }: TabProps) {
     const pkg = catalog.find((p) => p.id === f.package_id);
     if (!pkg) return toast("Escolha o pacote.", "error");
     const price = parseMoney(f.price);
-    await sellPackage(settings, c.id, pkg, {
+    if (!await save(toast, sellPackage(settings, c.id, pkg, {
       price: Number.isFinite(price) ? price : Number(pkg.price), purchased: f.purchased_on ?? todaySP(), method: f.method,
       installments: Math.min(Math.max(parseInt(f.installments, 10) || 1, 1), 12), paidNow: f.payment !== "pendente",
-    });
+    }))) return;
     reset();
     toast("Pacote vendido.");
   };
@@ -72,7 +73,7 @@ export function Pacotes({ c }: TabProps) {
             </Text>
             <Row wrap>
               {p.status === "ativo" && <Button small onPress={() => router.push(`/agenda/novo?client_id=${c.id}`)}>Agendar sessão</Button>}
-              <Segmented value={p.status} options={toOptions(PKG_STATUS)} onChange={(status) => write((w) => w.update("client_packages", p.id, { status }))} />
+              <Segmented value={p.status} options={toOptions(PKG_STATUS)} onChange={(status) => save(toast, write((w) => w.update("client_packages", p.id, { status })))} />
             </Row>
           </View>
         ))}
@@ -124,12 +125,12 @@ export function Crm({ c }: TabProps) {
   const me = useMe();
   const today = todaySP();
   const { f, set, reset } = useForm({ kind: "nota" as keyof typeof KINDS, due_on: null as string | null, content: "" });
-  const { data: items } = useQuery<Interaction>("select * from interactions where client_id = ? order by created_at desc", [c.id]);
+  const { data: items } = useQuery<Interaction>(`select *, ${ts("created_at")} as created_at from interactions where client_id = ? order by datetime(created_at) desc`, [c.id]);
   const { data: last } = useQuery<{ name: string }>(
     "select s.name from appointments a join services s on s.id = a.service_id where a.client_id = ? and a.status = 'concluido' order by a.starts_at desc limit 1", [c.id]);
   const add = async () => {
     if (!f.content.trim()) return toast("Escreva a anotação.", "error");
-    await write((w) => w.insert("interactions", clean({ ...f, client_id: c.id, created_by: me?.id, created_at: nowIso() })));
+    if (!await save(toast, write((w) => w.insert("interactions", clean({ ...f, client_id: c.id, created_by: me?.id, created_at: nowIso() }))))) return;
     reset();
     toast(f.due_on ? "Lembrete agendado." : "Anotação salva.");
   };
@@ -171,8 +172,8 @@ export function Crm({ c }: TabProps) {
                   </Row>
                   <T>{i.content}</T>
                   <Row gap={6}>
-                    {open && <Button small variant="outline" icon={Check} onPress={() => write((w) => w.update("interactions", i.id, { done_at: nowIso() }))}>Feito</Button>}
-                    <ConfirmButton onConfirm={() => write((w) => w.remove("interactions", i.id))} />
+                    {open && <Button small variant="outline" icon={Check} onPress={() => save(toast, write((w) => w.update("interactions", i.id, { done_at: nowIso() })))}>Feito</Button>}
+                    <ConfirmButton onConfirm={() => save(toast, write((w) => w.remove("interactions", i.id)))} />
                   </Row>
                 </TimelineItem>
               );

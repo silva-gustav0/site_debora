@@ -6,7 +6,7 @@ import { Text, View } from "react-native";
 import { Badge, Button, Card, ConfirmButton, Empty, Field, ListItem, MoneyField, moneyText, parseMoney, Screen, Select, Sheet, Toggle, useToast } from "@/components/ui";
 import { Font } from "@/constants/brand";
 import { asBool } from "@/db/hooks";
-import { write } from "@/db/write";
+import { save, write } from "@/db/write";
 
 const CATEGORIES = { facial: "Facial", corporal: "Corporal", terapias: "Terapias", combo: "Combo" };
 type Svc = { id: string; name: string; category: string; description: string | null; duration_min: number; price: number; return_days: number | null; active: number; show_on_home: number; icon: string };
@@ -26,7 +26,7 @@ export default function Servicos() {
     description: s.description ?? "", active: asBool(s.active), home: asBool(s.show_on_home), icon: s.icon,
   });
 
-  const save = async () => {
+  const submit = async () => {
     if (!f) return;
     const price = parseMoney(f.price), duration = Number(f.duration), returnDays = Number(f.returnDays);
     const name = f.name.trim().slice(0, 120);
@@ -41,7 +41,7 @@ export default function Servicos() {
       name, price, duration_min: duration, return_days: returnDays > 0 ? returnDays : null, category: f.category,
       description: f.description.trim().slice(0, 500) || null, active: f.active, show_on_home: f.home, icon: f.icon,
     };
-    await write(async (w) => { if (f.id) await w.update("services", id, row); else await w.insert("services", { ...row, id, sort_order: 99 }); });
+    if (!await save(toast, write(async (w) => { if (f.id) await w.update("services", id, row); else await w.insert("services", { ...row, id, sort_order: 99 }); }))) return;
     toast(f.id ? "Serviço atualizado." : "Serviço criado.");
     setF(null);
   };
@@ -52,7 +52,8 @@ export default function Servicos() {
       const n = (await Promise.all(["appointments", "packages", "client_packages"].map(q))).reduce((s, r) => s + (r?.n ?? 0), 0);
       if (!n) await w.remove("services", id);
       return n;
-    });
+    }).catch(() => null);
+    if (used === null) return toast("Não foi possível salvar. Tente de novo.", "error");
     if (used) return toast("Este serviço já tem agendamentos ou pacotes no histórico e não pode ser excluído. Desmarque “Disponível no site” para escondê-lo.", "error");
     toast("Serviço excluído.");
     setF(null);
@@ -86,7 +87,7 @@ export default function Servicos() {
             <Select label="Ícone" value={f.icon as ServiceIcon} onChange={(icon) => set({ icon })} options={Object.entries(SERVICE_ICONS).map(([value, label]) => ({ value, label }))} />
             <Toggle label="Disponível no site" value={f.active} onChange={(active) => set({ active })} />
             <Toggle label="Mostrar na página inicial do site" value={f.home} onChange={(home) => set({ home })} />
-            <Button onPress={save}>Salvar</Button>
+            <Button onPress={submit}>Salvar</Button>
             {!!f.id && <ConfirmButton onConfirm={() => remove(f.id)} small={false} />}
           </>
         )}

@@ -8,7 +8,7 @@ import { Button, Chip, Field, Select, useToast } from "@/components/ui";
 import { cs, T } from "@/components/client-ui";
 import { Brand, Font } from "@/constants/brand";
 import { asJson, useSettings } from "@/db/hooks";
-import { write } from "@/db/write";
+import { save, write } from "@/db/write";
 import type { ClientDb } from "@/lib/clients";
 
 type Answers = Record<string, AnswerValue>;
@@ -57,9 +57,9 @@ export function AnamnesisForm({ c, onSaved }: { c: ClientDb; onSaved?: () => voi
     const v = (prev as Answers | null)?.[q.id];
     return [q.id, q.type === "choice" ? matchOption(q.options, v) || undefined : v];
   }));
-  const save = async () => {
+  const submit = async () => {
     const given = Object.fromEntries(Object.entries(a).map(([k, v]) => [k, typeof v === "string" ? v.trim() || undefined : v]));
-    await write((w) => w.update("clients", c.id, anamnesisFromAnswers(given, "equipe", form, prev)));
+    if (!await save(toast, write((w) => w.update("clients", c.id, anamnesisFromAnswers(given, "equipe", form, prev))))) return;
     toast("Anamnese salva.");
     onSaved?.();
   };
@@ -77,7 +77,7 @@ export function AnamnesisForm({ c, onSaved }: { c: ClientDb; onSaved?: () => voi
           </View>
         </View>
       ))}
-      <Button icon={Check} style={{ alignSelf: "flex-start" }} onPress={save}>Salvar anamnese</Button>
+      <Button icon={Check} style={{ alignSelf: "flex-start" }} onPress={submit}>Salvar anamnese</Button>
     </View>
   );
 }

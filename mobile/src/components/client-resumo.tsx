@@ -21,7 +21,7 @@ export function Resumo({ c, go }: TabProps) {
      (select coalesce(sum(amount), 0) from transactions where client_id = ?1 and kind = 'receita' and status = 'pendente') pending,
      (select count(*) from transactions where client_id = ?1 and kind = 'receita' and status = 'pendente') n`, [c.id]);
   const { data: pkgs } = useQuery<CPkg>(PKGS_SQL, [c.id]);
-  const { data: rec } = useQuery<Rec>("select * from session_records where client_id = ? order by record_date desc, created_at desc limit 1", [c.id]);
+  const { data: rec } = useQuery<Rec>("select * from session_records where client_id = ? order by record_date desc, datetime(created_at) desc limit 1", [c.id]);
   const visits = Number(row?.visits ?? 0);
   const spent = Number(st[0]?.spent ?? 0);
   const r = row?.recurrence;

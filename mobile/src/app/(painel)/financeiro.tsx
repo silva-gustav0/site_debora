@@ -9,7 +9,7 @@ import { BarList, DailyBars, DataTable, MonthlyChart, Split } from "@/components
 import { Badge, Button, Card, ConfirmButton, Empty, ListItem, Row, Screen, Segmented, Stat, Tabs, useToast, useWide } from "@/components/ui";
 import { Brand, Font } from "@/constants/brand";
 import { useSettings } from "@/db/hooks";
-import { write } from "@/db/write";
+import { save, write } from "@/db/write";
 import { ts } from "@/lib/agenda";
 import { shareCsv } from "@/lib/export";
 import { group, sum } from "@/lib/finance";
@@ -29,7 +29,7 @@ export default function Financeiro() {
   const [kindFilter, setKindFilter] = useState("todos");
   const last = lastDayOfMonth(ym);
   const { data: txs } = useQuery<Tx>(
-    "select t.*, c.name as client_name, (select s.name from appointments a join services s on s.id = a.service_id where a.id = t.appointment_id) as service_name from transactions t left join clients c on c.id = t.client_id where t.occurred_on between ? and ? order by t.occurred_on desc, t.created_at desc",
+    "select t.*, c.name as client_name, (select s.name from appointments a join services s on s.id = a.service_id where a.id = t.appointment_id) as service_name from transactions t left join clients c on c.id = t.client_id where t.occurred_on between ? and ? order by t.occurred_on desc, datetime(t.created_at) desc",
     [`${ym}-01`, last],
   );
   const { data: pending } = useQuery<Tx>("select t.*, c.name as client_name from transactions t left join clients c on c.id = t.client_id where t.status = 'pendente' order by t.due_on");
@@ -64,17 +64,17 @@ export default function Financeiro() {
     ["= Resultado", result, true],
   ];
 
-  const markPaid = (t: Tx) => write(async (w) => {
-    await w.update("transactions", t.id, { status: "pago", occurred_on: today, fee: t.kind === "receita" ? cardFee(settings, t.method, t.amount) : 0 });
-    toast(t.kind === "receita" ? "Recebimento registrado." : "Pagamento registrado.");
-  });
+  const markPaid = async (t: Tx) => {
+    const ok = await save(toast, write((w) => w.update("transactions", t.id, { status: "pago", occurred_on: today, fee: t.kind === "receita" ? cardFee(settings, t.method, t.amount) : 0 })));
+    if (ok) toast(t.kind === "receita" ? "Recebimento registrado." : "Pagamento registrado.");
+  };
   /** Exporta os lançamentos do mês (mesmas colunas do painel). */
   const exportCsv = () => shareCsv(`financeiro-${ym}.csv`,
     ["Data", "Tipo", "Situação", "Categoria", "Descrição", "Cliente", "Forma", "Valor", "Taxa", "Líquido", "Vencimento"],
     [...txs].reverse().map((t) => [fmtDate(t.occurred_on), t.kind === "receita" ? "Receita" : "Despesa", t.status === "pago" ? "Pago" : "Pendente", t.category, t.description, t.client_name,
       METHOD_LABEL[t.method as keyof typeof METHOD_LABEL], Number(t.amount), Number(t.fee), Number(t.amount) - Number(t.fee), t.due_on ? fmtDate(t.due_on) : ""]),
   ).catch(() => toast("Não foi possível exportar.", "error"));
-  const remove = (id: string) => write((w) => w.remove("transactions", id));
+  const remove = (id: string) => save(toast, write((w) => w.remove("transactions", id)));
 
   const listed = kindFilter === "todos" ? txs : txs.filter((t) => t.kind === kindFilter);
   const toReceive = pending.filter((t) => t.kind === "receita");

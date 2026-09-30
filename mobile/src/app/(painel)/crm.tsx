@@ -1,16 +1,16 @@
 import { useQuery } from "@powersync/react-native";
 import { niceFirstName } from "@shared/whatsapp-messages";
-import { fillTemplate, firstName, fmtDate, INTERACTION_LABEL, STAGE_LABEL, todaySP, whatsappLink } from "@shared/format";
+import { dateSP, fillTemplate, firstName, fmtDate, INTERACTION_LABEL, STAGE_LABEL, todaySP, whatsappLink } from "@shared/format";
 import type { ClientStage, InteractionKind, TemplateKey } from "@shared/types";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import { Linking, Text, View } from "react-native";
 import { Cake, ClipboardCheck, TrendingUp, UserPlus } from "lucide-react-native";
-import { Avatar, Badge, Button, Card, Chip, ConfirmButton, Empty, Field, ListItem, Row, Screen, Select, Stat, Tabs, Txt, useWide } from "@/components/ui";
+import { Avatar, Badge, Button, Card, Chip, ConfirmButton, Empty, Field, ListItem, Row, Screen, Select, Stat, Tabs, Txt, useToast, useWide } from "@/components/ui";
 import { Brand, Font } from "@/constants/brand";
 import { type Client, logContact, TEMPLATE_INFO, useClients } from "@/lib/reports";
 import { useSettings } from "@/db/hooks";
-import { write } from "@/db/write";
+import { save, write } from "@/db/write";
 
 const COLUMNS: { stage: ClientStage; hint: string; color: string }[] = [
   { stage: "lead", hint: "Pediram informação ou agendaram pelo site", color: "#D4A73C" },
@@ -41,6 +41,7 @@ type Contact = { client_id: string; last: string; recent: number };
 
 /** CRM: funil por estágio, tarefas de acompanhamento e campanhas segmentadas pelo WhatsApp. */
 export default function Crm() {
+  const toast = useToast();
   const wide = useWide();
   const settings = useSettings();
   const clients = useClients();
@@ -57,7 +58,7 @@ export default function Crm() {
      where i.done_at is null and i.due_on is not null order by i.due_on limit 100`,
   );
   const { data: contacts } = useQuery<Contact>(
-    `select client_id, max(created_at) as last,
+    `select client_id, strftime('%Y-%m-%dT%H:%M:%SZ', max(julianday(created_at))) as last,
      max(case when kind = 'whatsapp' and julianday(created_at) > julianday('now', '-7 days') then 1 else 0 end) as recent from interactions group by client_id`,
   );
   const contact = useMemo(() => new Map(contacts.map((c) => [c.client_id, c])), [contacts]);
@@ -68,7 +69,7 @@ export default function Crm() {
   const message = custom.trim().slice(0, 1000) || settings.templates[template];
   const tags = [...new Set(clients.flatMap((c) => c.tags))].sort();
   const label = tag ? `etiqueta ${tag}` : SEGMENTS[segment].label;
-  const created = clients.filter((c) => c.created_at.startsWith(today.slice(0, 7)));
+  const created = clients.filter((c) => dateSP(c.created_at).startsWith(today.slice(0, 7)));
   const converted = created.filter((c) => c.visits > 0).length;
   const overdue = tasks.filter((t) => t.due_on < today).length;
 
@@ -118,9 +119,9 @@ export default function Crm() {
           right={<Badge tone={t.due_on < today ? "red" : t.due_on === today ? "gold" : "gray"}>{t.due_on === today ? "Hoje" : fmtDate(t.due_on, { year: undefined })}</Badge>}>
           <Txt.body>{t.content}</Txt.body>
           <Row wrap>
-            <Button small icon="checkmark" onPress={() => write((w) => w.update("interactions", t.id, { done_at: new Date().toISOString() }))}>Feito</Button>
+            <Button small icon="checkmark" onPress={() => save(toast, write((w) => w.update("interactions", t.id, { done_at: new Date().toISOString() })))}>Feito</Button>
             {!!t.phone && <Button small variant="outline" icon="logo-whatsapp" onPress={() => Linking.openURL(whatsappLink(t.phone, `Oi, ${firstName(t.name)}! Aqui é da ${settings.clinic_name} 🌸`) ?? "")}>WhatsApp</Button>}
-            <ConfirmButton onConfirm={() => write((w) => w.remove("interactions", t.id))} />
+            <ConfirmButton onConfirm={() => save(toast, write((w) => w.remove("interactions", t.id)))} />
           </Row>
         </Card>
       )))}

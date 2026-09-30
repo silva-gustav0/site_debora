@@ -35,7 +35,7 @@ export default function Attendance() {
   const client = useRows<{ skin_type: string | null; allergies: string | null; health_notes: string | null }>(
     "select skin_type, allergies, health_notes from clients where id = ?", [a?.client_id ?? ""])[0];
   const last = useRows<{ record_date: string; procedure: string; observations: string | null; next_steps: string | null }>(
-    "select record_date, procedure, observations, next_steps from session_records where client_id = ? order by record_date desc, created_at desc limit 1", [a?.client_id ?? ""])[0];
+    "select record_date, procedure, observations, next_steps from session_records where client_id = ? order by record_date desc, datetime(created_at) desc limit 1", [a?.client_id ?? ""])[0];
   const { width, height } = useWindowDimensions();
   const wide = width >= 900;
   const ring = Math.min(420, Math.min(width * (wide ? 0.68 : 1), height * (wide ? 1 : 0.58)) * 0.5);

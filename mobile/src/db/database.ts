@@ -1,5 +1,7 @@
 import { FetchStrategy, PowerSyncDatabase } from "@powersync/react-native";
 import * as Crypto from "expo-crypto";
+import { Directory, Paths } from "expo-file-system";
+import { Image } from "expo-image";
 import * as SecureStore from "expo-secure-store";
 import { SupabaseConnector } from "./connector";
 import { AppSchema } from "./schema";
@@ -26,8 +28,14 @@ export async function openDatabase() {
     database: { dbFilename: "clinica.db", sqliteOptions: { encryptionKey: await encryptionKey() } },
   });
   await db.init();
+  cipherVersion = (await db.getOptional<{ cipher_version: string }>("PRAGMA cipher_version"))?.cipher_version ?? null;
   return db;
 }
+
+let cipherVersion: string | null = null;
+
+/** Versão do SQLCipher do banco aberto (nulo = banco sem criptografia). */
+export const encryptionVersion = () => cipherVersion;
 
 export const connector = new SupabaseConnector();
 
@@ -40,11 +48,21 @@ export async function startSync() {
   return d;
 }
 
+/** Apaga os arquivos que o app guarda fora do banco: fotos pendentes, atendimentos, CSVs e cache de imagens. */
+async function wipeFiles() {
+  for (const item of new Directory(Paths.document).list()) {
+    if (item.name === "fotos-pendentes" || /^atendimento-.*\.json$/.test(item.name)) try { item.delete(); } catch {}
+  }
+  try { const out = new Directory(Paths.cache, "exportacoes"); if (out.exists) out.delete(); } catch {}
+  await Promise.all([Image.clearDiskCache(), Image.clearMemoryCache()]).catch(() => {});
+}
+
 /**
- * Apaga tudo do aparelho: dados locais e fila de envio. O VACUUM reescreve o arquivo para não
- * sobrar nada nas páginas liberadas. Usado ao sair e quando o acesso da pessoa é removido no painel.
+ * Apaga tudo do aparelho: dados locais, fila de envio e arquivos. O VACUUM reescreve o arquivo para não
+ * sobrar nada nas páginas liberadas. Usado ao sair, quando o acesso é removido e quando a sessão acaba.
  */
 export async function wipeDevice() {
+  await wipeFiles();
   const d = await openDatabase();
   await d.disconnectAndClear();
   await d.execute("VACUUM");

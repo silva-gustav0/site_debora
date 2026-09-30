@@ -120,7 +120,7 @@ function PhotoTile({ p, uri, width, action }: { p: Photo; uri?: string; width: `
   return (
     <View style={{ width, gap: 4 }}>
       <View style={{ aspectRatio: 3 / 4, borderRadius: 12, overflow: "hidden", backgroundColor: Brand.lineSoft }}>
-        <Image source={uri ? { uri, cacheKey: p.path ?? p.id } : undefined} style={{ flex: 1 }} contentFit="cover" />
+        <Image source={uri ? { uri, cacheKey: p.path ?? p.id } : undefined} style={{ flex: 1 }} contentFit="cover" cachePolicy="memory" />
         <LinearGradient colors={["transparent", "rgba(41,32,26,0.8)"]} style={{ position: "absolute", left: 0, right: 0, bottom: 0, padding: 8, paddingTop: 20 }}>
           <Text style={{ color: Brand.white, fontSize: 11, fontFamily: Font.body }} numberOfLines={2}>
             <Text style={{ fontFamily: Font.bold, letterSpacing: 1 }}>{(PHOTO_KINDS[p.kind] ?? p.kind).toUpperCase()}</Text> · {fmtDate(p.taken_on, { year: "2-digit" })}{p.caption ? `\n${p.caption}` : ""}

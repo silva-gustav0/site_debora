@@ -7,7 +7,7 @@ import { Progress, Split } from "@/components/charts";
 import { Avatar, Badge, Button, Card, Empty, Field, MoneyField, moneyText, parseMoney, Row, Screen, Segmented, Select, Sheet, Stat, Toggle, useToast, useWide } from "@/components/ui";
 import { Brand, Font } from "@/constants/brand";
 import { asBool, useServices } from "@/db/hooks";
-import { write } from "@/db/write";
+import { save, write } from "@/db/write";
 
 type Pkg = { id: string; name: string; service_id: string; sessions: number; price: number; validity_days: number | null; active: number; service_name: string | null };
 type Sold = { id: string; name: string; sessions_total: number; price: number; status: string; expires_on: string | null; purchased_on: string; client_name: string | null; used: number };
@@ -29,7 +29,7 @@ export default function Pacotes() {
   const [error, setError] = useState<string | null>(null);
   const set = (patch: Partial<typeof EMPTY>) => setForm((f) => f && { ...f, ...patch });
 
-  const save = async () => {
+  const submit = async () => {
     if (!form) return;
     const sessions = parseInt(form.sessions, 10);
     const price = parseMoney(form.price);
@@ -39,10 +39,10 @@ export default function Pacotes() {
     if (!(sessions >= 1 && sessions <= 100)) return setError("Número de sessões entre 1 e 100.");
     if (!Number.isFinite(price) || price < 0) return setError("Informe o preço.");
     const row = { name: form.name.trim(), service_id: form.service_id, sessions, price, validity_days: days > 0 ? days : null, active: form.active };
-    await write(async (w) => {
+    if (!await save(toast, write(async (w) => {
       if (form.id) await w.update("packages", form.id, row);
       else await w.insert("packages", { ...row, created_at: new Date().toISOString() });
-    });
+    }))) return;
     toast(form.id ? "Pacote atualizado." : "Pacote criado.");
     setForm(null);
   };
@@ -99,7 +99,7 @@ export default function Pacotes() {
                       : days !== null && days < 0 ? <Badge tone="red">vencido</Badge>
                       : days !== null && days <= 30 ? <Badge tone="gold">{`vence ${fmtDate(p.expires_on, { year: undefined })}`}</Badge>
                       : <Badge tone="green">{`${left(p)} restantes`}</Badge>}
-                    <Select label="Situação" value={p.status} options={STATUS} onChange={(status) => write((w) => w.update("client_packages", p.id, { status }))} />
+                    <Select label="Situação" value={p.status} options={STATUS} onChange={(status) => save(toast, write((w) => w.update("client_packages", p.id, { status })))} />
                   </View>
                 </View>
               );
@@ -135,7 +135,7 @@ export default function Pacotes() {
             <MoneyField label="Preço (R$)" value={form.price} onChangeText={(price) => set({ price })} />
             <Field label="Validade (dias, opcional)" value={form.validity} onChangeText={(validity) => set({ validity })} keyboardType="number-pad" />
             <Toggle label="Pacote ativo" value={form.active} onChange={(active) => set({ active })} />
-            <Button onPress={save}>Salvar pacote</Button>
+            <Button onPress={submit}>Salvar pacote</Button>
           </>
         )}
       </Sheet>

@@ -8,7 +8,8 @@ import { type ReactNode, useState } from "react";
 import { Linking, View } from "react-native";
 import { Button, Card, ConfirmButton, DateField, Field, Select, Toggle, type Tone, Txt, useToast } from "@/components/ui";
 import { asBool, asList } from "@/db/hooks";
-import { queryOne, type Row as DbRow, write } from "@/db/write";
+import { ts } from "@/lib/agenda";
+import { queryOne, type Row as DbRow, save, write } from "@/db/write";
 import { removeClientPhotos } from "@/lib/photo-sync";
 
 export type ClientDb = {
@@ -63,7 +64,7 @@ export function useForm<T extends object>(init: T) {
 
 /** Cadastro da cliente, reativo. */
 export function useClient(id: string) {
-  return useQuery<ClientDb>("select * from clients where id = ?", [id]).data[0];
+  return useQuery<ClientDb>(`select *, ${ts("created_at")} as created_at from clients where id = ?`, [id]).data[0];
 }
 
 /** Célula da grade de formulário do painel (3 colunas no tablet deitado, 2 em pé, 1 no celular); `full` ocupa a linha. */
@@ -81,7 +82,7 @@ export function ClientForm({ client: c, onSaved }: { client?: ClientDb; onSaved?
     marketing_opt_in: c ? asBool(c.marketing_opt_in) : true,
   });
   const [dup, setDup] = useState<{ id: string; name: string } | null>(null);
-  const save = async () => {
+  const submit = async () => {
     if (f.name.trim().length < 2) return toast("Informe o nome da cliente.", "error");
     const row = clean({
       ...f, name: f.name.slice(0, 120), phone: digits(f.phone).slice(0, 13), email: f.email.toLowerCase(), cpf: digits(f.cpf),
@@ -92,11 +93,12 @@ export function ClientForm({ client: c, onSaved }: { client?: ClientDb; onSaved?
     setDup(other);
     if (other) return toast(`Já existe a ficha de ${other.name} com este WhatsApp.`, "error");
     if (c) {
-      await write((w) => w.update("clients", c.id, row));
+      if (!await save(toast, write((w) => w.update("clients", c.id, row)))) return;
       toast("Dados salvos.");
       return onSaved ? onSaved() : router.back();
     }
-    const id = await write((w) => w.insert("clients", { ...row, anamnesis: {}, created_at: nowIso() }));
+    const id = await write((w) => w.insert("clients", { ...row, anamnesis: {}, created_at: nowIso() })).catch(() => null);
+    if (!id) return toast("Não foi possível salvar. Tente de novo.", "error");
     router.replace(`/clientes/${id}`);
   };
   return (
@@ -122,7 +124,7 @@ export function ClientForm({ client: c, onSaved }: { client?: ClientDb; onSaved?
           </View>
         </Cell>
       )}
-      <Cell full><Button icon={Check} style={{ alignSelf: "flex-start" }} onPress={save}>{c ? "Salvar dados" : "Cadastrar cliente"}</Button></Cell>
+      <Cell full><Button icon={Check} style={{ alignSelf: "flex-start" }} onPress={submit}>{c ? "Salvar dados" : "Cadastrar cliente"}</Button></Cell>
     </View>
   );
 }
@@ -137,7 +139,7 @@ export function DeleteClientCard({ id }: { id: string }) {
   const { connected } = useStatus();
   const remove = async () => {
     if (connected) await removeClientPhotos(id).catch(() => toast("Não foi possível remover as fotos do armazenamento.", "error"));
-    await write((w) => w.remove("clients", id));
+    if (!await save(toast, write((w) => w.remove("clients", id)))) return;
     toast("Cliente excluída.");
     router.dismissTo("/clientes");
   };

@@ -1,5 +1,5 @@
 import { useQuery } from "@powersync/react-native";
-import { brl, digits, fmtDate, formatPhone, SOURCE_LABEL, STAGE_LABEL, todaySP } from "@shared/format";
+import { brl, dateSP, digits, fmtDate, formatPhone, SOURCE_LABEL, STAGE_LABEL, todaySP } from "@shared/format";
 import { RECURRENCE_META } from "@shared/recurrence";
 import type { ClientStage } from "@shared/types";
 import { router, useLocalSearchParams } from "expo-router";
@@ -110,7 +110,7 @@ export default function Clientes() {
         <Stat label="Cadastrados" value={String(all.length)} icon={Users} />
         <Stat label="Já atendidas" value={String(withVisits.length)} hint={all.length ? `${Math.round((withVisits.length / all.length) * 100)}% da base` : undefined} />
         <Stat label="Valor médio por cliente" value={brl(ltv)} hint="total investido (LTV)" />
-        <Stat label="Novos no mês" value={String(all.filter((c) => c.created_at.slice(0, 7) === today.slice(0, 7)).length)} />
+        <Stat label="Novos no mês" value={String(all.filter((c) => dateSP(c.created_at).slice(0, 7) === today.slice(0, 7)).length)} />
       </StatGrid>}
 
       <View style={{ flexDirection: landscape ? "row" : "column", alignItems: landscape ? "center" : "stretch", gap: 12 }}>

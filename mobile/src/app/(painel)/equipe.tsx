@@ -1,6 +1,7 @@
 import { useQuery } from "@powersync/react-native";
 import { fmtDate } from "@shared/format";
 import { Fragment, useState } from "react";
+import { ts } from "@/lib/agenda";
 import { Avatar, Badge, Button, Card, ConfirmButton, Field, ListItem, Row, Screen, Toggle, Txt, useToast } from "@/components/ui";
 import { asBool, SITE_URL, useMe } from "@/db/hooks";
 import { useSession } from "@/lib/session";
@@ -13,7 +14,7 @@ export default function Equipe() {
   const toast = useToast();
   const me = useMe();
   const { session } = useSession();
-  const { data } = useQuery<Person>("select id, name, is_admin, created_at from staff order by created_at");
+  const { data } = useQuery<Person>(`select id, name, is_admin, ${ts("created_at")} as created_at from staff order by datetime(created_at)`);
   const [novo, setNovo] = useState({ name: "", email: "", password: "", is_admin: false });
   const [pw, setPw] = useState({ current: "", next: "", confirm: "" });
 

@@ -12,10 +12,10 @@ import {
 import { type ReactNode, useState } from "react";
 import { Linking, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import Svg, { Circle, G, Line, Polyline, Rect, Text as SvgText } from "react-native-svg";
-import { Badge, Button, Card, Empty, Row, Screen, Stat, Txt, useWide } from "@/components/ui";
+import { Badge, Button, Card, Empty, Row, Screen, Stat, Txt, useToast, useWide } from "@/components/ui";
 import { Brand, Font } from "@/constants/brand";
 import { useMe, useSettings } from "@/db/hooks";
-import { write } from "@/db/write";
+import { save, write } from "@/db/write";
 import { ApptItem, between, PKG_SQL, type Pkg, useAppts, useRows } from "@/lib/agenda";
 import { useSession } from "@/lib/session";
 
@@ -86,6 +86,7 @@ const Tile = ({ href, ...p }: Parameters<typeof Stat>[0] & { href: string }) => 
 
 /** Início: indicadores, agenda de hoje, receitas e despesas, alertas, tarefas e estado da sincronização. */
 export default function Home() {
+  const toast = useToast();
   const { session } = useSession();
   const me = useMe();
   const settings = useSettings();
@@ -126,7 +127,7 @@ export default function Home() {
     `select i.id, i.kind, i.content, i.due_on, i.client_id, c.name as client_name from interactions i left join clients c on c.id = i.client_id
      where i.done_at is null and i.due_on is not null and i.due_on <= ? order by i.due_on limit 6`, [today],
   );
-  const conflicts = useRows<{ id: string; message: string }>("select id, message from sync_conflicts order by created_at desc limit 5");
+  const conflicts = useRows<{ id: string; message: string }>("select id, message from sync_conflicts order by datetime(created_at) desc limit 5");
   const queued = useRows<{ n: number }>("select count(*) as n from ps_crud")[0]?.n ?? 0;
 
   const active = todayAppts.filter((a) => a.status !== "cancelado");
@@ -204,7 +205,7 @@ export default function Home() {
               </Row>
               <Text style={s.taskText} numberOfLines={2}><Text style={s.b}>{INTERACTION_LABEL[t.kind]}:</Text> {t.content}</Text>
             </View>
-            <Button small variant="outline" onPress={() => write((w) => w.update("interactions", t.id, { done_at: new Date().toISOString() }))}>Feito</Button>
+            <Button small variant="outline" onPress={() => save(toast, write((w) => w.update("interactions", t.id, { done_at: new Date().toISOString() })))}>Feito</Button>
           </Row>
         ))}
       </Card>

@@ -11,11 +11,11 @@ import {
 import { useEffect, useState } from "react";
 import { Linking, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import {
-  Badge, Button, Card, Chip, ConfirmButton, Empty, ListItem, Row, Screen, Section, Segmented, Sheet, Txt, useWide,
+  Badge, Button, Card, Chip, ConfirmButton, Empty, ListItem, Row, Screen, Section, Segmented, Sheet, Txt, useToast, useWide,
 } from "@/components/ui";
 import { Brand, Font } from "@/constants/brand";
 import { SITE_URL, useSettings } from "@/db/hooks";
-import { write } from "@/db/write";
+import { save, write } from "@/db/write";
 import { type Appt, ApptItem, between, STATUS_STYLE, ts, useAppts, useRows } from "@/lib/agenda";
 
 type Block = { id: string; starts_at: string; ends_at: string; reason: string };
@@ -26,6 +26,7 @@ const LEGEND: [AppointmentStatus, string][] = [["solicitado", "A confirmar"], ["
 
 /** Agenda por dia ou semana: grade de horários no tablet (AgendaGrid do painel) e lista do dia no celular. */
 export default function Agenda() {
+  const toast = useToast();
   const wide = useWide();
   const landscape = useWindowDimensions().width >= 1024;
   const settings = useSettings();
@@ -61,7 +62,7 @@ export default function Agenda() {
   const renderDay = (day: string) => {
     const list = appts.filter((a) => dateSP(a.starts_at) === day);
     const dayBlocks = blocks.filter((b) => dateSP(b.starts_at) === day);
-    const slots = view === "dia" ? freeSlots(day, settings.slot_step_min, [...list.filter((a) => a.status !== "cancelado"), ...dayBlocks], new Date(), settings.business_hours, settings.slot_step_min).filter((s) => s.available) : [];
+    const slots = view === "dia" ? freeSlots(day, settings.slot_step_min, [...list.filter((a) => a.status !== "cancelado" && a.status !== "faltou"), ...dayBlocks], new Date(), settings.business_hours, settings.slot_step_min).filter((s) => s.available) : [];
     const items: { at: string; a?: Appt; b?: Block }[] = [...list.map((a) => ({ at: a.starts_at, a })), ...dayBlocks.map((b) => ({ at: b.starts_at, b }))].sort((x, y) => x.at.localeCompare(y.at));
     return (
       <Section key={day} title={`${fmtWeekday(day)}, ${fmtDate(day, { year: undefined })}${day === today ? " · hoje" : ""}`} right={<Badge>{String(list.filter((a) => a.status !== "cancelado").length)}</Badge>}>
@@ -98,7 +99,7 @@ export default function Agenda() {
                 <Text style={s.remSub} numberOfLines={1}>{a.service_name}</Text>
               </View>
               {wa && <Button small variant="ghost" icon={MessageCircle} onPress={() => Linking.openURL(wa)}>{""}</Button>}
-              <Button small variant="ghost" icon={BellRing} onPress={() => write((w) => w.update("appointments", a.id, { reminder_sent_at: new Date().toISOString() }))}>{""}</Button>
+              <Button small variant="ghost" icon={BellRing} onPress={() => save(toast, write((w) => w.update("appointments", a.id, { reminder_sent_at: new Date().toISOString() })))}>{""}</Button>
             </Row>
           );
         })}
@@ -158,7 +159,7 @@ export default function Agenda() {
           <>
             <Txt.eyebrow>Horário bloqueado</Txt.eyebrow>
             <Txt.body>{fmtDate(block.starts_at)} {fmtTime(block.starts_at)} até {fmtDate(block.ends_at)} {fmtTime(block.ends_at)}</Txt.body>
-            <ConfirmButton confirmText="Remover bloqueio" onConfirm={async () => { await write((w) => w.remove("time_blocks", block.id)); setBlock(null); }}>Liberar horário</ConfirmButton>
+            <ConfirmButton confirmText="Remover bloqueio" onConfirm={async () => { if (await save(toast, write((w) => w.remove("time_blocks", block.id)))) setBlock(null); }}>Liberar horário</ConfirmButton>
           </>
         )}
       </Sheet>

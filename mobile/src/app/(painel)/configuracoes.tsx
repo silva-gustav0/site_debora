@@ -9,7 +9,7 @@ import { Text, View } from "react-native";
 import { Button, Card, ConfirmButton, Field, Row, Screen, Select, Tabs, TimeField, Toggle, Txt, useToast, useWide } from "@/components/ui";
 import { Brand, Font } from "@/constants/brand";
 import { useSettings } from "@/db/hooks";
-import { write } from "@/db/write";
+import { save, write } from "@/db/write";
 import { TEMPLATE_INFO } from "@/lib/reports";
 
 const DAYS = [1, 2, 3, 4, 5, 6, 0] as const;
@@ -30,15 +30,19 @@ function ClinicTab({ s }: { s: Settings }) {
   const text = (k: keyof typeof f, label: string, extra = {}) => <Field label={label} value={f[k]} onChangeText={(v) => setF({ ...f, [k]: v })} {...extra} />;
   const setDay = (d: number, h: DayHours) => setHours({ ...hours, [String(d)]: h });
 
-  const save = async () => {
+  const submit = async () => {
     for (const h of Object.values(hours)) if (h && toMinutes(h.close) <= toMinutes(h.open)) return toast("Confira os horários de abertura e fechamento.", "error");
     const step = Number(f.slot_step_min);
-    await patchSettings({
+    const next: Record<string, unknown> = {
       clinic_name: f.clinic_name.trim().slice(0, 120) || "Clínica Débora Silva", whatsapp: digits(f.whatsapp).slice(0, 20), address: f.address.trim().slice(0, 200),
       business_hours: hours, slot_step_min: [15, 20, 30, 60].includes(step) ? step : 30, min_lead_min: Math.max(Math.round(num(f.min_lead_min)), 0),
       max_days_ahead: clamp(Math.round(num(f.max_days_ahead)) || 90, 1, 365), cancel_min_hours: Math.max(Math.round(num(f.cancel_min_hours)), 0),
       fee_credit: clamp(num(f.fee_credit), 0, 30), fee_debit: clamp(num(f.fee_debit), 0, 30),
-    });
+    };
+    // Só grava o que mudou, para não sobrescrever o que outro aparelho alterou em outros campos.
+    const changed = Object.fromEntries(Object.entries(next).filter(([k, v]) => JSON.stringify(v) !== JSON.stringify(s[k as keyof Settings])));
+    if (!Object.keys(changed).length) return toast("Nada foi alterado.");
+    if (!await save(toast, patchSettings(changed))) return;
     toast("Configurações salvas.");
   };
 
@@ -86,7 +90,7 @@ function ClinicTab({ s }: { s: Settings }) {
         })}
         <Txt.muted style={{ paddingTop: 12 }}>Os horários valem para o site e para a grade da agenda. Para folgas pontuais, use “Bloquear” na agenda.</Txt.muted>
       </Card>
-      <Button onPress={save}>Salvar configurações</Button>
+      <Button onPress={submit}>Salvar configurações</Button>
     </>
   );
 }
@@ -104,7 +108,7 @@ function MessagesTab({ s }: { s: Settings }) {
         </Card>
       ))}
       <Button onPress={async () => {
-        await patchSettings({ templates: Object.fromEntries(Object.entries(t).map(([k, v]) => [k, v.trim().slice(0, 1000)]).filter(([, v]) => v)) });
+        if (!await save(toast, patchSettings({ templates: Object.fromEntries(Object.entries(t).map(([k, v]) => [k, v.trim().slice(0, 1000)]).filter(([, v]) => v)) }))) return;
         toast("Mensagens salvas.");
       }}>Salvar mensagens</Button>
     </>
@@ -120,10 +124,10 @@ function AnamnesisTab({ s }: { s: Settings }) {
     setForm({ sections: form.sections.map((sec, i) => (i === si ? { ...sec, questions: fn(sec.questions) } : sec)) });
   const setQ = (si: number, qi: number, p: Partial<AnamnesisQuestion>) => change(si, (qs) => qs.map((q, i) => (i === qi ? { ...q, ...p } : q)));
 
-  const save = async () => {
+  const submit = async () => {
     const clean = sanitizeForm(form);
     if (!clean) return toast("A ficha precisa de pelo menos uma pergunta com nome (e opções, quando for de escolha).", "error");
-    await patchSettings({ anamnesis_form: clean, consent_text: consent.trim() && consent.trim() !== DEFAULT_CONSENT ? consent.trim().slice(0, 8000) : null });
+    if (!await save(toast, patchSettings({ anamnesis_form: clean, consent_text: consent.trim() && consent.trim() !== DEFAULT_CONSENT ? consent.trim().slice(0, 8000) : null }))) return;
     toast("Ficha e termo salvos. As próximas fichas já usam este modelo.");
   };
 
@@ -146,9 +150,9 @@ function AnamnesisTab({ s }: { s: Settings }) {
       ))}
       <Button variant="outline" icon="add" onPress={() => setForm({ sections: [...form.sections, { id: newId(), title: "Nova seção", questions: [] }] })}>Adicionar seção</Button>
       <Card title="Termo de consentimento" eyebrow="Use {clinica} e {nome}"><Field label="Texto do termo" multiline value={consent} onChangeText={setConsent} style={{ minHeight: 220 } as never} /></Card>
-      <Button onPress={save}>Salvar ficha e termo</Button>
+      <Button onPress={submit}>Salvar ficha e termo</Button>
       <ConfirmButton small={false} confirmText="Voltar ao padrão" onConfirm={async () => {
-        await patchSettings({ anamnesis_form: null, consent_text: null });
+        if (!await save(toast, patchSettings({ anamnesis_form: null, consent_text: null }))) return;
         setForm(formOrDefault(null)); setConsent(DEFAULT_CONSENT);
         toast("Ficha e termo voltaram ao modelo original.");
       }}>Voltar ao modelo original</ConfirmButton>

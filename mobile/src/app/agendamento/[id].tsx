@@ -12,7 +12,7 @@ import { Linking, Share, StyleSheet, Text, View } from "react-native";
 import { Avatar, Badge, Button, DateField, Empty, Field, Row, TimeField, Txt, useToast } from "@/components/ui";
 import { Brand, Font } from "@/constants/brand";
 import { SITE_URL, useSettings } from "@/db/hooks";
-import { type Row as DbRow, write } from "@/db/write";
+import { type Row as DbRow, save, write } from "@/db/write";
 import { discountLabel } from "@shared/welcome";
 import { CompleteForm, DrawerScreen, isOpen, Label, PKG_SQL, type Pkg, STATUS_TONE, useAppts, useRows, voucherSplit } from "@/lib/agenda";
 import { supabase } from "@/lib/supabase";
@@ -43,7 +43,7 @@ export default function AppointmentDetail() {
   const link = a.public_token ? `${SITE_URL}/meu-agendamento/${a.public_token}` : "";
   const vars = { nome: firstName(a.client_name ?? ""), servico: a.service_name ?? "Atendimento", data: fmtDate(day, { year: undefined }), hora: time, clinica: settings.clinic_name, link };
   const wa = (key: keyof Settings["templates"]) => () => Linking.openURL(whatsappLink(a.client_phone, fillTemplate(settings.templates[key], vars)) ?? "");
-  const update = (patch: DbRow) => write((w) => w.update("appointments", a.id, patch));
+  const update = (patch: DbRow) => save(toast, write((w) => w.update("appointments", a.id, patch)));
   const { covered, due } = voucherSplit(a);
   const anamnesisMsg = (url: string) => `Olá, ${vars.nome}! Para seu atendimento, preencha sua ficha de anamnese neste link (válido por 2 horas): ${url}`;
   const future = open && Date.parse(a.starts_at) > now;
@@ -51,8 +51,7 @@ export default function AppointmentDetail() {
   const reschedule = async () => {
     const d = newDate ?? day, t = newTime ?? time;
     const startsAt = toTimestamp(d, t);
-    await update({ starts_at: startsAt, ends_at: new Date(Date.parse(startsAt) + Date.parse(a.ends_at) - Date.parse(a.starts_at)).toISOString(), reminder_sent_at: null });
-    toast("Atendimento remarcado.");
+    if (await update({ starts_at: startsAt, ends_at: new Date(Date.parse(startsAt) + Date.parse(a.ends_at) - Date.parse(a.starts_at)).toISOString(), reminder_sent_at: null })) toast("Atendimento remarcado.");
   };
 
   const sendAnamnesis = async () => {
