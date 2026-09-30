@@ -6,11 +6,12 @@ import {
   BarChart3, Boxes, CalendarDays, ExternalLink, Gift, KanbanSquare, LayoutDashboard, LogOut, type LucideIcon,
   Menu, Package, Repeat, Search, Settings, Sparkles, UserCog, Users, Wallet, X,
 } from "lucide-react-native";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { Linking, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Brand, Font } from "@/constants/brand";
 import { SITE_URL, useMe } from "@/db/hooks";
+import { useToast } from "@/components/ui";
 import { useSession } from "@/lib/session";
 
 type Item = { href: string; label: string; short?: string; icon: LucideIcon; badge?: "agenda" | "estoque" | "financeiro" };
@@ -41,13 +42,24 @@ const ITEMS = GROUPS.flatMap((g) => g.items);
 
 /** Contadores dourados do menu: pedidos a confirmar, estoque baixo e contas vencidas (iguais aos do painel). */
 function useBadges() {
-  const { data } = useQuery<{ agenda: number; estoque: number; financeiro: number }>(
+  const { data } = useQuery<{ agenda: number; estoque: number; financeiro: number; conflitos: number }>(
     `select (select count(*) from appointments where status = 'solicitado' and datetime(starts_at) >= datetime('now')) as agenda,
+            (select count(*) from sync_conflicts) as conflitos,
             (select count(*) from products where active = 1 and min_qty > 0 and stock_qty <= min_qty) as estoque,
             (select count(*) from transactions where status = 'pendente' and due_on <= ?) as financeiro`,
     [todaySP()],
   );
-  return data[0] ?? { agenda: 0, estoque: 0, financeiro: 0 };
+  return data[0] ?? { agenda: 0, estoque: 0, financeiro: 0, conflitos: 0 };
+}
+
+/** Avisa na hora quando o servidor recusa uma alteração (antes ela só aparecia em Sincronia). */
+function useConflictAlert(count: number) {
+  const toast = useToast();
+  const last = useRef<number | null>(null);
+  useEffect(() => {
+    if (last.current !== null && count > last.current) toast("Uma alteração não foi aceita pelo servidor. Veja o motivo em Sincronia.", "error");
+    last.current = count;
+  }, [count, toast]);
 }
 
 const initials = (n: string) => n.trim().split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? "").join("");
@@ -59,6 +71,7 @@ export function Shell({ children }: { children: ReactNode }) {
   const { width } = useWindowDimensions();
   const [open, setOpen] = useState(false);
   const path = usePathname();
+  useConflictAlert(useBadges().conflitos);
   const full = path.startsWith("/atendimento"); // atendimento em tela cheia, como no painel
   const phone = width < 768;
   // A navegação (children) fica sempre na mesma posição da árvore: trocar de tela ou girar o tablet não a recria.
@@ -155,7 +168,10 @@ function Full({ onNavigate }: { onNavigate?: () => void }) {
         </View>
         <View style={{ flexDirection: "row", gap: 4 }}>
           <Pressable style={s.footBtn} onPress={() => Linking.openURL(SITE_URL)}><ExternalLink size={14} color={Brand.sidebarText} /><Text style={s.footText}>Site</Text></Pressable>
-          <Pressable style={s.footBtn} onPress={() => nav("/conflitos")}><Repeat size={14} color={Brand.sidebarText} /><Text style={s.footText}>Sincronia</Text></Pressable>
+          <Pressable style={s.footBtn} onPress={() => nav("/conflitos")}>
+            <Repeat size={14} color={badges.conflitos ? Brand.goldSoft : Brand.sidebarText} /><Text style={s.footText}>Sincronia</Text>
+            {badges.conflitos > 0 && <Text style={[s.badge, { backgroundColor: "#E57373", color: Brand.white }]}>{badges.conflitos}</Text>}
+          </Pressable>
           <Pressable style={s.footBtn} onPress={signOut}><LogOut size={14} color={Brand.sidebarText} /><Text style={s.footText}>Sair</Text></Pressable>
         </View>
       </View>
@@ -178,6 +194,7 @@ function Rail() {
         ))}
       </ScrollView>
       <View style={{ borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.1)", paddingTop: 8, alignSelf: "stretch", alignItems: "center" }}>
+        <RailLink icon={Repeat} label="Sincronia" on={isActive(path, "/conflitos")} badge={badges.conflitos} onPress={() => go("/conflitos")} />
         <RailLink icon={LogOut} label="Sair" onPress={signOut} />
       </View>
     </SafeAreaView>

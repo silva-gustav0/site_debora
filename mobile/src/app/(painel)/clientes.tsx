@@ -5,13 +5,13 @@ import type { ClientStage } from "@shared/types";
 import { router, useLocalSearchParams } from "expo-router";
 import { Download, MessageCircle, Search, UserPlus, Users } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
 import { Avatar, Badge, Button, Card, Chip, Empty, ListItem, Row, Screen, Stat, useToast, useWide } from "@/components/ui";
 import { cs, StatGrid, Table, T, useLandscape } from "@/components/client-ui";
 import { Brand, Font } from "@/constants/brand";
 import { norm, STAGE_TONE } from "@/lib/clients";
 import { shareCsv } from "@/lib/export";
-import { type Client, useClients } from "@/lib/reports";
+import { type Client, useClientsState } from "@/lib/reports";
 import { type WaTarget, WhatsAppSheet } from "@/components/whatsapp-sheet";
 
 /** Etiquetas visíveis na lista (a marca da importação fica só no filtro, para não repetir em todas as linhas). */
@@ -36,7 +36,7 @@ export default function Clientes() {
   const wide = useWide();
   const landscape = useLandscape();
   const params = useLocalSearchParams<{ q?: string }>();
-  const stats = useClients();
+  const { clients: stats, loading } = useClientsState();
   const { data: spent } = useQuery<{ client_id: string; total: number }>("select client_id, sum(amount) as total from transactions where kind = 'receita' and status = 'pago' and client_id is not null group by client_id");
   const { data: emails } = useQuery<{ id: string; email: string | null }>("select id, email from clients");
   const all = useMemo<Item[]>(() => {
@@ -101,12 +101,17 @@ export default function Clientes() {
         <Button small icon={UserPlus} onPress={() => router.push("/clientes/nova")}>Nova cliente</Button>
       </>}
     >
-      <StatGrid cols={4}>
+      {loading && (
+        <Row gap={10} style={{ justifyContent: "center", paddingVertical: 8 }}>
+          <ActivityIndicator color={Brand.bronze} /><Text style={cs.small}>Carregando clientes…</Text>
+        </Row>
+      )}
+      {!loading && <StatGrid cols={4}>
         <Stat label="Cadastrados" value={String(all.length)} icon={Users} />
         <Stat label="Já atendidas" value={String(withVisits.length)} hint={all.length ? `${Math.round((withVisits.length / all.length) * 100)}% da base` : undefined} />
         <Stat label="Valor médio por cliente" value={brl(ltv)} hint="total investido (LTV)" />
         <Stat label="Novos no mês" value={String(all.filter((c) => c.created_at.slice(0, 7) === today.slice(0, 7)).length)} />
-      </StatGrid>
+      </StatGrid>}
 
       <View style={{ flexDirection: landscape ? "row" : "column", alignItems: landscape ? "center" : "stretch", gap: 12 }}>
         <View style={{ flex: landscape ? 1 : undefined, maxWidth: 448 }}>
@@ -138,7 +143,7 @@ export default function Clientes() {
             ))}
           </Row>
         </View>
-        {list.length === 0 ? <Empty icon={Users} text={all.length === 0 ? "Nenhum cliente cadastrado ainda." : "Nenhum cliente encontrado."} />
+        {loading ? null : list.length === 0 ? <Empty icon={Users} text={all.length === 0 ? "Nenhum cliente cadastrado ainda." : "Nenhum cliente encontrado."} />
         : wide ? (
           <Table
             minWidth={860}

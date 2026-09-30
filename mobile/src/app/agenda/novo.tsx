@@ -48,8 +48,11 @@ export default function NewAppointment() {
     const now = new Date().toISOString();
     try {
       await write(async (w) => {
+        // Cliente nova com WhatsApp que já tem ficha: usa a ficha existente (o banco recusaria a duplicada).
+        const tel = digits(phone).slice(0, 13) || null;
+        const existing = clientId && clientId !== NEW ? null : tel ? await w.get<{ id: string }>("select id from clients where phone = ? limit 1", [tel]) : null;
         const cid = clientId && clientId !== NEW ? clientId
-          : await w.insert("clients", { name: name.trim().slice(0, 120), phone: digits(phone).slice(0, 13) || null, stage: "em_contato", source: "whatsapp", created_at: now });
+          : existing?.id ?? await w.insert("clients", { name: name.trim().slice(0, 120), phone: tel, stage: "em_contato", source: "whatsapp", created_at: now });
         await w.insert("appointments", {
           client_id: cid, service_id: service.id, starts_at: startsAt, ends_at: new Date(Date.parse(startsAt) + mins * 60_000).toISOString(),
           price: packageId ? 0 : Number.isFinite(value) ? value : service.price, notes: notes.trim().slice(0, 1000) || null, status,

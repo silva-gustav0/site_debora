@@ -8,7 +8,7 @@ import { type ReactNode, useState } from "react";
 import { Linking, View } from "react-native";
 import { Button, Card, ConfirmButton, DateField, Field, Select, Toggle, type Tone, Txt, useToast } from "@/components/ui";
 import { asBool, asList } from "@/db/hooks";
-import { type Row as DbRow, write } from "@/db/write";
+import { queryOne, type Row as DbRow, write } from "@/db/write";
 import { removeClientPhotos } from "@/lib/photo-sync";
 
 export type ClientDb = {
@@ -80,12 +80,17 @@ export function ClientForm({ client: c, onSaved }: { client?: ClientDb; onSaved?
     stage: c?.stage ?? "cliente", source: c?.source ?? "instagram", tags: asList(c?.tags).join(", "), notes: c?.notes ?? "",
     marketing_opt_in: c ? asBool(c.marketing_opt_in) : true,
   });
+  const [dup, setDup] = useState<{ id: string; name: string } | null>(null);
   const save = async () => {
     if (f.name.trim().length < 2) return toast("Informe o nome da cliente.", "error");
     const row = clean({
       ...f, name: f.name.slice(0, 120), phone: digits(f.phone).slice(0, 13), email: f.email.toLowerCase(), cpf: digits(f.cpf),
       tags: f.tags.split(",").map((t) => t.trim().toLowerCase()).filter(Boolean).slice(0, 12),
     });
+    // O WhatsApp é único por ficha: o servidor recusaria e a cliente "sumiria". Avisa antes e oferece abrir a ficha.
+    const other = row.phone ? await findByPhone(String(row.phone), c?.id) : null;
+    setDup(other);
+    if (other) return toast(`Já existe a ficha de ${other.name} com este WhatsApp.`, "error");
     if (c) {
       await write((w) => w.update("clients", c.id, row));
       toast("Dados salvos.");
@@ -109,10 +114,22 @@ export function ClientForm({ client: c, onSaved }: { client?: ClientDb; onSaved?
       <Cell><Field label="Etiquetas" value={f.tags} onChangeText={set("tags")} placeholder="pele sensível, noivas" hint="Separe por vírgula." autoCapitalize="none" /></Cell>
       <Cell full><Field label="Observações" value={f.notes} onChangeText={set("notes")} multiline placeholder="Preferências, como gosta de ser atendida…" /></Cell>
       <Cell full><Toggle label="Aceita receber lembretes e promoções pelo WhatsApp (LGPD)" value={f.marketing_opt_in} onChange={set("marketing_opt_in")} /></Cell>
+      {dup && (
+        <Cell full>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 10, borderRadius: 12, padding: 12, backgroundColor: "#FDECEC", borderWidth: 1, borderColor: "#F2C1C1" }}>
+            <Txt.body style={{ flex: 1, color: "#9B2C2C" }}>{`Este WhatsApp já está na ficha de ${dup.name}. Use outro número ou abra a ficha existente.`}</Txt.body>
+            <Button small variant="outline" onPress={() => router.push(`/clientes/${dup.id}`)}>Abrir ficha</Button>
+          </View>
+        </Cell>
+      )}
       <Cell full><Button icon={Check} style={{ alignSelf: "flex-start" }} onPress={save}>{c ? "Salvar dados" : "Cadastrar cliente"}</Button></Cell>
     </View>
   );
 }
+
+/** Outra ficha com o mesmo WhatsApp (o banco não aceita duas). */
+export const findByPhone = (phone: string, exceptId?: string) =>
+  queryOne<{ id: string; name: string }>("select id, name from clients where phone = ? and id <> ? limit 1", [phone, exceptId ?? ""]);
 
 /** Zona de risco: exclui a cliente e, se on-line, as fotos do armazenamento (LGPD). */
 export function DeleteClientCard({ id }: { id: string }) {

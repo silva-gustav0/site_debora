@@ -24,9 +24,14 @@ type ClientRow = ClientStats & { id: string; name: string; phone: string | null;
 
 /** Clientes com estatísticas e situação de retorno (mesmo cálculo do painel web). */
 export function useClients() {
-  const { data } = useQuery<ClientRow>(CLIENTS_SQL);
+  return useClientsState().clients;
+}
+
+/** Igual a useClients, dizendo também se a primeira leitura ainda está em andamento (para não mostrar zeros). */
+export function useClientsState() {
+  const { data, isLoading } = useQuery<ClientRow>(CLIENTS_SQL);
   const services = useServices();
-  return useMemo(() => {
+  const clients = useMemo(() => {
     const today = todaySP();
     const returnDays = new Map(services.map((s) => [s.id, s.return_days]));
     return data.map((r) => ({
@@ -34,6 +39,7 @@ export function useClients() {
       recurrence: computeRecurrence(r, r.last_service_id ? returnDays.get(r.last_service_id) : null, today),
     }));
   }, [data, services]);
+  return { clients, loading: isLoading };
 }
 export type Client = ReturnType<typeof useClients>[number];
 
