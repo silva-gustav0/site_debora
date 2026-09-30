@@ -3,7 +3,7 @@ import { brl, digits, fmtDate, formatPhone, SOURCE_LABEL, STAGE_LABEL, todaySP }
 import { RECURRENCE_META } from "@shared/recurrence";
 import type { ClientStage } from "@shared/types";
 import { router, useLocalSearchParams } from "expo-router";
-import { Download, Search, UserPlus, Users } from "lucide-react-native";
+import { Download, MessageCircle, Search, UserPlus, Users } from "lucide-react-native";
 import { useMemo, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { Avatar, Badge, Button, Card, Chip, Empty, ListItem, Row, Screen, Stat, useToast, useWide } from "@/components/ui";
@@ -12,6 +12,11 @@ import { Brand, Font } from "@/constants/brand";
 import { norm, STAGE_TONE } from "@/lib/clients";
 import { shareCsv } from "@/lib/export";
 import { type Client, useClients } from "@/lib/reports";
+import { type WaTarget, WhatsAppSheet } from "@/components/whatsapp-sheet";
+
+/** Etiquetas visíveis na lista (a marca da importação fica só no filtro, para não repetir em todas as linhas). */
+const shownTags = (c: { tags: string[] }) => c.tags.filter((t) => !t.startsWith("importado-"));
+const PAGE = 60; // desenha a lista aos poucos (centenas de fichas deixam o tablet lento)
 
 const SORTS = { nome: "Nome", recentes: "Cadastro recente", visitas: "Mais visitas", valor: "Maior valor", ultima: "Última visita" } as const;
 type Sort = keyof typeof SORTS;
@@ -46,6 +51,8 @@ export default function Clientes() {
   const [tag, setTag] = useState<string | null>(null);
   const [birthdays, setBirthdays] = useState(false);
   const [sort, setSort] = useState<Sort>("nome");
+  const [wa, setWa] = useState<WaTarget | null>(null);
+  const [shown, setShown] = useState(PAGE);
   const today = todaySP();
   const month = today.slice(5, 7);
   const allTags = useMemo(() => [...new Set(all.flatMap((c) => c.tags))].sort(), [all]);
@@ -72,11 +79,18 @@ export default function Clientes() {
     <Row gap={12}>
       <Avatar name={c.name} size={34} />
       <View style={{ flex: 1, gap: 3 }}>
-        <T style={cs.bold}>{c.name}</T>
-        {c.tags.length > 0 && <Row wrap gap={4}>{c.tags.slice(0, 3).map((t) => <Badge key={t} tone="bronze">{t}</Badge>)}</Row>}
+        <T style={cs.bold} lines={1}>{c.name}</T>
+        {shownTags(c).length > 0 && <Row wrap gap={4}>{shownTags(c).slice(0, 3).map((t) => <Badge key={t} tone="bronze">{t}</Badge>)}</Row>}
       </View>
     </Row>
   );
+  // Ícone do WhatsApp: abre as sugestões de mensagem com o primeiro nome (sem abrir a ficha).
+  const waBtn = (c: Item) => c.phone ? (
+    <Pressable onPress={() => setWa(c)} hitSlop={8} accessibilityLabel={`WhatsApp de ${c.name}`} style={({ pressed }) => [{ width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center", backgroundColor: "#E9F8EF" }, pressed && { opacity: 0.6 }]}>
+      <MessageCircle size={17} color="#1F8F4E" />
+    </Pressable>
+  ) : null;
+  const page = list.slice(0, shown);
   const rec = (c: Item) => <Badge tone={RECURRENCE_META[c.recurrence.status].tone}>{RECURRENCE_META[c.recurrence.status].label}</Badge>;
 
   return (
@@ -129,21 +143,27 @@ export default function Clientes() {
           <Table
             minWidth={860}
             columns={[{ label: "Cliente", flex: 2.2 }, { label: "WhatsApp", flex: 1.5 }, { label: "Etapa", flex: 1.1 }, { label: "Visitas", flex: 0.9, right: true },
-              { label: "Última visita", flex: 1.3 }, { label: "Investido", flex: 1.1, right: true }, { label: "Retorno", flex: 1.5 }]}
-            rows={list.map((c) => ({
+              { label: "Última visita", flex: 1.3 }, { label: "Investido", flex: 1.1, right: true }, { label: "Retorno", flex: 1.5 }, { label: "", flex: 0.6, right: true }]}
+            rows={page.map((c) => ({
               key: c.id, onPress: () => open(c.id),
-              cells: [nameCell(c), formatPhone(c.phone) || "—", stageBadge(c.stage), String(c.visits ?? 0), fmtDate(c.last_visit), brl(c.spent), rec(c)],
+              cells: [nameCell(c), formatPhone(c.phone) || "—", stageBadge(c.stage), String(c.visits ?? 0), fmtDate(c.last_visit), brl(c.spent), rec(c), waBtn(c)],
             }))}
           />
         ) : (
           <View style={{ padding: 10, gap: 8 }}>
-            {list.map((c) => (
-              <ListItem key={c.id} title={c.name} subtitle={[formatPhone(c.phone), c.tags.slice(0, 3).join(", ")].filter(Boolean).join(" · ")}
-                left={<Avatar name={c.name} />} right={stageBadge(c.stage)} onPress={() => open(c.id)} />
+            {page.map((c) => (
+              <ListItem key={c.id} title={c.name} subtitle={[formatPhone(c.phone), shownTags(c).slice(0, 3).join(", ")].filter(Boolean).join(" · ")}
+                left={<Avatar name={c.name} />} right={<Row gap={8}>{stageBadge(c.stage)}{waBtn(c)}</Row>} onPress={() => open(c.id)} />
             ))}
           </View>
         )}
+        {list.length > shown && (
+          <View style={{ padding: 12, alignItems: "center" }}>
+            <Button small variant="outline" onPress={() => setShown(shown + PAGE)}>{`Mostrar mais (${list.length - shown} restantes)`}</Button>
+          </View>
+        )}
       </Card>
+      <WhatsAppSheet client={wa} onClose={() => setWa(null)} />
     </Screen>
   );
 }

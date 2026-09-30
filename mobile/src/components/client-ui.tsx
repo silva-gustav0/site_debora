@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react-native";
-import { Children, type ReactNode } from "react";
+import { Children, type ReactNode, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View, type ViewStyle } from "react-native";
 import { Icon } from "@/components/ui";
 import { Brand, Font } from "@/constants/brand";
@@ -78,24 +78,32 @@ export type TableRow = { key: string; cells: ReactNode[]; onPress?: () => void }
 
 /** Tabela do painel (.p-table): cabeçalho em versalete e linhas finas; rola de lado se não couber. */
 export function Table({ columns, rows, minWidth = 0 }: { columns: Column[]; rows: TableRow[]; minWidth?: number }) {
+  // Larguras fixas em pixels (proporcionais ao `flex` de cada coluna), iguais em todas as linhas e no cabeçalho:
+  // com flex, cada linha se ajustava ao próprio conteúdo e as colunas ficavam desalinhadas.
+  const [avail, setAvail] = useState(0);
+  const total = columns.reduce((n, c) => n + (c.flex ?? 1), 0);
+  const tableW = Math.max(avail, minWidth);
+  const widthOf = (c: Column) => (tableW ? Math.floor((tableW * (c.flex ?? 1)) / total) : undefined);
   const cell = (c: Column, i: number, node: ReactNode, head?: boolean) => (
-    <View key={i} style={[s.cell, { flex: c.flex ?? 1 }, c.right && { alignItems: "flex-end" }]}>
+    <View key={i} style={[s.cell, { width: widthOf(c), overflow: "hidden" }, c.right ? { alignItems: "flex-end" } : { alignItems: "flex-start" }]}>
       {typeof node === "string" || typeof node === "number"
-        ? <Text style={[head ? s.th : s.td, c.right && { textAlign: "right" }]}>{head ? String(node).toUpperCase() : node}</Text>
+        ? <Text numberOfLines={head ? 1 : 2} style={[head ? s.th : s.td, c.right && { textAlign: "right" }]}>{head ? String(node).toUpperCase() : node}</Text>
         : node}
     </View>
   );
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
-      <View style={{ flex: 1, minWidth }}>
-        <View style={[s.tr, s.thead]}>{columns.map((c, i) => cell(c, i, c.label, true))}</View>
-        {rows.map((r) => (
-          <Pressable key={r.key} onPress={r.onPress} disabled={!r.onPress} style={({ pressed }) => [s.tr, pressed && { backgroundColor: "#FEFAF6" }]}>
-            {columns.map((c, i) => cell(c, i, r.cells[i]))}
-          </Pressable>
-        ))}
-      </View>
-    </ScrollView>
+    <View onLayout={(e) => setAvail(Math.floor(e.nativeEvent.layout.width))}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <View style={{ width: tableW || undefined }}>
+          <View style={[s.tr, s.thead]}>{columns.map((c, i) => cell(c, i, c.label, true))}</View>
+          {rows.map((r) => (
+            <Pressable key={r.key} onPress={r.onPress} disabled={!r.onPress} style={({ pressed }) => [s.tr, pressed && { backgroundColor: "#FEFAF6" }]}>
+              {columns.map((c, i) => cell(c, i, r.cells[i]))}
+            </Pressable>
+          ))}
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 

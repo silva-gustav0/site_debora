@@ -1,11 +1,12 @@
 import { useQuery } from "@powersync/react-native";
+import { niceFirstName } from "@shared/whatsapp-messages";
 import { fillTemplate, firstName, fmtDate, INTERACTION_LABEL, STAGE_LABEL, todaySP, whatsappLink } from "@shared/format";
 import type { ClientStage, InteractionKind, TemplateKey } from "@shared/types";
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import { Linking, Text, View } from "react-native";
 import { Cake, ClipboardCheck, TrendingUp, UserPlus } from "lucide-react-native";
-import { Avatar, Badge, Button, Card, Chip, ConfirmButton, Empty, Field, ListItem, Row, Screen, Select, Stat, Tabs, Txt, useToast, useWide } from "@/components/ui";
+import { Avatar, Badge, Button, Card, Chip, ConfirmButton, Empty, Field, ListItem, Row, Screen, Select, Stat, Tabs, Txt, useWide } from "@/components/ui";
 import { Brand, Font } from "@/constants/brand";
 import { type Client, logContact, TEMPLATE_INFO, useClients } from "@/lib/reports";
 import { useSettings } from "@/db/hooks";
@@ -40,7 +41,6 @@ type Contact = { client_id: string; last: string; recent: number };
 
 /** CRM: funil por estágio, tarefas de acompanhamento e campanhas segmentadas pelo WhatsApp. */
 export default function Crm() {
-  const toast = useToast();
   const wide = useWide();
   const settings = useSettings();
   const clients = useClients();
@@ -51,6 +51,7 @@ export default function Crm() {
   const [tag, setTag] = useState("");
   const [modelo, setModelo] = useState<TemplateKey | "">("");
   const [custom, setCustom] = useState("");
+  const [sent, setSent] = useState<Set<string>>(() => new Set()); // enviadas nesta sessão (envio em sequência)
   const { data: tasks } = useQuery<Task>(
     `select i.id, i.client_id, i.kind, i.content, i.due_on, c.name, c.phone from interactions i join clients c on c.id = i.client_id
      where i.done_at is null and i.due_on is not null order by i.due_on limit 100`,
@@ -72,11 +73,15 @@ export default function Crm() {
   const overdue = tasks.filter((t) => t.due_on < today).length;
 
   const send = (c: Client, text: string) => Linking.openURL(whatsappLink(c.phone, text) ?? "");
-  const sendTo = (c: Client) => send(c, fillTemplate(message, { nome: firstName(c.name), clinica: settings.clinic_name, servico: "tratamento" }));
-  const register = async (c: Client) => {
-    await logContact(c.id, `Campanha (${label}): ${fillTemplate(message, { nome: firstName(c.name), clinica: settings.clinic_name, servico: "tratamento" }).slice(0, 300)}`);
-    toast("Contato registrado.");
+  const textFor = (c: Client) => fillTemplate(message, { nome: niceFirstName(c.name), clinica: settings.clinic_name, servico: "tratamento" });
+  // Abre o WhatsApp com a mensagem pronta e já registra no histórico (sem o passo "Registrar").
+  const sendTo = async (c: Client) => {
+    await send(c, textFor(c));
+    setSent((s) => new Set(s).add(c.id));
+    await logContact(c.id, `Campanha (${label}): ${textFor(c).slice(0, 300)}`);
   };
+  const next = audience.find((c) => !sent.has(c.id));
+  const done = audience.filter((c) => sent.has(c.id)).length;
 
   return (
     <Screen eyebrow="Relacionamento" title="CRM & Campanhas" subtitle="Funil de clientes, tarefas de acompanhamento e mensagens em massa pelo WhatsApp">
@@ -136,11 +141,16 @@ export default function Crm() {
             <Field label="Ou escreva uma mensagem própria" hint="Use {nome} para personalizar." multiline value={custom} onChangeText={setCustom} />
           </Card>
           <Card title={tag ? `Etiqueta: ${tag}` : SEGMENTS[segment].label} eyebrow={`3. Envie · ${audience.length} clientes · ${audience.filter((c) => contact.get(c.id)?.recent).length} contatadas nos últimos 7 dias`}>
-            <Txt.muted>Toque em “Enviar” para abrir o WhatsApp com a mensagem pronta e depois em “Registrar” para marcar no histórico. Só aparecem clientes que aceitam mensagens (LGPD).</Txt.muted>
+            <Txt.muted>O WhatsApp não permite envio automático para várias pessoas de um número comum, então o app faz em sequência: toque no botão, envie no WhatsApp e volte; a próxima já fica pronta. Cada envio é registrado no histórico. Só aparecem clientes que aceitam mensagens (LGPD).</Txt.muted>
+            {audience.length > 0 && (next ? (
+              <Button variant="gold" icon="logo-whatsapp" onPress={() => sendTo(next)}>
+                {`Enviar para ${niceFirstName(next.name)} (${done + 1} de ${audience.length})`}
+              </Button>
+            ) : <Badge tone="green">Todas as {audience.length} mensagens deste público foram abertas.</Badge>)}
             {audience.length === 0 ? <Empty icon="paper-plane-outline" text="Ninguém neste segmento." /> : audience.map((c) => (
               <ListItem key={c.id} left={<Avatar name={c.name} size={30} />} title={c.name}
                 subtitle={`${segment === "aniversariantes" && !tag && c.birth_date ? `dia ${c.birth_date.slice(8)}` : `${c.visits} visitas`}${contact.get(c.id)?.recent ? " · contatada nesta semana" : ""}`}
-                right={<Row><Button small icon="paper-plane" onPress={() => sendTo(c)}>Enviar</Button><Button small variant="ghost" onPress={() => register(c)}>Registrar</Button></Row>} />
+                right={sent.has(c.id) ? <Badge tone="green">Enviada</Badge> : <Button small variant="outline" icon="paper-plane" onPress={() => sendTo(c)}>Enviar</Button>} />
             ))}
           </Card>
         </>

@@ -129,8 +129,13 @@ function Full({ onNavigate }: { onNavigate?: () => void }) {
             {g.items.map((it) => {
               const on = isActive(path, it.href), n = it.badge ? badges[it.badge] : 0;
               return (
-                <Pressable key={it.href} onPress={() => nav(it.href)} style={({ pressed }) => [s.link, on && s.linkOn, pressed && { opacity: 0.8 }]}>
-                  {on && <LinearGradient colors={["rgba(232,200,130,0.16)", "rgba(232,200,130,0.02)"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={StyleSheet.absoluteFill} />}
+                // Estrutura fixa (fundo e borda sempre presentes, só a cor muda): no Android, pôr/tirar a borda ou o
+                // fundo de um item com cantos arredondados deixava o item invisível depois de selecionado.
+                <Pressable key={it.href} onPress={() => nav(it.href)} style={({ pressed }) => [s.link, { borderLeftColor: on ? Brand.goldSoft : "transparent" }, pressed && { opacity: 0.8 }]}>
+                  <LinearGradient
+                    colors={on ? ["rgba(232,200,130,0.16)", "rgba(232,200,130,0.02)"] : ["transparent", "transparent"]}
+                    start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={[StyleSheet.absoluteFill, { borderRadius: 8 }]} pointerEvents="none"
+                  />
                   <it.icon size={16} strokeWidth={1.8} color={on ? Brand.white : Brand.sidebarText} />
                   <Text style={[s.linkText, on && { color: Brand.white }]}>{it.label}</Text>
                   {n > 0 && <Text style={s.badge}>{n}</Text>}
@@ -182,7 +187,7 @@ function Rail() {
 /** Um ícone do trilho, destacado quando é a tela atual. */
 function RailLink({ icon: Icon, label, on, badge = 0, onPress }: { icon: LucideIcon; label: string; on?: boolean; badge?: number; onPress: () => void }) {
   return (
-    <Pressable onPress={onPress} style={[s.rail, on && s.railOn]}>
+    <Pressable onPress={onPress} style={[s.rail, on ? s.railOn : s.railOff]}>
       <Icon size={19} strokeWidth={1.8} color={on ? Brand.white : Brand.sidebarText} />
       <Text style={[s.railText, on && { color: Brand.white }]} numberOfLines={1}>{label}</Text>
       {badge > 0 && <Text style={[s.badge, { position: "absolute", top: 4, right: 8, fontSize: 9.5 }]}>{badge}</Text>}
@@ -203,8 +208,7 @@ const s = StyleSheet.create({
   search: { flexDirection: "row", alignItems: "center", gap: 8, marginHorizontal: 4, marginBottom: 18, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.06)", borderWidth: 1, borderColor: "rgba(255,255,255,0.1)", paddingHorizontal: 12 },
   searchInput: { flex: 1, color: Brand.white, fontFamily: Font.body, fontSize: 14, paddingVertical: 8 },
   group: { fontFamily: Font.bold, fontSize: 9.5, letterSpacing: 2.3, color: "rgba(232,200,130,0.6)", paddingHorizontal: 12, marginBottom: 6 },
-  link: { flexDirection: "row", alignItems: "center", gap: 12, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 9, overflow: "hidden" },
-  linkOn: { borderLeftWidth: 2, borderLeftColor: Brand.goldSoft },
+  link: { flexDirection: "row", alignItems: "center", gap: 12, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 9, borderLeftWidth: 2 },
   linkText: { flex: 1, fontFamily: Font.body, fontSize: 13.5, color: Brand.sidebarText },
   badge: { backgroundColor: Brand.goldSoft, color: "#29201A", fontFamily: Font.bold, fontSize: 10.5, borderRadius: 999, paddingHorizontal: 6, minWidth: 20, textAlign: "center", overflow: "hidden" },
   footer: { borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.1)", paddingTop: 14, marginTop: 14, gap: 10 },
@@ -215,7 +219,8 @@ const s = StyleSheet.create({
   meRole: { color: "rgba(255,255,255,0.45)", fontFamily: Font.body, fontSize: 11 },
   footBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, borderRadius: 8, paddingVertical: 8 },
   footText: { color: Brand.sidebarText, fontFamily: Font.body, fontSize: 12.5 },
-  rail: { width: 64, alignItems: "center", gap: 3, borderRadius: 12, paddingVertical: 8 },
-  railOn: { backgroundColor: "rgba(232,200,130,0.16)", borderWidth: 1, borderColor: "rgba(232,200,130,0.35)" },
+  rail: { width: 64, alignItems: "center", gap: 3, borderRadius: 12, paddingVertical: 8, borderWidth: 1 },
+  railOn: { backgroundColor: "rgba(232,200,130,0.16)", borderColor: "rgba(232,200,130,0.35)" },
+  railOff: { backgroundColor: "transparent", borderColor: "transparent" },
   railText: { fontFamily: Font.body, fontSize: 10, color: Brand.sidebarText },
 });
