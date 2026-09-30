@@ -47,7 +47,7 @@ Todo push no `master` publica o site (GitHub Actions) e, se mexer em `mobile/**`
   `appointments.voucher_id`, `transactions.appointment_id`, `transactions.client_package_id`, `transactions(status, due_on)`);
   erros de gravação sem aviso (helper `save()` com toast); configurações regravam todas as colunas (perde edição de outro aparelho);
   `faltou` ainda bloqueia horário livre na agenda do app; CRM usa mês em UTC.
-- **App — funções:** aviso de "APK novo disponível" dentro do app (hoje só o painel antigo avisa); "Vender pacote" na tela
+- **App — funções:** "Vender pacote" na tela
   Pacotes; cartão "Chamar de volta" no Início; cenas animadas completas no atendimento.
 - **Refazer auditorias** de banco/sincronização e site/infra/GitHub Actions.
 - **Supabase → Authentication:** cadastro público desativado e senha mínima 8 (feito em 30/09). Falta: proteção contra

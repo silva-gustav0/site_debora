@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { LoadingScreen, LoginScreen } from "@/components/auth-screens";
 import { Shell } from "@/components/sidebar";
 import { ToastProvider } from "@/components/ui";
+import { UpdateBanner } from "@/components/update-banner";
 import { Brand } from "@/constants/brand";
 import { openDatabase } from "@/db/database";
 import { SessionProvider, useSession } from "@/lib/session";
@@ -53,6 +54,7 @@ export default function RootLayout() {
   return (
     <SessionProvider>
       <Gate />
+      <UpdateBanner />
     </SessionProvider>
   );
 }
