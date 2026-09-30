@@ -31,8 +31,8 @@ Todo push no `master` publica o site (GitHub Actions) e, se mexer em `mobile/**`
    põem `discount_pct` em um único atendimento da cliente (site, painel ou app); cancelado/falta passa para o próximo.
    Painel/tablet mostram "Cliente nova · 5%" e já sugerem o valor com desconto. Senha esquecida: ficha no painel →
    "Liberar novo cadastro". **Para ligar SMS no futuro:** conta num provedor de SMS aceito pelo Supabase (ex.: Twilio) e
-   trocar o cadastro/entrada para código por SMS. Com as contas criadas pelo servidor, já dá para **desativar
-   "Allow new users to sign up"** no Supabase; a senha mínima do Supabase deve ficar em **8** (é o mínimo das clientes).
+   trocar o cadastro/entrada para código por SMS. Feito em 30/09: "Allow new users to sign up" **desativado** no Supabase
+   (conferido: `/auth/v1/signup` responde `signup_disabled`) e senha mínima do Supabase em **8** (mínimo das clientes).
 5. **Vouchers online (InfinitePay)** continuam aguardando a InfiniteTag da clínica (seção própria abaixo).
 
 ## Pendências (em ordem)
@@ -50,8 +50,10 @@ Todo push no `master` publica o site (GitHub Actions) e, se mexer em `mobile/**`
 - **App — funções:** aviso de "APK novo disponível" dentro do app (hoje só o painel antigo avisa); "Vender pacote" na tela
   Pacotes; cartão "Chamar de volta" no Início; cenas animadas completas no atendimento.
 - **Refazer auditorias** de banco/sincronização e site/infra/GitHub Actions.
-- **Supabase → Authentication:** desativar "Allow new users to sign up" (ainda **ativo**); proteção contra senhas vazadas;
-  senha mínima 8 (mínimo das contas de clientes; a equipe já exige 10 no painel). Opcional: MFA e CAPTCHA.
+- **Supabase → Authentication:** cadastro público desativado e senha mínima 8 (feito em 30/09). Falta: proteção contra
+  senhas vazadas (só no plano pago). Opcional: MFA e CAPTCHA.
+- **Supabase — cota do plano gratuito:** o painel mostra "Grace period is over"; se passar do limite, site, painel e app
+  param. Conferir em Billing o que está no limite e decidir entre reduzir uso ou plano Pro.
 - **Cloudflare:** ativar DNSSEC (no Cloudflare e depois no Registro.br).
 - **Tokens** que passaram pela conversa de 28–29/09 (Supabase `sbp_`, Vercel `vcp_`, PowerSync `jpt_`, Cloudflare `cfut_`,
   Expo): revogar os que não estão em uso. Em uso como secrets do GitHub: `CLOUDFLARE_API_TOKEN` e `EXPO_TOKEN` (se revogar,
@@ -123,8 +125,8 @@ Feita com 4 agentes (site público, painel, banco, configuração). Correções 
 - Android: `allowBackup="false"` (vale no próximo build do APK).
 
 **Pendências da vistoria (fazer no painel do Supabase → Authentication):**
-- Desativar "Allow new users to sign up" (está **ativo** em produção; o `config.toml` só vale localmente).
-- Ativar proteção contra senhas vazadas e senha mínima de 10 caracteres.
+- ~~Desativar "Allow new users to sign up"~~ e senha mínima (feito em 30/09; mínimo 8 por causa das clientes).
+- Ativar proteção contra senhas vazadas.
 - Opcional: MFA (TOTP) para a equipe, CAPTCHA (Turnstile) nos formulários públicos.
 - Guardar backup offline do keystore do Android (`equipe.keystore`).
 
