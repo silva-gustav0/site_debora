@@ -1,8 +1,15 @@
 import { getActivePromotions } from "@/lib/site";
 import PromoNotice from "./PromoNotice";
+import SiteWhatsApp, { clinicWhatsapp } from "./SiteWhatsApp";
 
-/** Busca a promoção marcada como aviso fixo (se estiver no ar) e mostra o cartão flutuante. */
+/** Itens flutuantes das páginas públicas: aviso da promoção (se houver) e balão do WhatsApp. */
 export default async function PromoNoticeSlot() {
-  const promo = (await getActivePromotions()).find((p) => p.show_as_notice);
-  return promo ? <PromoNotice promo={promo} /> : null;
+  const [promos, phone] = await Promise.all([getActivePromotions(), clinicWhatsapp()]);
+  const promo = promos.find((p) => p.show_as_notice);
+  return (
+    <>
+      {promo && <PromoNotice promo={promo} phone={phone} />}
+      <SiteWhatsApp phone={phone} />
+    </>
+  );
 }

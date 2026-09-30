@@ -13,6 +13,7 @@ import PromoNoticeSlot from "@/components/PromoNoticeSlot";
 import CustomSection from "@/components/CustomSection";
 import { getPublicConfig } from "@/app/actions/public";
 import { DEFAULT_HOURS, hoursSummary } from "@/lib/hours";
+import { DEFAULT_SETTINGS } from "@/lib/settings-core";
 import { getActivePromotions, getBlogPosts, getHomeServices, getSiteContent } from "@/lib/site";
 
 // Montada a cada acesso: edições do painel aparecem na hora (sem cache de páginas no Cloudflare).
@@ -39,9 +40,9 @@ export default async function Home() {
 
   const { hidden, custom } = content.layout;
   const blocks = {
-    hero: <Hero content={content.hero} brandName={content.brand.full_name} promo={promotions.find((p) => p.show_in_hero) ?? null} />,
+    hero: <Hero content={content.hero} brandName={content.brand.full_name} promo={promotions.find((p) => p.show_in_hero) ?? null} phone={config?.whatsapp ?? DEFAULT_SETTINGS.whatsapp} />,
     about: <About content={content.about} />,
-    services: <Services content={content.services} services={services} promotions={promotions} />,
+    services: <Services content={content.services} services={services} promotions={promotions} phone={config?.whatsapp ?? DEFAULT_SETTINGS.whatsapp} />,
     schedule: <Schedule config={config} content={content.schedule} />,
     blog: posts.length > 0 && <BlogSection content={content.blog} posts={posts} />,
     contact: <Contact content={content.contact} hours={hours} />,

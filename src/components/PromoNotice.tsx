@@ -1,19 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
 import { ArrowRight, Gift, X } from "lucide-react";
 import { brl, diffDays, fmtDate, todaySP } from "@/lib/format";
 import type { Promotion } from "@/lib/site-content";
+import { siteWhatsapp, track } from "@/lib/site-tracking";
 
 const storageKey = (id: string) => `aviso-promocao-fechado:${id}`;
 
 /** Cartão flutuante da promoção marcada como aviso fixo; a visitante pode fechar e ele não volta para essa promoção. */
-export default function PromoNotice({ promo }: { promo: Promotion }) {
+export default function PromoNotice({ promo, phone }: { promo: Promotion; phone: string }) {
   const [visible, setVisible] = useState(false);
   const [closed, setClosed] = useState(false);
   const [atBooking, setAtBooking] = useState(false);
-  const isHome = usePathname() === "/";
 
   useEffect(() => {
     let dismissed = false;
@@ -43,16 +42,16 @@ export default function PromoNotice({ promo }: { promo: Promotion }) {
     : daysLeft === 0 ? "Termina hoje"
     : daysLeft <= 7 ? `Faltam ${daysLeft} ${daysLeft === 1 ? "dia" : "dias"}`
     : `Válido até ${fmtDate(promo.ends_on, { year: undefined })}`;
-  const href = isHome ? "#agendamento" : `/${promo.service_id ? `?servico=${encodeURIComponent(promo.service_id)}` : ""}#agendamento`;
-  const onCta = () => {
-    if (isHome && promo.service_id) window.dispatchEvent(new CustomEvent("select-service", { detail: promo.service_id }));
-  };
+  // O botão leva ao WhatsApp da Débora já dizendo que veio do site por esta promoção.
+  const href = siteWhatsapp(phone, { kind: "promocao", id: promo.id, name: promo.title });
+  const onCta = () => track("whatsapp", `aviso:promocao:${promo.id}`);
 
   return (
     <aside
       aria-label="Oferta especial"
+      data-track="promocao" data-track-id={promo.id} data-track-name={promo.title}
       aria-hidden={atBooking || undefined}
-      className={`promo-notice fixed z-40 bottom-3 left-3 right-3 sm:left-auto sm:right-6 sm:bottom-6 sm:w-[370px] rounded-2xl overflow-hidden transition-all duration-500 ${atBooking ? "opacity-0 translate-y-6 pointer-events-none" : ""}`}
+      className={`promo-notice fixed z-40 bottom-3 left-3 right-[84px] sm:right-auto sm:left-6 sm:bottom-6 sm:w-[370px] rounded-2xl overflow-hidden transition-all duration-500 ${atBooking ? "opacity-0 translate-y-6 pointer-events-none" : ""}`}
       style={{
         background: "linear-gradient(135deg, #2B221B 0%, #3B2E24 100%)",
         border: "1px solid rgba(201,151,58,0.4)",
@@ -97,6 +96,8 @@ export default function PromoNotice({ promo }: { promo: Promotion }) {
           </div>
           <a
             href={href}
+            target="_blank"
+            rel="noopener noreferrer"
             onClick={onCta}
             className="mt-3 inline-flex items-center gap-1.5 text-[11px] tracking-[0.18em] uppercase font-bold rounded-full px-4 py-2.5 transition-transform active:scale-95"
             style={{ fontFamily: "var(--font-lato), sans-serif", color: "#2B221B", background: "linear-gradient(135deg,#E8C882,#C9973A)" }}

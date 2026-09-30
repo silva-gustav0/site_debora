@@ -2,11 +2,12 @@ import Image from "next/image";
 import AnimateIn from "./AnimateIn";
 import { ArrowRight, Star } from "lucide-react";
 import { brl } from "@/lib/format";
+import WhatsAppLink from "./WhatsAppLink";
 import type { Promotion, SiteContent } from "@/lib/site-content";
 
 export default function Hero({
-  content: c, brandName, promo,
-}: { content: SiteContent["hero"]; brandName: string; promo: Promotion | null }) {
+  content: c, brandName, promo, phone,
+}: { content: SiteContent["hero"]; brandName: string; promo: Promotion | null; phone: string }) {
   const stats = c.stats.filter((s) => s.value.trim());
   return (
     <section
@@ -179,8 +180,8 @@ export default function Hero({
               </div>}
 
               {/* Promo card top-left */}
-              {promo && <a
-                href="#servicos"
+              {promo && <WhatsAppLink
+                phone={phone} interest={{ kind: "promocao", id: promo.id, name: promo.title }} from="destaque"
                 className="absolute -left-6 top-12 bg-white rounded-xl shadow-[0_8px_40px_rgba(201,151,58,0.18)] p-4 w-44 hover:-translate-y-0.5 transition-transform"
                 style={{ border: "1px solid #EEDFBF" }}
               >
@@ -202,7 +203,7 @@ export default function Hero({
                 >
                   {brl(promo.price)}
                 </div>}
-              </a>}
+              </WhatsAppLink>}
 
               {/* Next appointment card bottom-right */}
               {c.card_title && <div

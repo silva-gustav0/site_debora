@@ -14,7 +14,14 @@ Todo push no `master` publica o site (GitHub Actions) e, se mexer em `mobile/**`
    se a "rolagem infinita sem conteúdo" sumiu junto (hipótese: era a tela invisível).
 2. **Auditoria de 29/09** pela metade: as de *banco/sincronização* e *site/infra/GitHub Actions* foram interrompidas
    pelo limite de uso e precisam ser refeitas. As de *app* e *qualidade* terminaram; achados na lista de pendências abaixo.
-3. **Vouchers online (InfinitePay)** continuam aguardando a InfiniteTag da clínica (seção própria abaixo).
+3. **Site (29/09 noite):** balão fixo do WhatsApp da Débora (número de Configurações, hoje 5511984271714) em todas as
+   páginas públicas, com mensagem "Vim pelo site…" conforme o serviço/promoção que a pessoa olhou e uma sugestão por sessão;
+   botões das promoções (banner, destaque do topo e aviso flutuante) levam ao WhatsApp citando a promoção.
+   Navegação anônima em `site_events` (sessão da aba, sem IP/nome; `/api/eventos`, `src/lib/site-tracking.ts`) e quadro
+   "Site · o que as visitantes olham" em Relatórios. Links do Instagram com `?utm_source=instagram` aparecem na origem.
+   **655 clientes importados** da planilha antiga (tag `importado-2026-09`; 29 com telefone repetido têm observação
+   para conferir). Planilhas `*.csv` ficam fora do Git.
+4. **Vouchers online (InfinitePay)** continuam aguardando a InfiniteTag da clínica (seção própria abaixo).
 
 ## Pendências (em ordem)
 

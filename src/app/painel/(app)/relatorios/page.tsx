@@ -8,6 +8,7 @@ import { toMinutes } from "@/lib/hours";
 import { BarList } from "@/components/painel/charts";
 import { Avatar, Card, Chips, EmptyState, PageHeader, StatTile } from "@/components/painel/ui";
 import type { ClientSource } from "@/lib/types";
+import SiteReport from "./SiteReport";
 
 export const metadata = { title: "Relatórios" };
 
@@ -189,6 +190,8 @@ export default async function ReportsPage({ searchParams }: PageProps<"/painel/r
           )}
         </Card>
       </div>
+
+      <SiteReport supabase={supabase} from={from} to={to} services={services} siteBookings={appts.filter((a) => a.source === "site").length} />
     </>
   );
 }

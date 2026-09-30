@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { brl, fmtDate } from "@/lib/format";
 import type { HomeService, Promotion, ServiceIcon, SiteContent } from "@/lib/site-content";
+import { siteWhatsapp, track } from "@/lib/site-tracking";
 
 const ICONS: Record<ServiceIcon, React.ElementType> = {
   sparkles: Sparkles, waves: Waves, heart: Heart, flower: Flower2, leaf: Leaf,
@@ -18,14 +19,14 @@ const PALETTE = [
   { color: "#6B8F71", bg: "#F4F8F5", border: "#C9DACF" },
 ];
 
-/** Leva ao agendamento já com o serviço da promoção selecionado. */
+/** Leva ao agendamento já com o serviço selecionado. */
 const selectService = (id: string | null) => {
   if (id) window.dispatchEvent(new CustomEvent("select-service", { detail: id }));
 };
 
 export default function Services({
-  content: c, services, promotions,
-}: { content: SiteContent["services"]; services: HomeService[]; promotions: Promotion[] }) {
+  content: c, services, promotions, phone,
+}: { content: SiteContent["services"]; services: HomeService[]; promotions: Promotion[]; phone: string }) {
   const cols = services.length >= 3 ? "sm:grid-cols-3" : services.length === 2 ? "sm:grid-cols-2" : "";
 
   return (
@@ -75,6 +76,7 @@ export default function Services({
               return (
                 <AnimateIn key={s.id} animation="up" delay={(i % 3) * 120}>
                   <div
+                    data-track="servico" data-track-id={s.id} data-track-name={s.name}
                     className="hover-lift rounded-2xl p-8 flex flex-col h-full"
                     style={{
                       background: "white",
@@ -123,6 +125,7 @@ export default function Services({
           {promotions.map((p, i) => (
             <AnimateIn key={p.id} animation="up" delay={300 + i * 100}>
               <div
+                data-track="promocao" data-track-id={p.id} data-track-name={p.title}
                 className="rounded-2xl p-8 sm:p-10 flex flex-col sm:flex-row items-center justify-between gap-6"
                 style={{
                   background: "linear-gradient(135deg, #2B221B 0%, #3B2E24 100%)",
@@ -196,7 +199,10 @@ export default function Services({
                       </div>
                     </div>
                   )}
-                  <a href="#agendamento" onClick={() => selectService(p.service_id)} className="btn-primary">
+                  <a
+                    href={siteWhatsapp(phone, { kind: "promocao", id: p.id, name: p.title })} target="_blank" rel="noopener noreferrer"
+                    onClick={() => track("whatsapp", `banner:promocao:${p.id}`)} className="btn-primary"
+                  >
                     {p.cta_label} <ArrowRight size={13} />
                   </a>
                 </div>

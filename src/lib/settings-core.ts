@@ -4,7 +4,7 @@ import type { Settings } from "./types";
 
 export const DEFAULT_SETTINGS: Settings = {
   clinic_name: "Clínica Débora Silva",
-  whatsapp: "551165782211",
+  whatsapp: "5511984271714",
   address: "Av. Paulista, 1337 - Bela Vista, São Paulo — SP",
   business_hours: DEFAULT_HOURS,
   slot_step_min: 30,

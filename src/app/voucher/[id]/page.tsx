@@ -13,6 +13,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { brl, firstName, fmtDate, SITE_URL, whatsappLink } from "@/lib/format";
 import { openAppointmentFor, STATE_LABEL, voucherPath, voucherState, type VoucherRow, type VoucherState, navHidden } from "@/lib/vouchers";
 import { CopyCode, PaymentWatcher, PrintButton } from "./VoucherClient";
+import SiteWhatsApp from "@/components/SiteWhatsApp";
 
 // O status muda quando o pagamento é confirmado: sempre renderiza na hora.
 export const dynamic = "force-dynamic";
@@ -73,6 +74,7 @@ export default async function VoucherPage({ params }: PageProps<"/voucher/[id]">
           brand={brand} contact={content.contact} footer={content.footer} services={services} hidden={content.layout.hidden}
           hours={hoursSummary(config?.hours ?? DEFAULT_HOURS)}
         />
+        <SiteWhatsApp />
       </div>
     </>
   );

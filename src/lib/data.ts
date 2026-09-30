@@ -122,7 +122,7 @@ export const clinicInfo = {
   neighborhood: "Bela Vista",
   city:         "São Paulo — SP",
   phone:        "(11) 6578-2211",
-  whatsapp:     "551165782211",
+  whatsapp:     "5511984271714",
   instagram:    "@talissaesteticaebemestar",
   instagramUrl: "https://instagram.com/talissaesteticaebemestar",
   email:        "contato@talissaestetica.com.br",
