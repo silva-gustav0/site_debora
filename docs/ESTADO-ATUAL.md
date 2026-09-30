@@ -8,13 +8,17 @@ Todo push no `master` publica o site (GitHub Actions) e, se mexer em `mobile/**`
 
 1. **App Android 2.1** publicado (visual igual ao painel web no tablet) na Release `app-v2.1.0` do GitHub.
    Falta **testar no tablet real** e corrigir o que estiver diferente do painel (pedir prints deitado e em pé).
+   Atualização de 29/09 (EAS Update): telas do menu viraram abas sem barra em `mobile/src/app/(painel)/` (a tela sumia
+   após tocar no menu: pilha com animação `fade` no Android), sem animação entre telas, e o app **não pede mais
+   senha/digital do aparelho** (pedido do Gustavo: simplicidade; só login com e-mail na primeira vez). Conferir no tablet
+   se a "rolagem infinita sem conteúdo" sumiu junto (hipótese: era a tela invisível).
 2. **Auditoria de 29/09** pela metade: as de *banco/sincronização* e *site/infra/GitHub Actions* foram interrompidas
    pelo limite de uso e precisam ser refeitas. As de *app* e *qualidade* terminaram; achados na lista de pendências abaixo.
 3. **Vouchers online (InfinitePay)** continuam aguardando a InfiniteTag da clínica (seção própria abaixo).
 
 ## Pendências (em ordem)
 
-- **App — segurança (auditoria 29/09):** fotos vistas ficam no cache de disco do `expo-image` sem criptografia
+- **App — segurança (auditoria 29/09):** trava por digital/PIN removida a pedido (29/09); fotos vistas ficam no cache de disco do `expo-image` sem criptografia
   (usar `cachePolicy="memory"` e limpar no sair); fotos pendentes, `atendimento-*.json` e CSVs exportados ficam fora do
   banco criptografado e não são apagados no `wipeDevice`; se a pessoa é removida com o app aberto (ou a sessão expira),
   o app cai no login sem apagar os dados; sem `FLAG_SECURE` (miniatura nos apps recentes); conferir `PRAGMA cipher_version`

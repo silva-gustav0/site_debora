@@ -5,9 +5,10 @@ import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
-import { LoadingScreen, LockScreen, LoginScreen } from "@/components/auth-screens";
+import { LoadingScreen, LoginScreen } from "@/components/auth-screens";
 import { Shell } from "@/components/sidebar";
 import { ToastProvider } from "@/components/ui";
+import { Brand } from "@/constants/brand";
 import { openDatabase } from "@/db/database";
 import { SessionProvider, useSession } from "@/lib/session";
 
@@ -15,7 +16,7 @@ SplashScreen.preventAutoHideAsync();
 
 type Db = Awaited<ReturnType<typeof openDatabase>>;
 
-/** Só mostra o app com a pessoa logada e desbloqueada (digital/PIN). */
+/** Só mostra o app com a pessoa logada (sem pedir a senha do aparelho). */
 function Gate() {
   const { status } = useSession();
   const [db, setDb] = useState<Db | null>(null);
@@ -30,15 +31,16 @@ function Gate() {
 
   if (status === "loading" || !fonts) return null;
   if (status === "signed-out") return <LoginScreen />;
-  if (status === "locked") return <LockScreen />;
   if (!db) return <LoadingScreen />;
   return (
     <PowerSyncContext.Provider value={db}>
       <ToastProvider>
         <Shell>
-          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: "transparent" }, animation: "fade" }}>
+          {/* Sem animação entre telas: o "fade" do Android deixava telas invisíveis ao voltar várias de uma vez. */}
+          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Brand.canvas }, animation: "none" }}>
+            <Stack.Screen name="(painel)" />
             {["agendamento/[id]", "agenda/novo", "agenda/bloqueio"].map((name) => (
-              <Stack.Screen key={name} name={name} options={{ presentation: "transparentModal" }} />
+              <Stack.Screen key={name} name={name} options={{ presentation: "transparentModal", contentStyle: { backgroundColor: "transparent" } }} />
             ))}
           </Stack>
         </Shell>

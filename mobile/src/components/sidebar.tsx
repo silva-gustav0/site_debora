@@ -59,19 +59,21 @@ export function Shell({ children }: { children: ReactNode }) {
   const { width } = useWindowDimensions();
   const [open, setOpen] = useState(false);
   const path = usePathname();
-  if (path.startsWith("/atendimento")) return <View style={s.main}>{children}</View>; // atendimento em tela cheia, como no painel
-  if (width >= 1024) return <Row><Gradient style={{ width: 256 }}><Full /></Gradient><View style={s.main}>{children}</View></Row>;
-  if (width >= 768) return <Row><Gradient style={{ width: 76 }}><Rail /></Gradient><View style={s.main}>{children}</View></Row>;
+  const full = path.startsWith("/atendimento"); // atendimento em tela cheia, como no painel
+  const phone = width < 768;
+  // A navegação (children) fica sempre na mesma posição da árvore: trocar de tela ou girar o tablet não a recria.
   return (
-    <View style={s.main}>
-      <Gradient>
-        <SafeAreaView edges={["top"]} style={s.topbar}>
-          <Pressable onPress={() => go("/")}><Text style={s.topTitle}>Débora Silva</Text></Pressable>
-          <Pressable onPress={() => setOpen(true)} hitSlop={10} accessibilityLabel="Abrir menu"><Menu size={22} color={Brand.white} /></Pressable>
-        </SafeAreaView>
-      </Gradient>
-      {children}
-      <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
+    <View style={[s.main, !phone && { flexDirection: "row" }]}>
+      {full ? null : width >= 1024 ? <Gradient style={{ width: 256 }}><Full /></Gradient> : !phone ? <Gradient style={{ width: 76 }}><Rail /></Gradient> : (
+        <Gradient>
+          <SafeAreaView edges={["top"]} style={s.topbar}>
+            <Pressable onPress={() => go("/")}><Text style={s.topTitle}>Débora Silva</Text></Pressable>
+            <Pressable onPress={() => setOpen(true)} hitSlop={10} accessibilityLabel="Abrir menu"><Menu size={22} color={Brand.white} /></Pressable>
+          </SafeAreaView>
+        </Gradient>
+      )}
+      <View style={s.main}>{children}</View>
+      <Modal visible={open && phone && !full} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
         <View style={{ flex: 1, flexDirection: "row" }}>
           <Gradient style={{ width: 288, maxWidth: "85%" }}>
             <Pressable onPress={() => setOpen(false)} style={s.close} accessibilityLabel="Fechar menu"><X size={20} color="rgba(255,255,255,0.7)" /></Pressable>
@@ -88,8 +90,6 @@ export function Shell({ children }: { children: ReactNode }) {
 function Gradient({ children, style }: { children: ReactNode; style?: object }) {
   return <LinearGradient colors={[...Brand.sidebar]} locations={[0, 0.55, 1]} style={style}>{children}</LinearGradient>;
 }
-
-const Row = ({ children }: { children: ReactNode }) => <View style={{ flex: 1, flexDirection: "row", backgroundColor: Brand.canvas }}>{children}</View>;
 
 /** Selo "D" dourado do painel. */
 const Logo = ({ size = 40 }: { size?: number }) => (

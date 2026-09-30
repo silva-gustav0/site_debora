@@ -1,5 +1,4 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { Fingerprint } from "lucide-react-native";
 import { type ReactNode, useState } from "react";
 import { ActivityIndicator, KeyboardAvoidingView, Linking, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -80,18 +79,6 @@ export function LoginScreen() {
       {(error ?? sessionError) && <Text style={s.error}>{error ?? sessionError}</Text>}
       <Button onPress={submit} loading={pending} style={{ marginTop: 4 }}>Entrar</Button>
       <Pressable onPress={() => Linking.openURL(SITE_URL)} style={s.link}><Text style={s.linkText}>← Voltar ao site</Text></Pressable>
-    </AuthFrame>
-  );
-}
-
-/** Trava do app: pede a digital ou o PIN do aparelho. */
-export function LockScreen() {
-  const { unlock, signOut, error } = useSession();
-  return (
-    <AuthFrame eyebrow="App bloqueado" title="Desbloquear" subtitle="Use a digital ou o PIN do aparelho para continuar.">
-      {error && <Text style={s.error}>{error}</Text>}
-      <Button icon={Fingerprint} onPress={unlock} style={{ marginTop: 4 }}>Desbloquear</Button>
-      <Pressable onPress={signOut} style={s.link}><Text style={s.linkText}>Sair e apagar os dados deste aparelho</Text></Pressable>
     </AuthFrame>
   );
 }

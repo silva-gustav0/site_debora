@@ -1,20 +1,15 @@
 import type { Session } from "@supabase/supabase-js";
-import * as LocalAuthentication from "expo-local-authentication";
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { AppState } from "react-native";
 import { startSync, wipeDevice } from "@/db/database";
 import { supabase } from "./supabase";
 
-/** Depois de quanto tempo em segundo plano o app pede a digital/PIN de novo. */
-const LOCK_AFTER_MS = 5 * 60_000;
-
-type Status = "loading" | "signed-out" | "locked" | "ready";
+type Status = "loading" | "signed-out" | "ready";
 type SessionCtx = {
   status: Status;
   session: Session | null;
   error: string | null;
   signIn: (email: string, password: string) => Promise<string | null>;
-  unlock: () => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -39,7 +34,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<Status>("loading");
   const [session, setSession] = useState<Session | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const backgroundAt = useRef<number | null>(null);
 
   const signOut = useCallback(async () => {
     await wipeDevice().catch(() => {});
@@ -48,23 +42,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     setStatus("signed-out");
   }, []);
 
-  const unlock = useCallback(async () => {
-    setError(null);
-    const level = await LocalAuthentication.getEnrolledLevelAsync();
-    if (level === LocalAuthentication.SecurityLevel.NONE) {
-      setError("Configure uma senha, PIN ou digital no aparelho para usar o app (protege os dados das clientes).");
-      return;
-    }
-    const r = await LocalAuthentication.authenticateAsync({ promptMessage: "Desbloquear o app da clínica", cancelLabel: "Cancelar" });
-    if (!r.success) return;
-    setStatus("ready");
-  }, []);
-
-  // Sessão salva: abre travado; sem sessão, vai para o login.
+  // Sessão salva: abre direto, sem pedir a senha do aparelho; sem sessão, vai para o login.
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
-      setStatus(data.session ? "locked" : "signed-out");
+      setStatus(data.session ? "ready" : "signed-out");
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s));
     return () => sub.subscription.unsubscribe();
@@ -82,16 +64,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     });
   }, [status, session, signOut]);
 
-  // Trava de novo depois de um tempo em segundo plano.
+  // O Android corta a conexão em segundo plano: reconecta na hora ao voltar.
   useEffect(() => {
-    const sub = AppState.addEventListener("change", (s) => {
-      if (s !== "active") { backgroundAt.current = Date.now(); return; }
-      startSync().catch(() => {}); // o Android corta a conexão em segundo plano: reconecta na hora ao voltar
-      if (backgroundAt.current && Date.now() - backgroundAt.current > LOCK_AFTER_MS) {
-        setStatus((cur) => (cur === "ready" ? "locked" : cur));
-      }
-      backgroundAt.current = null;
-    });
+    const sub = AppState.addEventListener("change", (s) => { if (s === "active") startSync().catch(() => {}); });
     return () => sub.remove();
   }, []);
 
@@ -103,9 +78,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       return "Esta conta não tem acesso ao painel da clínica.";
     }
     setSession(data.session);
-    setStatus("locked");
+    setStatus("ready");
     return null;
   }, []);
 
-  return <Ctx.Provider value={{ status, session, error, signIn, unlock, signOut }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ status, session, error, signIn, signOut }}>{children}</Ctx.Provider>;
 }
