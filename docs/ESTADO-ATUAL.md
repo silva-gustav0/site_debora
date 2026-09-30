@@ -21,7 +21,19 @@ Todo push no `master` publica o site (GitHub Actions) e, se mexer em `mobile/**`
    "Site · o que as visitantes olham" em Relatórios. Links do Instagram com `?utm_source=instagram` aparecem na origem.
    **655 clientes importados** da planilha antiga (tag `importado-2026-09`; 29 com telefone repetido têm observação
    para conferir). Planilhas `*.csv` ficam fora do Git.
-4. **Vouchers online (InfinitePay)** continuam aguardando a InfiniteTag da clínica (seção própria abaixo).
+4. **Contas de clientes no site (29–30/09):** login por WhatsApp + senha (sem SMS por enquanto). A conta é criada só pelo
+   servidor (`src/app/actions/account.ts`, `auth.admin.createUser` com e-mail interno `<telefone>@clientes.deborasilvaestetica.com.br`)
+   e ligada à ficha em `clients.user_id`. Sem SMS a conta é limitada: nome, telefone, desconto e agendamentos futuros.
+   O site descobre sozinho: número fora das fichas = cliente nova (nome + senha, **5% de boas-vindas**,
+   `clients.welcome_discount_pct`); ficha sem conta (ex.: importada) = só cria senha; com conta = entra.
+   Convite "Primeira vez aqui? 5%" no canto; ofertas pedem cadastro antes do WhatsApp ("continuar sem cadastro" existe);
+   o passo final do agendamento pede entrar/criar conta. Desconto: gatilhos em `appointments` (migração `20261004120000`)
+   põem `discount_pct` em um único atendimento da cliente (site, painel ou app); cancelado/falta passa para o próximo.
+   Painel/tablet mostram "Cliente nova · 5%" e já sugerem o valor com desconto. Senha esquecida: ficha no painel →
+   "Liberar novo cadastro". **Para ligar SMS no futuro:** conta num provedor de SMS aceito pelo Supabase (ex.: Twilio) e
+   trocar o cadastro/entrada para código por SMS. Com as contas criadas pelo servidor, já dá para **desativar
+   "Allow new users to sign up"** no Supabase; a senha mínima do Supabase deve ficar em **8** (é o mínimo das clientes).
+5. **Vouchers online (InfinitePay)** continuam aguardando a InfiniteTag da clínica (seção própria abaixo).
 
 ## Pendências (em ordem)
 
@@ -39,7 +51,7 @@ Todo push no `master` publica o site (GitHub Actions) e, se mexer em `mobile/**`
   Pacotes; cartão "Chamar de volta" no Início; cenas animadas completas no atendimento.
 - **Refazer auditorias** de banco/sincronização e site/infra/GitHub Actions.
 - **Supabase → Authentication:** desativar "Allow new users to sign up" (ainda **ativo**); proteção contra senhas vazadas;
-  senha mínima 10. Opcional: MFA e CAPTCHA.
+  senha mínima 8 (mínimo das contas de clientes; a equipe já exige 10 no painel). Opcional: MFA e CAPTCHA.
 - **Cloudflare:** ativar DNSSEC (no Cloudflare e depois no Registro.br).
 - **Tokens** que passaram pela conversa de 28–29/09 (Supabase `sbp_`, Vercel `vcp_`, PowerSync `jpt_`, Cloudflare `cfut_`,
   Expo): revogar os que não estão em uso. Em uso como secrets do GitHub: `CLOUDFLARE_API_TOKEN` e `EXPO_TOKEN` (se revogar,

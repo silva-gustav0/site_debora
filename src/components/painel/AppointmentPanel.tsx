@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { discountLabel, withDiscount } from "@/lib/welcome";
 import { BellRing, CalendarClock, CheckCircle2, Clock, Gift, MessageCircle, Package, Play, UserRound, XCircle } from "lucide-react";
 import ActionForm from "./ActionForm";
 import AnamnesisLinkButton from "./AnamnesisLinkButton";
@@ -45,6 +46,9 @@ export default function AppointmentPanel({
   const v = appt.vouchers;
   const covered = !v ? 0 : appt.voucher_amount !== null ? Number(appt.voucher_amount) : v.kind === "servico" ? Number(appt.price) : Math.min(Number(v.balance), Number(appt.price));
   const due = Math.max(0, Math.round((Number(appt.price) - covered) * 100) / 100);
+  // Desconto de boas-vindas (cliente nova do site): o valor sugerido já sai com o desconto.
+  const pct = Number(appt.discount_pct ?? 0);
+  const suggested = v ? due : pct ? withDiscount(Number(appt.price), pct) : Number(appt.price);
   const al = anamnesisLink;
   const anamnesisStatus = !al || al.revoked_at ? null
     : al.submitted_at ? `Ficha recebida às ${fmtTime(al.submitted_at)} de ${fmtDate(al.submitted_at)}.`
@@ -78,6 +82,11 @@ export default function AppointmentPanel({
         {pkg && (
           <p className="col-span-2 flex items-center gap-2 text-[#6B5A4B]">
             <Package size={15} className="text-[#C9973A]" /> {pkg.name} · sessão {Number(pkg.sessions_used) + (appt.status === "concluido" ? 0 : 1)} de {pkg.sessions_total}
+          </p>
+        )}
+        {pct > 0 && (
+          <p className="col-span-2 flex items-center gap-2 rounded-xl px-3 py-2 text-[#7A5510] bg-[#FFF6DD]">
+            <Gift size={15} /> Cliente nova · {discountLabel(Number(appt.price), pct)}
           </p>
         )}
         {v && (
@@ -145,6 +154,11 @@ export default function AppointmentPanel({
             </p>
           ) : (<>
           {v && <p className="text-sm text-[#6B5A4B]">O voucher {v.code} cobre {brl(covered)}. Cobre só a diferença.</p>}
+          {pct > 0 && !v && (
+            <p className="text-sm text-[#7A5510]">
+              {Number(appt.price) > 0 ? `Valor já com ${pct}% de boas-vindas.` : `Cliente nova: dê ${pct}% de desconto no valor cobrado.`}
+            </p>
+          )}
           <label className="flex items-center gap-2 text-sm text-[#6B5A4B]">
             <input type="checkbox" name="register_payment" defaultChecked={!pkg} className="accent-[#82590F]" />
             Registrar pagamento {pkg && <Badge tone="plum">sessão de pacote já paga</Badge>}
@@ -152,7 +166,7 @@ export default function AppointmentPanel({
           <div className="grid grid-cols-2 gap-2">
             <label>
               <span className="p-label">{v ? "Diferença recebida" : "Valor recebido"}</span>
-              <input name="amount" inputMode="decimal" defaultValue={String(v ? due : appt.price).replace(".", ",")} className="p-input p-num" />
+              <input name="amount" inputMode="decimal" defaultValue={String(suggested).replace(".", ",")} className="p-input p-num" />
             </label>
             <label>
               <span className="p-label">Forma</span>

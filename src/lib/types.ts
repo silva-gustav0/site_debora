@@ -32,6 +32,8 @@ export type ClientRow = {
   allergies: string | null;
   health_notes: string | null;
   marketing_opt_in: boolean;
+  user_id: string | null;
+  welcome_discount_pct: number;
   cpf: string | null;
   address: string | null;
   occupation: string | null;
@@ -62,6 +64,7 @@ export type AppointmentRow = {
   voucher_id: string | null;
   /** Quanto o voucher cobriu (gravado ao concluir). */
   voucher_amount: number | null;
+  discount_pct: number;
 };
 
 export type AppointmentVoucher = { id: string; code: string; kind: "servico" | "valor"; balance: number; service_name: string | null };

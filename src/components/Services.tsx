@@ -7,6 +7,7 @@ import {
 import { brl, fmtDate } from "@/lib/format";
 import type { HomeService, Promotion, ServiceIcon, SiteContent } from "@/lib/site-content";
 import { siteWhatsapp, track } from "@/lib/site-tracking";
+import { gateOffer, useAccount } from "@/lib/account-store";
 
 const ICONS: Record<ServiceIcon, React.ElementType> = {
   sparkles: Sparkles, waves: Waves, heart: Heart, flower: Flower2, leaf: Leaf,
@@ -27,6 +28,9 @@ const selectService = (id: string | null) => {
 export default function Services({
   content: c, services, promotions, phone,
 }: { content: SiteContent["services"]; services: HomeService[]; promotions: Promotion[]; phone: string }) {
+  const { account } = useAccount();
+  const pct = account?.discount?.state === "disponivel" ? account.discount.pct : 0;
+  const offerHref = (p: Promotion) => siteWhatsapp(phone, { kind: "promocao", id: p.id, name: p.title }, pct);
   const cols = services.length >= 3 ? "sm:grid-cols-3" : services.length === 2 ? "sm:grid-cols-2" : "";
 
   return (
@@ -200,8 +204,8 @@ export default function Services({
                     </div>
                   )}
                   <a
-                    href={siteWhatsapp(phone, { kind: "promocao", id: p.id, name: p.title })} target="_blank" rel="noopener noreferrer"
-                    onClick={() => track("whatsapp", `banner:promocao:${p.id}`)} className="btn-primary"
+                    href={offerHref(p)} target="_blank" rel="noopener noreferrer" className="btn-primary"
+                    onClick={(e) => { if (!gateOffer(e, { id: p.id, name: p.title, href: offerHref(p) })) track("whatsapp", `banner:promocao:${p.id}`); }}
                   >
                     {p.cta_label} <ArrowRight size={13} />
                   </a>

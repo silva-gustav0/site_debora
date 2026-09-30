@@ -6,8 +6,11 @@ import {
 } from "lucide-react";
 import AnimateIn from "./AnimateIn";
 import VoucherField, { type AppliedVoucher } from "./VoucherField";
+import AccountForm from "./AccountForm";
+import { loadAccount, signOutAccount, useAccount } from "@/lib/account-store";
+import { withDiscount } from "@/lib/welcome";
 import { clinicInfo, services as staticServices } from "@/lib/data";
-import { addDays, brl, fmtDate, fmtWeekday, maskPhone, todaySP, whatsappLink } from "@/lib/format";
+import { addDays, brl, fmtDate, fmtWeekday, formatPhone, maskPhone, todaySP, whatsappLink } from "@/lib/format";
 import { candidateSlots, dayHours, DEFAULT_HOURS, hoursSummary } from "@/lib/hours";
 import { createBooking, getAvailability, type PublicConfig } from "@/app/actions/public";
 import { checkVoucherCode } from "@/app/actions/vouchers";
@@ -52,7 +55,9 @@ export default function Schedule({ config, content: c }: { config: PublicConfig 
   const [slots, setSlots] = useState<Slot[] | null>(null);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState<{ serviceName: string; date: string; time: string; token?: string; voucher?: { code: string; due: number } } | null>(null);
+  const [done, setDone] = useState<{ serviceName: string; date: string; time: string; token?: string; discountPct?: number; voucher?: { code: string; due: number } } | null>(null);
+  const { account } = useAccount();
+  const welcomePct = account?.discount?.state === "disponivel" ? account.discount.pct : 0;
   const [voucher, setVoucher] = useState<AppliedVoucher | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -133,7 +138,7 @@ export default function Schedule({ config, content: c }: { config: PublicConfig 
   };
 
   const whatsText = (svc: string, d: string, t: string) =>
-    `Olá! Sou ${form.name.trim()} e gostaria de agendar ${svc} em ${fmtDate(d)} às ${t}.`;
+    `Olá! Sou ${account?.name ?? form.name.trim()} e gostaria de agendar ${svc} em ${fmtDate(d)} às ${t}.`;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -150,7 +155,8 @@ export default function Schedule({ config, content: c }: { config: PublicConfig 
     startTransition(async () => {
       const r = await createBooking({ serviceId: service.id, date, time, ...form, voucherCode: voucher?.code });
       if (r.ok) {
-        setDone({ serviceName: r.serviceName, date: r.date, time: r.time, token: r.token, voucher: r.voucher });
+        setDone({ serviceName: r.serviceName, date: r.date, time: r.time, token: r.token, discountPct: r.discountPct, voucher: r.voucher });
+        if (account) loadAccount(true); // desconto passa a "reservado" e o horário entra em "minha conta"
       } else {
         setError(r.message);
         if (r.slotTaken) { setTime(null); loadSlots(date, service); }
@@ -198,6 +204,11 @@ export default function Schedule({ config, content: c }: { config: PublicConfig 
               <br />
               {fmtWeekday(done.date, "long")}, {fmtDate(done.date)} às {done.time}
             </p>
+            {!!done.discountPct && (
+              <p className="text-sm rounded-xl px-4 py-3 mb-4" style={{ background: "#FFF6DD", color: "#7A5510" }}>
+                Seu desconto de <strong className="font-medium">{done.discountPct}% de boas-vindas</strong> já está aplicado neste atendimento.
+              </p>
+            )}
             {done.voucher && (
               <p className="text-sm rounded-xl px-4 py-3 mb-4" style={{ background: "#EAF6EE", color: "#1F6B3A" }}>
                 Voucher <strong className="font-medium">{done.voucher.code}</strong> aplicado:{" "}
@@ -460,9 +471,38 @@ export default function Schedule({ config, content: c }: { config: PublicConfig 
                   </div>
                 )}
 
-                {step === 3 && (
+                {step === 3 && online && account === null && (
+                  <div className="max-w-md mx-auto py-2">
+                    <p className="section-label mb-2" style={{ fontSize: "9px" }}>Falta pouco</p>
+                    <h3 className="text-2xl font-light text-bronze-800 mb-1">Entre ou crie sua conta para confirmar</h3>
+                    <p className="text-sm font-light text-text-secondary leading-6 mb-5">
+                      É rapidinho: só o seu WhatsApp e uma senha. Clientes novos ganham 5% de desconto neste atendimento.
+                    </p>
+                    <AccountForm clinicPhone={clinicWhatsapp} onDone={() => setError(null)} />
+                    {service && date && time && (
+                      <a
+                        href={whatsappLink(clinicWhatsapp, `Olá! Gostaria de agendar ${service.name} em ${fmtDate(date)} às ${time}.`) ?? "#"}
+                        target="_blank" rel="noopener noreferrer" className="block text-center text-xs text-text-muted underline mt-4"
+                      >
+                        Prefiro agendar pelo WhatsApp
+                      </a>
+                    )}
+                  </div>
+                )}
+                {step === 3 && online && account === undefined && (
+                  <p className="flex justify-center py-10 text-text-muted"><Loader2 size={18} className="animate-spin" /></p>
+                )}
+
+                {step === 3 && (!online || account) && (
                   <form id="booking-form" onSubmit={handleSubmit}>
+                    {account && (
+                      <p className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl px-4 py-3 mb-5 text-sm" style={{ background: "#FBF7EE", border: "1px solid #EEDFBF" }}>
+                        <span>Agendando como <strong className="font-normal text-bronze-800">{account.name}</strong> · {formatPhone(account.phone)}</span>
+                        <button type="button" onClick={() => signOutAccount()} className="text-xs underline text-text-muted">Não é você?</button>
+                      </p>
+                    )}
                     <div className="grid sm:grid-cols-2 gap-5 mb-6">
+                      {!account && <>
                       <div>
                         <label htmlFor="bk-name" className="block text-[11px] tracking-widest uppercase text-text-muted mb-2">Nome Completo</label>
                         <input
@@ -481,6 +521,7 @@ export default function Schedule({ config, content: c }: { config: PublicConfig 
                           onChange={(e) => setForm({ ...form, phone: maskPhone(e.target.value) })}
                         />
                       </div>
+                      </>}
                       <div className="sm:col-span-2">
                         <label htmlFor="bk-email" className="block text-[11px] tracking-widest uppercase text-text-muted mb-2">
                           E-mail <span className="normal-case tracking-normal">(opcional)</span>
@@ -520,7 +561,9 @@ export default function Schedule({ config, content: c }: { config: PublicConfig 
                             label: "Valor",
                             value: service && coverage(service)
                               ? (coverage(service)!.due === 0 ? "Pago com voucher" : `${brl(coverage(service)!.due)} + voucher`)
-                              : service && service.price > 0 ? brl(service.price) : "A combinar",
+                              : service && service.price > 0
+                                ? (welcomePct ? `${brl(withDiscount(service.price, welcomePct))} (−${welcomePct}%)` : brl(service.price))
+                                : welcomePct ? `A combinar · −${welcomePct}%` : "A combinar",
                           },
                         ].map((item) => (
                           <div key={item.label}>

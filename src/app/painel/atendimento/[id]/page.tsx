@@ -12,7 +12,7 @@ export default async function AttendancePage({ params }: PageProps<"/painel/aten
   const { supabase } = await requireStaff();
   const { data: appt } = await supabase
     .from("appointments")
-    .select("id, status, price, client_package_id, starts_at, ends_at, notes, voucher_amount, clients(id, name, skin_type, allergies, health_notes), services(name, category, duration_min), vouchers(code, kind, balance)")
+    .select("id, status, price, client_package_id, starts_at, ends_at, notes, voucher_amount, discount_pct, clients(id, name, skin_type, allergies, health_notes), services(name, category, duration_min), vouchers(code, kind, balance)")
     .eq("id", id).maybeSingle();
   if (!appt) notFound();
 
@@ -35,7 +35,7 @@ export default async function AttendancePage({ params }: PageProps<"/painel/aten
 
   return (
     <AttendanceScreen
-      appointment={{ id: appt.id, status: appt.status, price, fromPackage: Boolean(appt.client_package_id), notes: appt.notes, voucher }}
+      appointment={{ id: appt.id, status: appt.status, price, fromPackage: Boolean(appt.client_package_id), notes: appt.notes, voucher, discountPct: Number(appt.discount_pct) }}
       client={client}
       serviceName={serviceName}
       minutes={minutes}

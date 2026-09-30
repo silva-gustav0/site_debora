@@ -13,6 +13,7 @@ import { Avatar, Badge, Button, DateField, Empty, Field, Row, TimeField, Txt, us
 import { Brand, Font } from "@/constants/brand";
 import { SITE_URL, useSettings } from "@/db/hooks";
 import { type Row as DbRow, write } from "@/db/write";
+import { discountLabel } from "@shared/welcome";
 import { CompleteForm, DrawerScreen, isOpen, Label, PKG_SQL, type Pkg, STATUS_TONE, useAppts, useRows, voucherSplit } from "@/lib/agenda";
 import { supabase } from "@/lib/supabase";
 
@@ -86,6 +87,12 @@ export default function AppointmentDetail() {
         <Info>Valor: <Text style={{ fontFamily: Font.bold }}>{pkg ? "Pacote" : a.v_code ? (due === 0 ? "Pago (voucher)" : `${brl(due)} + voucher`) : brl(a.price)}</Text></Info>
         <Info>Origem: {a.source === "site" ? "Site" : "Painel"}</Info>
         {pkg && <Info icon={Package}>{pkg.name} · sessão {pkg.used + (a.status === "concluido" ? 0 : 1)} de {pkg.sessions_total}</Info>}
+        {Number(a.discount_pct ?? 0) > 0 && (
+          <Row gap={8} style={{ ...s.voucher, backgroundColor: "#FFF6DD" }}>
+            <Gift size={15} color="#7A5510" />
+            <Text style={[s.info, { color: "#7A5510", flex: 1 }]}>Cliente nova · {discountLabel(Number(a.price), Number(a.discount_pct))}</Text>
+          </Row>
+        )}
         {a.v_code && (
           <Row gap={8} style={s.voucher}>
             <Gift size={15} color="#1F6B3A" />

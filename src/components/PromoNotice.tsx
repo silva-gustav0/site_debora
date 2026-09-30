@@ -5,6 +5,7 @@ import { ArrowRight, Gift, X } from "lucide-react";
 import { brl, diffDays, fmtDate, todaySP } from "@/lib/format";
 import type { Promotion } from "@/lib/site-content";
 import { siteWhatsapp, track } from "@/lib/site-tracking";
+import { gateOffer, useAccount } from "@/lib/account-store";
 
 const storageKey = (id: string) => `aviso-promocao-fechado:${id}`;
 
@@ -13,6 +14,8 @@ export default function PromoNotice({ promo, phone }: { promo: Promotion; phone:
   const [visible, setVisible] = useState(false);
   const [closed, setClosed] = useState(false);
   const [atBooking, setAtBooking] = useState(false);
+  const { account } = useAccount();
+  const pct = account?.discount?.state === "disponivel" ? account.discount.pct : 0;
 
   useEffect(() => {
     let dismissed = false;
@@ -43,8 +46,10 @@ export default function PromoNotice({ promo, phone }: { promo: Promotion; phone:
     : daysLeft <= 7 ? `Faltam ${daysLeft} ${daysLeft === 1 ? "dia" : "dias"}`
     : `Válido até ${fmtDate(promo.ends_on, { year: undefined })}`;
   // O botão leva ao WhatsApp da Débora já dizendo que veio do site por esta promoção.
-  const href = siteWhatsapp(phone, { kind: "promocao", id: promo.id, name: promo.title });
-  const onCta = () => track("whatsapp", `aviso:promocao:${promo.id}`);
+  const href = siteWhatsapp(phone, { kind: "promocao", id: promo.id, name: promo.title }, pct);
+  const onCta = (e: React.MouseEvent) => {
+    if (!gateOffer(e, { id: promo.id, name: promo.title, href })) track("whatsapp", `aviso:promocao:${promo.id}`);
+  };
 
   return (
     <aside

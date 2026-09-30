@@ -10,6 +10,7 @@ import { dayHours, freeSlots, toTimestamp, SP_OFFSET } from "@/lib/hours";
 import { getSettings } from "@/lib/settings";
 import { findUsableVoucher } from "@/lib/vouchers";
 import { clientIp, TOO_MANY, withinLimits } from "@/lib/rate-limit";
+import { currentClient } from "@/lib/client-account";
 import type { ActionState, BusinessHours, ServiceRow, Settings } from "@/lib/types";
 
 type Admin = NonNullable<ReturnType<typeof createAdminClient>>;
@@ -95,14 +96,16 @@ export type BookingInput = {
 };
 
 export type BookingResult =
-  | { ok: true; serviceName: string; date: string; time: string; token: string; voucher?: { code: string; covered: number; due: number } }
+  | { ok: true; serviceName: string; date: string; time: string; token: string; discountPct: number; voucher?: { code: string; covered: number; due: number } }
   | { ok: false; message: string; slotTaken?: boolean };
 
 export async function createBooking(input: BookingInput): Promise<BookingResult> {
   if (input.website) return { ok: false, message: "Não foi possível enviar." };
 
-  const name = clean(input.name, 120);
-  const phone = digits(input.phone).slice(0, 13);
+  // Com conta no site, agenda na ficha da conta (o número não pode ser trocado pelo navegador).
+  const account = await currentClient();
+  const name = account?.name ?? clean(input.name, 120);
+  const phone = account?.phone ?? digits(input.phone).slice(0, 13);
   const email = clean(input.email, 160).toLowerCase();
   const notes = clean(input.notes, 500);
 
@@ -147,7 +150,7 @@ export async function createBooking(input: BookingInput): Promise<BookingResult>
     return { ok: false, slotTaken: true, message: "Esse horário acabou de ficar indisponível. Escolha outro, por favor." };
   }
 
-  const clientId = await upsertClient(db, { name, phone, email });
+  const clientId = account?.id ?? await upsertClient(db, { name, phone, email });
   if (!clientId) return { ok: false, message: "Não foi possível registrar seus dados. Tente novamente." };
 
   const startsAt = toTimestamp(input.date, input.time);
@@ -163,7 +166,7 @@ export async function createBooking(input: BookingInput): Promise<BookingResult>
     source: "site",
     status: "solicitado",
     voucher_id: voucher?.id ?? null,
-  }).select("public_token").single();
+  }).select("public_token, discount_pct").single();
   if (error) {
     if (error.code === "23505" && voucher) return { ok: false, message: "Este voucher acabou de ser reservado para outro agendamento." };
     if (error.code === "23P01") {
@@ -175,7 +178,7 @@ export async function createBooking(input: BookingInput): Promise<BookingResult>
   const price = Number(service.price);
   const covered = voucher ? (voucher.kind === "servico" ? price : Math.min(voucher.balance, price)) : 0;
   return {
-    ok: true, serviceName: service.name, date: input.date, time: input.time, token: data.public_token,
+    ok: true, serviceName: service.name, date: input.date, time: input.time, token: data.public_token, discountPct: Number(data.discount_pct),
     ...(voucher ? { voucher: { code: voucher.code, covered, due: Math.max(0, Math.round((price - covered) * 100) / 100) } } : {}),
   };
 }

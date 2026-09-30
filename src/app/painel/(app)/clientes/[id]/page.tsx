@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
-  ArrowLeft, CalendarPlus, Check, ClipboardList, FileSignature, Images, MessageCircle, NotebookPen, Package, Printer, ShieldAlert, Trash2,
+  ArrowLeft, CalendarPlus, Check, ClipboardList, FileSignature, Images, KeyRound, MessageCircle, NotebookPen, Package, Printer, ShieldAlert, Trash2,
 } from "lucide-react";
 import { requireStaff } from "@/lib/dal";
 import { APPT_SELECT, listServices } from "@/lib/queries";
@@ -19,7 +19,7 @@ import PhotoUploader from "@/components/painel/PhotoUploader";
 import SubmitButton from "@/components/painel/SubmitButton";
 import { Alert, Avatar, Badge, Card, EmptyState, Progress, StageBadge, StatTile, StatusBadge, Tabs } from "@/components/painel/ui";
 import {
-  addInteraction, addSessionRecord, completeInteraction, deleteClientAction, deleteInteraction, deletePhoto,
+  addInteraction, addSessionRecord, completeInteraction, deleteClientAction, deleteInteraction, deletePhoto, resetSiteAccess,
   deleteSessionRecord, sellPackage, setClientPackageStatus, setConsent,
 } from "../../../actions";
 import type {
@@ -120,6 +120,8 @@ export default async function ClientPage({ params, searchParams }: PageProps<"/p
                 {age !== null && <span>{age} anos</span>}
                 {a.fitzpatrick && <span>Fototipo {a.fitzpatrick}</span>}
                 <span>Via {SOURCE_LABEL[client.source]} · desde {fmtDate(client.created_at, { month: "short" })}</span>
+                {client.user_id && <span>Tem conta no site</span>}
+                {Number(client.welcome_discount_pct) > 0 && <span className="text-[#7A5510]">Cliente nova do site ({Number(client.welcome_discount_pct)}% no 1º atendimento)</span>}
               </p>
               {client.tags.length > 0 && <div className="flex flex-wrap gap-1 mt-2">{client.tags.map((t) => <Badge key={t} tone="bronze">{t}</Badge>)}</div>}
             </div>
@@ -485,6 +487,15 @@ export default async function ClientPage({ params, searchParams }: PageProps<"/p
       {tab === "dados" && (
         <div className="flex flex-col gap-5">
           <Card title="Dados cadastrais"><ClientForm client={client} /></Card>
+          {client.user_id && (
+            <Card title="Conta no site" eyebrow="Senha esquecida">
+              <p className="text-sm text-[#857566] mb-3">A cliente entra no site com o WhatsApp e uma senha. Se ela esqueceu a senha, remova a conta: ela cria outra com o mesmo número (a ficha continua igual).</p>
+              <form action={resetSiteAccess}>
+                <input type="hidden" name="id" value={client.id} />
+                <ConfirmButton confirmText="Remover conta do site"><KeyRound size={13} /> Liberar novo cadastro</ConfirmButton>
+              </form>
+            </Card>
+          )}
           <Card title="Excluir cliente" eyebrow="Zona de risco">
             <p className="text-sm text-[#857566] mb-3">Remove a cliente com agendamentos, prontuário, fotos e anotações (direito de exclusão da LGPD). Os lançamentos financeiros permanecem, sem vínculo.</p>
             <form action={deleteClientAction}>

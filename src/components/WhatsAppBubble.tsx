@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { X } from "lucide-react";
+import { Gift, X } from "lucide-react";
+import { openAccount, useAccount } from "@/lib/account-store";
+import { WELCOME_PCT } from "@/lib/welcome";
 import { ATTENDANT, flush, type Interest, interestRaw, setInterest, siteWhatsapp, track } from "@/lib/site-tracking";
 
 const SECTIONS = ["servicos", "agendamento", "contato", "blog"];
@@ -69,6 +71,20 @@ export default function WhatsAppBubble({ phone }: { phone: string }) {
   const raw = useSyncExternalStore(subscribe, interestRaw, () => null);
   const interest = useMemo<Interest | null>(() => { try { return raw ? JSON.parse(raw) : null; } catch { return null; } }, [raw]);
   const [tip, setTip] = useState(false);
+  const [welcome, setWelcome] = useState(false);
+  const { account } = useAccount();
+  const pct = account?.discount?.state === "disponivel" ? account.discount.pct : 0;
+
+  // Visitante sem conta: convite dos 5% para clientes novos (até fechar; volta só em outra visita).
+  useEffect(() => {
+    if (account !== null) return;
+    let closed = false;
+    try { closed = localStorage.getItem("boas-vindas-fechado") === "1"; } catch {}
+    if (closed) return;
+    const t = setTimeout(() => setWelcome(true), 6000);
+    return () => clearTimeout(t);
+  }, [account]);
+  const closeWelcome = () => { setWelcome(false); try { localStorage.setItem("boas-vindas-fechado", "1"); } catch {} };
 
   useEffect(() => {
     // Uma sugestão por sessão, depois de um tempo navegando.
@@ -76,7 +92,7 @@ export default function WhatsAppBubble({ phone }: { phone: string }) {
     return () => clearTimeout(t);
   }, []);
 
-  const href = siteWhatsapp(phone, interest);
+  const href = siteWhatsapp(phone, interest, pct);
   const click = () => { setTip(false); track("whatsapp", `balao${interest ? `:${interest.kind}:${interest.id}` : ""}`); };
   const tipText = interest?.kind === "promocao" ? `Quer garantir a promoção “${interest.name}”? Chame a ${ATTENDANT} no WhatsApp.`
     : interest ? `Ficou com alguma dúvida sobre ${interest.name}? A ${ATTENDANT} responde pelo WhatsApp.`
@@ -84,7 +100,22 @@ export default function WhatsAppBubble({ phone }: { phone: string }) {
 
   return (
     <div className="fixed z-50 bottom-4 right-4 sm:bottom-6 sm:right-6 flex flex-col items-end gap-3" style={{ fontFamily: "var(--font-lato), sans-serif" }}>
-      {tip && (
+      {welcome && account === null && (
+        <div role="status" className="relative max-w-[270px] rounded-2xl px-4 py-3.5 pr-9 text-white shadow-[0_14px_40px_rgba(43,34,27,0.35)]" style={{ background: "linear-gradient(135deg,#2B221B,#48392B)", border: "1px solid rgba(201,151,58,0.45)" }}>
+          <p className="flex items-center gap-1.5 text-[10px] tracking-[0.25em] uppercase" style={{ color: "#E8C882" }}><Gift size={12} /> Primeira vez aqui?</p>
+          <p className="mt-1 text-[19px] leading-snug font-light" style={{ fontFamily: "var(--font-cormorant), serif" }}>Clientes novos ganham {WELCOME_PCT}% de desconto</p>
+          <p className="mt-1 text-[12.5px] text-white/65">Complete seu cadastro com nome, número e senha para resgatar.</p>
+          <button
+            onClick={() => { setWelcome(false); track("secao", "convite-boas-vindas"); openAccount({ kind: "boas-vindas" }); }}
+            className="mt-3 w-full rounded-full px-4 py-2 text-[11px] tracking-[0.16em] uppercase font-bold text-[#2B221B]" style={{ background: "linear-gradient(135deg,#E8C882,#C9973A)" }}
+          >
+            Quero meus {WELCOME_PCT}%
+          </button>
+          <button onClick={() => { setWelcome(false); openAccount({ kind: "conta" }); }} className="mt-2 w-full text-center text-[11.5px] text-white/60 underline">Já sou cliente · entrar</button>
+          <button onClick={closeWelcome} aria-label="Fechar convite" className="absolute top-1.5 right-1.5 w-7 h-7 flex items-center justify-center rounded-full text-white/50 hover:bg-white/10"><X size={14} /></button>
+        </div>
+      )}
+      {tip && !(welcome && account === null) && (
         <div role="status" className="relative max-w-[250px] rounded-2xl bg-white px-4 py-3 pr-9 text-[13.5px] leading-snug text-[#3B2E24] shadow-[0_12px_36px_rgba(43,34,27,0.22)]" style={{ border: "1px solid #EEDFBF" }}>
           <a href={href} target="_blank" rel="noopener noreferrer" onClick={click}>{tipText}</a>
           <button onClick={() => setTip(false)} aria-label="Fechar sugestão" className="absolute top-1.5 right-1.5 w-7 h-7 flex items-center justify-center rounded-full text-[#A69885] hover:bg-[#FAF5EC]">

@@ -1,5 +1,6 @@
 "use client";
 
+import { discountLabel, withDiscount } from "@/lib/welcome";
 import { startTransition, useActionState, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -58,7 +59,7 @@ function chime(ctx: AudioContext | null) {
 type Props = {
   appointment: {
     id: string; status: string; price: number; fromPackage: boolean; notes: string | null;
-    voucher: { code: string; covered: number; due: number } | null;
+    voucher: { code: string; covered: number; due: number } | null; discountPct: number;
   };
   client: { id: string; name: string; skin_type: string | null; allergies: string | null; health_notes: string | null } | null;
   serviceName: string;
@@ -311,7 +312,7 @@ export default function AttendanceScreen({ appointment, client, serviceName, min
 
       {finishing && (
         <FinishSheet
-          id={id} serviceName={serviceName} price={appointment.price} fromPackage={appointment.fromPackage} fees={fees} voucher={appointment.voucher}
+          id={id} serviceName={serviceName} price={appointment.price} fromPackage={appointment.fromPackage} fees={fees} voucher={appointment.voucher} discountPct={appointment.discountPct}
           record={record}
           onClose={() => setFinishing(false)}
           onDone={() => { writeStore(clockKey, null); writeStore(`atendimento-notas:${id}`, null); }}
@@ -321,8 +322,8 @@ export default function AttendanceScreen({ appointment, client, serviceName, min
   );
 }
 
-function FinishSheet({ id, serviceName, price, fromPackage, fees, voucher, record, onClose, onDone }: {
-  id: string; serviceName: string; price: number; fromPackage: boolean; fees: { credit: number; debit: number };
+function FinishSheet({ id, serviceName, price, fromPackage, fees, voucher, discountPct, record, onClose, onDone }: {
+  id: string; serviceName: string; price: number; fromPackage: boolean; fees: { credit: number; debit: number }; discountPct: number;
   voucher: { code: string; covered: number; due: number } | null;
   record: { observations: string; products: string; next: string; parameters: string };
   onClose: () => void; onDone: () => void;
@@ -379,6 +380,12 @@ function FinishSheet({ id, serviceName, price, fromPackage, fees, voucher, recor
             <Gift size={18} className="flex-shrink-0" /> O voucher {voucher.code} cobre {brl(voucher.covered)}. Cobre só a diferença de {brl(voucher.due)}.
           </p>
         )}
+        {discountPct > 0 && !voucher && (
+          <p className="flex items-center gap-2.5 rounded-2xl px-4 py-3 text-sm bg-[#FFF6DD] text-[#5C4010]">
+            <Gift size={18} className="flex-shrink-0" />
+            {price > 0 ? `Cliente nova: ${discountLabel(price, discountPct)} já no valor.` : `Cliente nova: dê ${discountPct}% de desconto no valor cobrado.`}
+          </p>
+        )}
         <label className="flex items-center gap-2 text-[15px]">
           <input type="checkbox" name="register_payment" checked={pay} onChange={(e) => setPay(e.target.checked)} className="accent-[#82590F] w-5 h-5" />
           Registrar pagamento {fromPackage && <span className="text-xs text-[#857566]">(sessão de pacote já paga)</span>}
@@ -387,7 +394,7 @@ function FinishSheet({ id, serviceName, price, fromPackage, fees, voucher, recor
           <div className="grid grid-cols-2 gap-3">
             <label>
               <span className="p-label">{voucher ? "Diferença recebida" : "Valor recebido"}</span>
-              <input name="amount" inputMode="decimal" defaultValue={String(voucher ? voucher.due : price).replace(".", ",")} className="p-input p-num text-[16px]" />
+              <input name="amount" inputMode="decimal" defaultValue={String(voucher ? voucher.due : discountPct ? withDiscount(price, discountPct) : price).replace(".", ",")} className="p-input p-num text-[16px]" />
             </label>
             <label>
               <span className="p-label">Forma</span>

@@ -2,6 +2,7 @@ import { useQuery } from "@powersync/react-native";
 import { addDays, brl, dateSP, fmtDate, fmtTime, METHOD_LABEL, STATUS_LABEL, todaySP } from "@shared/format";
 import { toTimestamp } from "@shared/hours";
 import { cardFee } from "@shared/settings-core";
+import { discountLabel, withDiscount } from "@shared/welcome";
 import type { AppointmentStatus, PaymentMethod } from "@shared/types";
 import { router, Stack } from "expo-router";
 import { CheckCircle2, ChevronRight, Gift, Package, X } from "lucide-react-native";
@@ -22,14 +23,14 @@ export type Appt = {
   id: string; client_id: string | null; service_id: string; starts_at: string; ends_at: string; status: AppointmentStatus;
   price: number; notes: string | null; source: string | null; client_package_id: string | null; public_token: string | null;
   confirmed_at: string | null; reminder_sent_at: string | null; cancel_reason: string | null; voucher_id: string | null;
-  voucher_amount: number | null; client_name: string | null; client_phone: string | null; service_name: string | null;
+  voucher_amount: number | null; discount_pct: number | null; client_name: string | null; client_phone: string | null; service_name: string | null;
   service_category: string | null; duration_min: number | null; v_code: string | null; v_kind: "servico" | "valor" | null;
   v_balance: number | null; v_service_name: string | null;
 };
 
 const APPT_SQL = `select a.id, a.client_id, a.service_id, ${ts("a.starts_at")} as starts_at, ${ts("a.ends_at")} as ends_at, a.status,
   a.price, a.notes, a.source, a.client_package_id, a.public_token, ${ts("a.confirmed_at")} as confirmed_at,
-  ${ts("a.reminder_sent_at")} as reminder_sent_at, a.cancel_reason, a.voucher_id, a.voucher_amount, c.name as client_name,
+  ${ts("a.reminder_sent_at")} as reminder_sent_at, a.cancel_reason, a.voucher_id, a.voucher_amount, a.discount_pct, c.name as client_name,
   c.phone as client_phone, s.name as service_name, s.category as service_category, s.duration_min, v.code as v_code,
   v.kind as v_kind, v.balance as v_balance, v.service_name as v_service_name
   from appointments a left join clients c on c.id = a.client_id left join services s on s.id = a.service_id
@@ -135,7 +136,8 @@ export function CompleteForm({ a, record, onDone }: { a: Appt; record?: SessionN
   const { covered, due } = voucherSplit(a);
   const paidByVoucher = !!a.v_code && due === 0;
   const [pay, setPay] = useState(!a.client_package_id);
-  const [amount, setAmount] = useState(moneyText(a.v_code ? due : a.price));
+  const pct = Number(a.discount_pct ?? 0); // desconto de boas-vindas (cliente nova do site)
+  const [amount, setAmount] = useState(moneyText(a.v_code ? due : pct ? withDiscount(Number(a.price), pct) : a.price));
   const [method, setMethod] = useState<PaymentMethod>("pix");
   const [note, setNote] = useState("");
 
@@ -173,6 +175,9 @@ export function CompleteForm({ a, record, onDone }: { a: Appt; record?: SessionN
       {paidByVoucher ? <Badge tone="green">Já pago pelo voucher {a.v_code}. Não cobre a cliente.</Badge> : (
         <>
           {a.v_code && <Txt.muted>O voucher {a.v_code} cobre {brl(covered)}. Cobre só a diferença.</Txt.muted>}
+          {pct > 0 && !a.v_code && (
+            <Badge tone="gold">{Number(a.price) > 0 ? `Cliente nova: ${discountLabel(Number(a.price), pct)} já no valor.` : `Cliente nova: dê ${pct}% de desconto no valor cobrado.`}</Badge>
+          )}
           <Toggle label="Registrar pagamento" value={pay} onChange={setPay} hint={a.client_package_id ? "Sessão de pacote já paga" : undefined} />
           {pay && (
             <>

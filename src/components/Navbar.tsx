@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { LogIn, Menu, X } from "lucide-react";
+import { Menu, UserRound, X } from "lucide-react";
+import { openAccount, useAccount } from "@/lib/account-store";
 
 type NavItem = { label: string; hash: string; section?: string; path?: string };
 
@@ -28,6 +29,8 @@ export default function Navbar({ logo, name, hidden = [], extra = [] }: { logo: 
   const links: NavItem[] = [...base.slice(0, -1), ...extra, ...base.slice(-1)];
   const [open, setOpen]       = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { account } = useAccount();
+  const accountLabel = account ? `Olá, ${account.firstName}` : "Entrar";
   const pathname              = usePathname();
   const isHome                = pathname === "/";
 
@@ -80,15 +83,15 @@ export default function Navbar({ logo, name, hidden = [], extra = [] }: { logo: 
               ))}
             </nav>
 
-            {/* Área da equipe + CTA */}
+            {/* Conta da cliente + CTA (a área da equipe fica no rodapé) */}
             <div className="hidden md:flex items-center gap-5">
-              <Link
-                href="/painel"
+              <button
+                onClick={() => openAccount({ kind: "conta" })}
                 className="flex items-center gap-1.5 text-[12px] font-light tracking-[0.15em] uppercase hover:text-bronze-500 transition-colors duration-200"
                 style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B5A4B" }}
               >
-                <LogIn size={14} /> Área da equipe
-              </Link>
+                <UserRound size={14} /> {accountLabel}
+              </button>
               <a href={href("agendamento")} className="btn-primary">
                 Agendar
               </a>
@@ -151,14 +154,13 @@ export default function Navbar({ logo, name, hidden = [], extra = [] }: { logo: 
           </nav>
 
           <div className="px-6 pb-12 flex flex-col gap-4">
-            <Link
-              href="/painel"
-              onClick={() => setOpen(false)}
+            <button
+              onClick={() => { setOpen(false); openAccount({ kind: "conta" }); }}
               className="flex items-center justify-center gap-2 py-3 text-[13px] tracking-[0.1em] uppercase"
               style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B4A10" }}
             >
-              <LogIn size={16} /> Área da equipe
-            </Link>
+              <UserRound size={16} /> {accountLabel}
+            </button>
             <a
               href={href("agendamento")}
               onClick={() => setOpen(false)}

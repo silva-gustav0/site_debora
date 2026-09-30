@@ -127,9 +127,25 @@ export async function deleteClientAction(fd: FormData) {
   const id = str(fd, "id");
   const { data: photos } = await supabase.from("client_photos").select("path").eq("client_id", id);
   if (photos?.length) await supabase.storage.from("client-photos").remove(photos.map((p) => p.path));
+  await removeSiteAccount(supabase, id);
   await supabase.from("clients").delete().eq("id", id);
   refresh();
   redirect("/painel/clientes");
+}
+
+/** Apaga a conta do site ligada à ficha (a ficha continua); o número fica livre para um novo cadastro. */
+async function removeSiteAccount(supabase: Awaited<ReturnType<typeof requireStaff>>["supabase"], clientId: string) {
+  const { data } = await supabase.from("clients").select("user_id").eq("id", clientId).maybeSingle();
+  // Só contas de cliente: nunca apaga login da equipe.
+  const { data: isStaff } = data?.user_id ? await supabase.from("staff").select("user_id").eq("user_id", data.user_id).maybeSingle() : { data: null };
+  if (data?.user_id && !isStaff) await createAdminClient()?.auth.admin.deleteUser(data.user_id);
+}
+
+/** Painel: a cliente esqueceu a senha do site; remove a conta para ela se cadastrar de novo com o mesmo número. */
+export async function resetSiteAccess(fd: FormData) {
+  const { supabase } = await requireStaff();
+  await removeSiteAccount(supabase, str(fd, "id"));
+  refresh();
 }
 
 export async function setClientStage(fd: FormData) {

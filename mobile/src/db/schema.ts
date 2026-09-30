@@ -9,14 +9,14 @@ const { text, real, integer } = column;
 
 const clients = new Table({
   name: text, phone: text, email: text, birth_date: text, instagram: text, source: text, stage: text,
-  tags: text, notes: text, skin_type: text, allergies: text, health_notes: text, marketing_opt_in: integer,
+  tags: text, notes: text, skin_type: text, allergies: text, health_notes: text, marketing_opt_in: integer, welcome_discount_pct: real,
   created_at: text, updated_at: text, cpf: text, address: text, occupation: text, anamnesis: text, consent_signed_at: text,
 }, { indexes: { phone: ["phone"], name: ["name"] } });
 
 const appointments = new Table({
   client_id: text, service_id: text, starts_at: text, ends_at: text, status: text, price: real, notes: text,
   source: text, created_at: text, client_package_id: text, public_token: text, confirmed_at: text,
-  reminder_sent_at: text, cancel_reason: text, voucher_id: text, voucher_amount: real,
+  reminder_sent_at: text, cancel_reason: text, voucher_id: text, voucher_amount: real, discount_pct: real,
 }, { indexes: { starts: ["starts_at"], client: ["client_id", "starts_at"] } });
 
 const services = new Table({

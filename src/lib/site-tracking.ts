@@ -43,11 +43,16 @@ export function setInterest(i: Interest) {
   window.dispatchEvent(new Event("site-interesse"));
 }
 
-/** Mensagem pronta para a Débora, dizendo que veio do site e o que interessou. */
-export function siteMessage(i: Interest | null) {
-  if (i?.kind === "promocao") return `Olá, ${ATTENDANT}! Vim pelo site e tenho interesse na promoção "${i.name}".`;
-  if (i?.kind === "servico") return `Olá, ${ATTENDANT}! Vim pelo site e gostaria de saber mais sobre ${i.name}.`;
-  return `Olá, ${ATTENDANT}! Vim pelo site e gostaria de mais informações.`;
+/** Mensagem pronta para a Débora, dizendo que veio do site, o que interessou e se tem o desconto de boas-vindas. */
+export function siteMessage(i: Interest | null, welcomePct = 0) {
+  const base = i?.kind === "promocao" ? `Olá, ${ATTENDANT}! Vim pelo site e tenho interesse na promoção "${i.name}".`
+    : i?.kind === "servico" ? `Olá, ${ATTENDANT}! Vim pelo site e gostaria de saber mais sobre ${i.name}.`
+    : `Olá, ${ATTENDANT}! Vim pelo site e gostaria de mais informações.`;
+  return welcomePct ? `${base} Acabei de me cadastrar e quero usar meu desconto de ${welcomePct}% de boas-vindas.` : base;
 }
 
-export const siteWhatsapp = (phone: string, i: Interest | null) => whatsappLink(phone, siteMessage(i)) ?? "#";
+export const siteWhatsapp = (phone: string, i: Interest | null, welcomePct = 0) => whatsappLink(phone, siteMessage(i, welcomePct)) ?? "#";
+
+/** Resgate do desconto de boas-vindas direto com a Débora. */
+export const welcomeWhatsapp = (phone: string, name: string, pct: number) =>
+  whatsappLink(phone, `Olá, ${ATTENDANT}! Sou ${name}, acabei de me cadastrar no site e quero resgatar meu desconto de ${pct}% de boas-vindas.`) ?? "#";
