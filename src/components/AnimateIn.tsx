@@ -8,6 +8,8 @@ type Props = {
   className?: string;
   children: React.ReactNode;
   as?: keyof React.JSX.IntrinsicElements;
+  /** Topo da página: anima já no primeiro desenho, sem esperar o JavaScript carregar. */
+  immediate?: boolean;
 };
 
 export default function AnimateIn({
@@ -16,12 +18,13 @@ export default function AnimateIn({
   className = "",
   children,
   as: Tag = "div",
+  immediate = false,
 }: Props) {
   const ref = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el || immediate) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -33,7 +36,7 @@ export default function AnimateIn({
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [immediate]);
 
   const Element = Tag as React.ElementType;
   return (
@@ -41,7 +44,7 @@ export default function AnimateIn({
       ref={ref}
       data-animate={animation}
       data-delay={delay}
-      className={className}
+      className={immediate ? `${className} visible` : className}
     >
       {children}
     </Element>

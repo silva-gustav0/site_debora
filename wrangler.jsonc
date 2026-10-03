@@ -9,6 +9,8 @@
   "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "clinica-debora" }],
   // Otimização de imagens do next/image pelo Cloudflare Images.
   "images": { "binding": "IMAGES" },
+  // O banco (Supabase) fica nos EUA: o Cloudflare roda o Worker perto dele, e cada consulta deixa de cruzar o continente.
+  "placement": { "mode": "smart" },
   // Domínios do site (DNS e certificado gerenciados pelo Cloudflare).
   "routes": [
     { "pattern": "deborasilvaestetica.com.br", "custom_domain": true },

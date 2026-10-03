@@ -50,7 +50,7 @@ export default function Hero({
 
           {/* ── Text column ── */}
           <div>
-            {c.badge && <AnimateIn animation="fade">
+            {c.badge && <AnimateIn immediate animation="fade">
               <div
                 className="inline-flex items-center gap-2 mb-7 px-4 py-2 rounded-full border border-bronze-200"
                 style={{ background: "rgba(251,247,238,0.8)" }}
@@ -60,7 +60,7 @@ export default function Hero({
               </div>
             </AnimateIn>}
 
-            <AnimateIn animation="up" delay={100}>
+            <AnimateIn immediate animation="up" delay={100}>
               <h1
                 className="text-5xl sm:text-6xl lg:text-7xl font-light leading-[1.1] text-bronze-900 mb-5"
                 style={{ fontFamily: "var(--font-cormorant), serif", color: "#3B2A12" }}
@@ -73,11 +73,11 @@ export default function Hero({
               </h1>
             </AnimateIn>
 
-            <AnimateIn animation="scale" delay={200}>
+            <AnimateIn immediate animation="scale" delay={200}>
               <div className="gold-line mb-6" />
             </AnimateIn>
 
-            <AnimateIn animation="up" delay={300}>
+            <AnimateIn immediate animation="up" delay={300}>
               <p
                 className="text-base font-light leading-7 max-w-md mb-9"
                 style={{
@@ -89,7 +89,7 @@ export default function Hero({
               </p>
             </AnimateIn>
 
-            <AnimateIn animation="up" delay={400}>
+            <AnimateIn immediate animation="up" delay={400}>
               <div className="flex flex-col sm:flex-row gap-4">
                 <a href="#agendamento" className="btn-primary">
                   {c.cta_primary} <ArrowRight size={15} />
@@ -100,7 +100,7 @@ export default function Hero({
               </div>
             </AnimateIn>
 
-            {stats.length > 0 && <AnimateIn animation="up" delay={500}>
+            {stats.length > 0 && <AnimateIn immediate animation="up" delay={500}>
               <div className="flex gap-10 mt-12 pt-10 border-t border-bronze-100">
                 {stats.map((s) => (
                   <div key={s.label}>
@@ -123,7 +123,7 @@ export default function Hero({
           </div>
 
           {/* ── Visual column ── */}
-          <AnimateIn animation="right" delay={200} className="hidden lg:block">
+          <AnimateIn immediate animation="right" delay={200} className="hidden lg:block">
             <div className="relative">
               {/* Main hero image */}
               <div
@@ -133,9 +133,9 @@ export default function Hero({
                   src={c.image}
                   alt={`Tratamento estético na ${brandName}`}
                   fill
-                  priority
+                  fetchPriority="high"
                   className="object-cover"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  sizes="(max-width: 1023px) 1px, (max-width: 1280px) 50vw, 620px"
                 />
                 {/* Rose overlay for brand harmony */}
                 <div

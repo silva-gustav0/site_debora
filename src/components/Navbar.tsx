@@ -46,12 +46,12 @@ export default function Navbar({ logo, name, hidden = [], extra = [] }: { logo: 
   }, []);
 
   const navBg = scrolled
-    ? "bg-[#FDFAF7]/95 backdrop-blur-md shadow-[0_2px_24px_rgba(154,111,30,0.1)]"
+    ? "bg-[#FDFAF7]/[0.97] shadow-[0_2px_24px_rgba(154,111,30,0.1)]"
     : "bg-transparent";
 
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${navBg}`}>
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-[background-color,box-shadow] duration-500 ${navBg}`}>
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
           <div className="flex items-center justify-between h-[72px]">
 
@@ -62,7 +62,8 @@ export default function Navbar({ logo, name, hidden = [], extra = [] }: { logo: 
                 alt={name}
                 width={1052}
                 height={577}
-                priority
+                sizes="117px"
+                preload
                 className="h-16 w-auto transition-opacity group-hover:opacity-80"
               />
             </a>
@@ -122,6 +123,7 @@ export default function Navbar({ logo, name, hidden = [], extra = [] }: { logo: 
               alt={name}
               width={1052}
               height={577}
+              sizes="88px"
               className="h-12 w-auto"
             />
             <button

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { ArrowRight, Gift, X } from "lucide-react";
 import { brl, diffDays, fmtDate, todaySP } from "@/lib/format";
 import type { Promotion } from "@/lib/site-content";
@@ -74,8 +75,7 @@ export default function PromoNotice({ promo, phone }: { promo: Promotion; phone:
 
       <div className="flex gap-3.5 p-4 pr-11 sm:p-5 sm:pr-12">
         {promo.image_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={promo.image_url} alt="" className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-cover flex-shrink-0" style={{ border: "1px solid rgba(201,151,58,0.4)" }} />
+          <Image src={promo.image_url} alt="" width={128} height={128} sizes="64px" className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-cover flex-shrink-0" style={{ border: "1px solid rgba(201,151,58,0.4)" }} />
         ) : (
           <div className="promo-notice-icon w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "linear-gradient(135deg,#C9973A,#E8C882)" }}>
             <Gift size={19} className="text-white" />

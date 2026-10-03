@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import AnimateIn from "./AnimateIn";
 import {
   Sparkles, Waves, Heart, Flower2, Leaf, Sun, Droplet, Gem, Hand, Star, ArrowRight, Tag,
@@ -138,10 +139,12 @@ export default function Services({
               >
                 <div className="flex items-start gap-4">
                   {p.image_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <Image
                       src={p.image_url}
                       alt=""
+                      width={160}
+                      height={160}
+                      sizes="80px"
                       className="w-20 h-20 rounded-xl object-cover flex-shrink-0"
                       style={{ border: "1px solid rgba(201,151,58,0.4)" }}
                     />

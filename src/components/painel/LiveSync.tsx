@@ -13,9 +13,13 @@ export default function LiveSync() {
   useEffect(() => {
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
     const db = createClient();
-    let timer: ReturnType<typeof setTimeout> | undefined, poll: ReturnType<typeof setInterval> | undefined, hiddenAt = 0, subscribedOnce = false;
+    let timer: ReturnType<typeof setTimeout> | undefined, poll: ReturnType<typeof setInterval> | undefined, hiddenAt = 0, subscribedOnce = false, dirty = false;
     // A própria action revalida o painel e já devolve a tela atualizada (uma ida ao servidor só).
-    const sync = () => { clearTimeout(timer); timer = setTimeout(() => startTransition(() => { syncPanel(); }), 100); };
+    // Mudanças em sequência (um salvar mexe em várias tabelas) viram uma atualização só; aba escondida atualiza ao voltar.
+    const sync = () => {
+      if (document.hidden) { dirty = true; return; }
+      clearTimeout(timer); timer = setTimeout(() => startTransition(() => { syncPanel(); }), 400);
+    };
     let channel: ReturnType<typeof db.channel> | undefined;
     db.auth.getSession().then(async ({ data }) => {
       if (data.session) await db.realtime.setAuth(data.session.access_token);
@@ -30,7 +34,7 @@ export default function LiveSync() {
           if ((status === "CHANNEL_ERROR" || status === "TIMED_OUT") && !poll) poll = setInterval(sync, 30_000);
         });
     });
-    const onVisible = () => { if (document.hidden) hiddenAt = Date.now(); else if (hiddenAt && Date.now() - hiddenAt > 15_000) sync(); };
+    const onVisible = () => { if (document.hidden) hiddenAt = Date.now(); else if (dirty || (hiddenAt && Date.now() - hiddenAt > 15_000)) { dirty = false; sync(); } };
     document.addEventListener("visibilitychange", onVisible);
     return () => { clearTimeout(timer); clearInterval(poll); document.removeEventListener("visibilitychange", onVisible); if (channel) db.removeChannel(channel); };
   }, []);
