@@ -1,32 +1,11 @@
 import Image from "next/image";
 import AnimateIn from "./AnimateIn";
-import { Heart, Eye, Diamond } from "lucide-react";
 import { paragraphs as toParagraphs, type SiteContent } from "@/lib/site-content";
 
-const pillarStyles = [
-  {
-    icon: Heart,
-    gradient: "linear-gradient(135deg,#9A6F1E,#6B4A10)",
-    bg: "linear-gradient(135deg,#FBF7EE,#FDFAF7)",
-    border: "#EEDFBF",
-  },
-  {
-    icon: Eye,
-    gradient: "linear-gradient(135deg,#C9973A,#A87B25)",
-    bg: "linear-gradient(135deg,#FFF8E7,#FDFAF7)",
-    border: "#E8C882",
-  },
-  {
-    icon: Diamond,
-    gradient: "linear-gradient(135deg,#9A6F1E,#C9973A)",
-    bg: "linear-gradient(135deg,#FBF7EE,#FFF8E7)",
-    border: "#DEC58E",
-  },
-];
+const numerals = ["I", "II", "III", "IV", "V", "VI"];
 
 export default function About({ content: c }: { content: SiteContent["about"] }) {
   const pillars = c.pillars
-    .map((p, i) => ({ ...pillarStyles[i % pillarStyles.length], ...p }))
     .filter((p) => p.title.trim() || p.text.trim());
   const paragraphs = toParagraphs(c.text);
 
@@ -143,38 +122,52 @@ export default function About({ content: c }: { content: SiteContent["about"] })
         </div>
 
         {/* Mission / Vision / Values */}
-        <div className={`grid gap-6 ${pillars.length >= 3 ? "md:grid-cols-3" : pillars.length === 2 ? "md:grid-cols-2" : ""}`}>
-          {pillars.map((p, i) => (
-            <AnimateIn key={i} animation="up" delay={i * 150}>
-              <div
-                className="hover-lift p-8 rounded-2xl relative overflow-hidden group"
-                style={{ background: p.bg, border: `1px solid ${p.border}` }}
-              >
-                <div
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                  style={{ background: "linear-gradient(135deg,rgba(154,111,30,0.04),rgba(201,151,58,0.04))" }}
-                />
-                <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center mb-5"
-                  style={{ background: p.gradient }}
-                >
-                  <p.icon size={20} className="text-white" />
+        <div
+          className={`grid border-y divide-y md:divide-y-0 md:divide-x divide-[#EEDFBF] border-[#EEDFBF] ${pillars.length >= 3 ? "md:grid-cols-3" : pillars.length === 2 ? "md:grid-cols-2" : ""}`}
+        >
+          {pillars.map((p, i) => {
+            const lines = p.text.split("\n").map((l) => l.trim()).filter(Boolean);
+            return (
+              <AnimateIn key={i} animation="up" delay={i * 120} className="py-10 md:py-12 md:px-10 md:first:pl-0 md:last:pr-0">
+                <div>
+                  <div className="flex items-baseline gap-4 mb-6">
+                    <span
+                      className="italic text-lg"
+                      style={{ fontFamily: "var(--font-cormorant), serif", color: "#C9973A" }}
+                    >
+                      {numerals[i] ?? i + 1}.
+                    </span>
+                    <h3
+                      className="text-3xl font-light tracking-wide"
+                      style={{ fontFamily: "var(--font-cormorant), serif", color: "#3B2A12" }}
+                    >
+                      {p.title}
+                    </h3>
+                  </div>
+                  {lines.length > 1 ? (
+                    <ul className="flex flex-col">
+                      {lines.map((l, j) => (
+                        <li
+                          key={j}
+                          className="italic text-xl leading-9"
+                          style={{ fontFamily: "var(--font-cormorant), serif", color: "#6B4A10" }}
+                        >
+                          {l}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p
+                      className="text-[15px] font-light leading-7"
+                      style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B5A4B" }}
+                    >
+                      {p.text}
+                    </p>
+                  )}
                 </div>
-                <h3
-                  className="text-2xl font-light mb-3"
-                  style={{ fontFamily: "var(--font-cormorant), serif", color: "#3B2A12" }}
-                >
-                  {p.title}
-                </h3>
-                <p
-                  className="text-sm font-light leading-7 whitespace-pre-line"
-                  style={{ fontFamily: "var(--font-lato), sans-serif", color: "#6B5A4B" }}
-                >
-                  {p.text}
-                </p>
-              </div>
-            </AnimateIn>
-          ))}
+              </AnimateIn>
+            );
+          })}
         </div>
       </div>
     </section>
