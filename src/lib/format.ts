@@ -82,6 +82,9 @@ export function whatsappLink(phone: string | null | undefined, text?: string) {
   return `https://wa.me/${d}${text ? `?text=${encodeURIComponent(text)}` : ""}`;
 }
 
+/** Link de anamnese sem os hífens do token: com eles o WhatsApp lia o UUID como chave Pix e o resto do link ia como texto. */
+export const anamnesisUrl = (site: string, token: string) => `${site}/anamnese/${token.replace(/-/g, "")}`;
+
 export const firstName = (name: string) => name.trim().split(/\s+/)[0] ?? name;
 
 export const STATUS_LABEL: Record<AppointmentStatus, string> = {

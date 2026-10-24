@@ -13,7 +13,7 @@ export default function AnamnesisLinkButton({ appointmentId, phone, greeting, st
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [pending, start] = useTransition();
-  const message = (url: string) => `${greeting} Para seu atendimento, preencha sua ficha de anamnese neste link (válido por 2 horas): ${url}`;
+  const message = (url: string) => `${greeting} Para seu atendimento, preencha sua ficha de anamnese neste link (válido por 2 horas):\n\n${url}`;
 
   const generate = () => {
     const tab = phone ? window.open("", "_blank") : null;

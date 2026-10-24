@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { requireAdmin, requireStaff } from "@/lib/dal";
-import { addDays, digits, SITE_URL, todaySP } from "@/lib/format";
+import { addDays, anamnesisUrl, digits, SITE_URL, todaySP } from "@/lib/format";
 import { anamnesisUpdate } from "@/lib/anamnesis";
 import { DEFAULT_CONSENT, formOrDefault, sanitizeForm, type AnamnesisFormDef } from "@/lib/anamnesis-schema";
 import { bool, fail, int, isDate, isTime, isUuid, money, opt, str } from "@/lib/form";
@@ -112,7 +112,7 @@ export async function createAnamnesisLink(appointmentId: string): Promise<Anamne
     .insert({ appointment_id: appt.id, client_id: appt.client_id }).select("token, expires_at").single();
   if (error) return { ok: false, message: "Não foi possível gerar o link. A migração do banco já foi aplicada?" };
   refresh();
-  return { ok: true, url: `${SITE_URL}/anamnese/${data.token}`, expiresAt: data.expires_at };
+  return { ok: true, url: anamnesisUrl(SITE_URL, data.token), expiresAt: data.expires_at };
 }
 
 export async function setConsent(fd: FormData) {

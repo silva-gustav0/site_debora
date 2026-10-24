@@ -1,5 +1,5 @@
 import { useStatus } from "@powersync/react-native";
-import { brl, dateSP, fillTemplate, firstName, fmtDate, fmtTime, fmtWeekday, formatPhone, STATUS_LABEL, whatsappLink } from "@shared/format";
+import { anamnesisUrl, brl, dateSP, fillTemplate, firstName, fmtDate, fmtTime, fmtWeekday, formatPhone, STATUS_LABEL, whatsappLink } from "@shared/format";
 import { toTimestamp } from "@shared/hours";
 import type { Settings } from "@shared/types";
 import { LinearGradient } from "expo-linear-gradient";
@@ -45,7 +45,7 @@ export default function AppointmentDetail() {
   const wa = (key: keyof Settings["templates"]) => () => Linking.openURL(whatsappLink(a.client_phone, fillTemplate(settings.templates[key], vars)) ?? "");
   const update = (patch: DbRow) => save(toast, write((w) => w.update("appointments", a.id, patch)));
   const { covered, due } = voucherSplit(a);
-  const anamnesisMsg = (url: string) => `Olá, ${vars.nome}! Para seu atendimento, preencha sua ficha de anamnese neste link (válido por 2 horas): ${url}`;
+  const anamnesisMsg = (url: string) => `Olá, ${vars.nome}! Para seu atendimento, preencha sua ficha de anamnese neste link (válido por 2 horas):\n\n${url}`;
   const future = open && Date.parse(a.starts_at) > now;
 
   const reschedule = async () => {
@@ -59,7 +59,7 @@ export default function AppointmentDetail() {
     await supabase.from("anamnesis_links").update({ revoked_at: new Date().toISOString() }).eq("appointment_id", a.id).is("revoked_at", null);
     const { data, error } = await supabase.from("anamnesis_links").insert({ appointment_id: a.id, client_id: a.client_id }).select("token, expires_at").single();
     if (error || !data) return toast("Não foi possível gerar o link. Aguarde a sincronização e tente de novo.", "error");
-    const url = `${SITE_URL}/anamnese/${data.token}`;
+    const url = anamnesisUrl(SITE_URL, data.token);
     setAnamnesis({ url, expires: data.expires_at });
     const w = whatsappLink(a.client_phone, anamnesisMsg(url));
     if (w) Linking.openURL(w);

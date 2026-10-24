@@ -9,7 +9,10 @@ export type AnamnesisLinkView =
 /** Valida o token do link de anamnese e devolve o cliente ligado a ele (só se ainda estiver valendo). */
 export async function getAnamnesisLink(token: string): Promise<AnamnesisLinkView> {
   const db = createAdminClient();
-  if (!db || !/^[0-9a-f-]{36}$/i.test(token)) return { state: "invalid" };
+  // Aceita o token com ou sem hífens (os links enviados pelo WhatsApp vão sem).
+  const hex = token.replace(/-/g, "").toLowerCase();
+  if (!db || !/^[0-9a-f]{32}$/.test(hex)) return { state: "invalid" };
+  token = `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
   const { data } = await db.from("anamnesis_links")
     .select("token, client_id, expires_at, submitted_at, revoked_at, clients(name, anamnesis), appointments(starts_at, status, services(name))")
     .eq("token", token).maybeSingle();
