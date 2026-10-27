@@ -7,11 +7,11 @@ import {
   Menu, Package, Repeat, Search, Settings, Sparkles, UserCog, Users, Wallet, X,
 } from "lucide-react-native";
 import { type ReactNode, useEffect, useRef, useState } from "react";
-import { Linking, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from "react-native";
+import { Linking, Modal, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Brand, Font } from "@/constants/brand";
 import { SITE_URL, useMe } from "@/db/hooks";
-import { useToast } from "@/components/ui";
+import { TextBox, useToast } from "@/components/ui";
 import { useSession } from "@/lib/session";
 
 type Item = { href: string; label: string; short?: string; icon: LucideIcon; badge?: "agenda" | "estoque" | "financeiro" };
@@ -130,7 +130,7 @@ function Full({ onNavigate }: { onNavigate?: () => void }) {
       </Pressable>
       <View style={s.search}>
         <Search size={14} color="rgba(255,255,255,0.4)" />
-        <TextInput
+        <TextBox
           value={q} onChangeText={setQ} placeholder="Buscar cliente…" placeholderTextColor="rgba(255,255,255,0.4)" style={s.searchInput}
           returnKeyType="search" onSubmitEditing={() => { nav(`/clientes?q=${encodeURIComponent(q)}`); setQ(""); }}
         />

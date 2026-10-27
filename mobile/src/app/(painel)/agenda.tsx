@@ -11,10 +11,10 @@ import {
 import { useEffect, useState } from "react";
 import { Linking, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import {
-  Badge, Button, Card, Chip, ConfirmButton, Empty, ListItem, Row, Screen, Section, Segmented, Sheet, Txt, useToast, useWide,
+  Badge, Button, Card, Chip, ConfirmButton, Empty, ListItem, Row, Screen, Section, Segmented, Select, Sheet, Txt, useToast, useWide,
 } from "@/components/ui";
 import { Brand, Font } from "@/constants/brand";
-import { SITE_URL, useSettings } from "@/db/hooks";
+import { SITE_URL, useServices, useSettings } from "@/db/hooks";
 import { save, write } from "@/db/write";
 import { type Appt, ApptItem, between, STATUS_STYLE, ts, useAppts, useRows } from "@/lib/agenda";
 
@@ -36,11 +36,15 @@ export default function Agenda() {
   const [view, setView] = useState<"dia" | "semana">(wide ? "semana" : "dia");
   const [block, setBlock] = useState<Block | null>(null);
   const [picking, setPicking] = useState(false);
+  const [svc, setSvc] = useState("");
+  const services = useServices();
   const monday = addDays(d, -((weekday(d) + 6) % 7));
   const from = view === "dia" ? d : monday;
   const to = view === "dia" ? d : addDays(monday, 6);
   const [where, ...params] = between(from, to);
-  const appts = useAppts(where, params);
+  const allAppts = useAppts(where, params);
+  // Filtro por procedimento: a grade e os números mostram só esse serviço.
+  const appts = svc ? allAppts.filter((a) => a.service_id === svc) : allAppts;
   const [bw, ...bp] = between(from, to, "starts_at");
   const blocks = useRows<Block>(`select id, ${ts("starts_at")} as starts_at, ${ts("ends_at")} as ends_at, reason from time_blocks where ${bw} order by datetime(starts_at)`, bp);
   const [tw, ...tp] = between(tomorrow, tomorrow);
@@ -111,7 +115,7 @@ export default function Agenda() {
     <Screen
       eyebrow="Agenda"
       title={view === "dia" ? `${fmtWeekday(d, "long")}, ${fmtDate(d, { month: "long", year: undefined })}` : `Semana de ${fmtDate(monday, { year: undefined })}`}
-      subtitle={`${active.length} atendimentos · ${brl(active.reduce((sum, a) => sum + Number(a.price), 0))} previstos · ocupação ${occupancy}%${pending.length ? ` · ${pending.length} a confirmar` : ""}`}
+      subtitle={`${svc ? `Só ${services.find((x) => x.id === svc)?.name ?? "o procedimento escolhido"} (outros horários ocultos) · ` : ""}${active.length} atendimentos · ${brl(active.reduce((sum, a) => sum + Number(a.price), 0))} previstos · ocupação ${occupancy}%${pending.length ? ` · ${pending.length} a confirmar` : ""}`}
       right={
         <>
           <Segmented value={view} options={[{ value: "dia", label: "Dia" }, { value: "semana", label: "Semana" }]} onChange={setView} />
@@ -126,6 +130,12 @@ export default function Agenda() {
         </>
       }
     >
+      <View style={{ maxWidth: 340 }}>
+        <Select
+          label="Procedimento" value={svc} onChange={setSvc} searchable
+          options={[{ value: "", label: "Todos os procedimentos" }, ...services.map((x) => ({ value: x.id, label: x.name }))]}
+        />
+      </View>
       {picking && (
         <DateTimePicker
           value={new Date(`${d}T12:00:00`)} mode="date"

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Download, Search, UserPlus, Users } from "lucide-react";
 import { requireStaff } from "@/lib/dal";
-import { clientsWithStats } from "@/lib/queries";
+import { clientsWithStats, listServices } from "@/lib/queries";
 import { brl, digits, fmtDate, formatPhone, STAGE_LABEL, todaySP } from "@/lib/format";
 import { RECURRENCE_META } from "@/lib/recurrence";
 import ClientForm from "@/components/painel/ClientForm";
@@ -12,6 +12,8 @@ import type { ClientStage } from "@/lib/types";
 export const metadata = { title: "Clientes" };
 
 const normalize = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+/** Sem vir há pelo menos isso e sem nada marcado: "sumidas". */
+const AWAY_DAYS = 60;
 const SORTS = { nome: "Nome", recentes: "Cadastro recente", visitas: "Mais visitas", valor: "Maior valor", ultima: "Última visita" } as const;
 
 export default async function ClientsPage({ searchParams }: PageProps<"/painel/clientes">) {
@@ -22,12 +24,25 @@ export default async function ClientsPage({ searchParams }: PageProps<"/painel/c
   const stage = typeof sp.etapa === "string" && sp.etapa in STAGE_LABEL ? (sp.etapa as ClientStage) : null;
   const sort = typeof sp.ordem === "string" && sp.ordem in SORTS ? (sp.ordem as keyof typeof SORTS) : "nome";
 
-  const all = await clientsWithStats(supabase, today);
+  const proc = typeof sp.proc === "string" ? sp.proc : "";
+  const away = sp.sumidas === "1";
+  const [all, services, procRes] = await Promise.all([
+    clientsWithStats(supabase, today),
+    listServices(supabase),
+    proc ? supabase.from("appointments").select("client_id, starts_at").eq("service_id", proc).eq("status", "concluido") : Promise.resolve({ data: [] }),
+  ]);
+  // Quem já fez o procedimento escolhido e quando foi a última vez.
+  const procLast = new Map<string, string>();
+  for (const a of (procRes.data ?? []) as { client_id: string; starts_at: string }[]) {
+    if ((procLast.get(a.client_id) ?? "") < a.starts_at) procLast.set(a.client_id, a.starts_at);
+  }
   const nq = normalize(q);
   const dq = digits(q);
   const list = all
     .filter((c) => {
       if (stage && c.stage !== stage) return false;
+      if (proc && !procLast.has(c.id)) return false;
+      if (away && (c.recurrence.status === "agendada" || (c.recurrence.daysSinceLast ?? -1) < AWAY_DAYS)) return false;
       if (!q) return true;
       return normalize(c.name).includes(nq) || (c.email ?? "").includes(nq) || (dq.length >= 3 && (c.phone ?? "").includes(dq)) || c.tags.some((t) => normalize(t).includes(nq));
     })
@@ -42,7 +57,7 @@ export default async function ClientsPage({ searchParams }: PageProps<"/painel/c
   const counts = all.reduce<Record<string, number>>((acc, c) => ({ ...acc, [c.stage]: (acc[c.stage] ?? 0) + 1 }), {});
   const href = (patch: Record<string, string | null>) => {
     const p = new URLSearchParams();
-    const cur = { q: q || null, etapa: stage, ordem: sort === "nome" ? null : sort, ...patch };
+    const cur = { q: q || null, etapa: stage, ordem: sort === "nome" ? null : sort, proc: proc || null, sumidas: away ? "1" : null, ...patch };
     for (const [k, v] of Object.entries(cur)) if (v) p.set(k, v);
     const s = p.toString();
     return `/painel/clientes${s ? `?${s}` : ""}`;
@@ -76,6 +91,8 @@ export default async function ClientsPage({ searchParams }: PageProps<"/painel/c
       <div className="flex flex-col lg:flex-row lg:items-center gap-3 mb-4">
         <form className="relative flex-1 max-w-md" action="/painel/clientes">
           {stage && <input type="hidden" name="etapa" value={stage} />}
+          {proc && <input type="hidden" name="proc" value={proc} />}
+          {away && <input type="hidden" name="sumidas" value="1" />}
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A69885]" aria-hidden="true" />
           <input name="q" defaultValue={q} placeholder="Nome, telefone, e-mail ou etiqueta" className="p-input pl-9" aria-label="Buscar clientes" />
         </form>
@@ -86,6 +103,20 @@ export default async function ClientsPage({ searchParams }: PageProps<"/painel/c
             ...Object.entries(STAGE_LABEL).map(([v, l]) => ({ key: v, label: `${l} · ${counts[v] ?? 0}`, href: href({ etapa: v }) })),
           ]}
         />
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3 mb-4">
+        <form action="/painel/clientes" className="flex gap-1">
+          {q && <input type="hidden" name="q" value={q} />}
+          {stage && <input type="hidden" name="etapa" value={stage} />}
+          {away && <input type="hidden" name="sumidas" value="1" />}
+          <select name="proc" defaultValue={proc} aria-label="Filtrar por procedimento feito" className="p-input w-auto py-[7px] max-w-[260px]">
+            <option value="">Qualquer procedimento</option>
+            {services.map((s) => <option key={s.id} value={s.id}>Já fez: {s.name}</option>)}
+          </select>
+          <button className="p-btn-ghost">Filtrar</button>
+        </form>
+        <Link href={href({ sumidas: away ? null : "1" })} className="p-chip" aria-current={away}>Sem vir há {AWAY_DAYS}+ dias e sem horário marcado</Link>
       </div>
 
       <Card bodyClassName="overflow-x-auto">
@@ -103,7 +134,7 @@ export default async function ClientsPage({ searchParams }: PageProps<"/painel/c
         ) : (
           <table className="p-table">
             <thead>
-              <tr><th>Cliente</th><th>WhatsApp</th><th>Etapa</th><th className="text-right">Visitas</th><th>Última visita</th><th className="text-right">Investido</th><th>Retorno</th></tr>
+              <tr><th>Cliente</th><th>WhatsApp</th><th>Etapa</th><th className="text-right">Visitas</th><th>Última visita</th>{proc && <th>Último deste procedimento</th>}<th className="text-right">Investido</th><th>Retorno</th></tr>
             </thead>
             <tbody>
               {list.map((c) => (
@@ -120,7 +151,8 @@ export default async function ClientsPage({ searchParams }: PageProps<"/painel/c
                   <td className="p-num whitespace-nowrap">{formatPhone(c.phone) || "—"}</td>
                   <td><StageBadge stage={c.stage} /></td>
                   <td className="text-right p-num">{c.stats?.visits ?? 0}</td>
-                  <td className="whitespace-nowrap">{fmtDate(c.stats?.last_visit)}</td>
+                  <td className="whitespace-nowrap">{fmtDate(c.stats?.last_visit)}{c.recurrence.daysSinceLast !== null && <span className="block text-xs text-[#857566]">há {c.recurrence.daysSinceLast} dias</span>}</td>
+                  {proc && <td className="whitespace-nowrap">{fmtDate(procLast.get(c.id))}</td>}
                   <td className="text-right p-num whitespace-nowrap">{brl(c.stats?.total_spent)}</td>
                   <td><Badge tone={RECURRENCE_META[c.recurrence.status].tone}>{RECURRENCE_META[c.recurrence.status].label}</Badge></td>
                 </tr>

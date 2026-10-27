@@ -5,8 +5,9 @@ import type { ClientStage } from "@shared/types";
 import { router, useLocalSearchParams } from "expo-router";
 import { Download, MessageCircle, Search, UserPlus, Users } from "lucide-react-native";
 import { useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
-import { Avatar, Badge, Button, Card, Chip, Empty, ListItem, Row, Screen, Stat, useToast, useWide } from "@/components/ui";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { Avatar, Badge, Button, Card, Chip, Empty, ListItem, Row, Screen, Select, Stat, TextBox, useToast, useWide } from "@/components/ui";
+import { useServices } from "@/db/hooks";
 import { cs, StatGrid, Table, T, useLandscape } from "@/components/client-ui";
 import { Brand, Font } from "@/constants/brand";
 import { norm, STAGE_TONE } from "@/lib/clients";
@@ -18,6 +19,8 @@ import { type WaTarget, WhatsAppSheet } from "@/components/whatsapp-sheet";
 const shownTags = (c: { tags: string[] }) => c.tags.filter((t) => !t.startsWith("importado-"));
 const PAGE = 60; // desenha a lista aos poucos (centenas de fichas deixam o tablet lento)
 
+/** Sem vir há pelo menos isso e sem nada marcado: "sumidas". */
+const AWAY_DAYS = 60;
 const SORTS = { nome: "Nome", recentes: "Cadastro recente", visitas: "Mais visitas", valor: "Maior valor", ultima: "Última visita" } as const;
 type Sort = keyof typeof SORTS;
 type Item = Client & { email: string | null; spent: number };
@@ -50,6 +53,13 @@ export default function Clientes() {
   const [stage, setStage] = useState<string | null>(null);
   const [tag, setTag] = useState<string | null>(null);
   const [birthdays, setBirthdays] = useState(false);
+  const [away, setAway] = useState(false);
+  const [proc, setProc] = useState("");
+  const services = useServices();
+  // Quem já fez o procedimento escolhido e quando foi a última vez.
+  const { data: procRows } = useQuery<{ client_id: string; last: string }>(
+    "select client_id, max(strftime('%Y-%m-%dT%H:%M:%SZ', starts_at)) as last from appointments where service_id = ? and status = 'concluido' and client_id is not null group by client_id", [proc]);
+  const procLast = useMemo(() => new Map(procRows.map((r) => [r.client_id, r.last])), [procRows]);
   const [sort, setSort] = useState<Sort>("nome");
   const [wa, setWa] = useState<WaTarget | null>(null);
   const [shown, setShown] = useState(PAGE);
@@ -61,6 +71,7 @@ export default function Clientes() {
   const dq = digits(q);
   const list = all.filter((c) =>
     (!stage || c.stage === stage) && (!tag || c.tags.includes(tag)) && (!birthdays || c.birth_date?.slice(5, 7) === month) &&
+    (!proc || procLast.has(c.id)) && (!away || (c.recurrence.status !== "agendada" && (c.recurrence.daysSinceLast ?? -1) >= AWAY_DAYS)) &&
     (!nq || norm(c.name).includes(nq) || norm(c.email).includes(nq) || (dq.length >= 3 && (c.phone ?? "").includes(dq)) || c.tags.some((t) => norm(t).includes(nq))),
   ).sort(sorter(sort));
   const withVisits = all.filter((c) => Number(c.visits) > 0);
@@ -91,6 +102,11 @@ export default function Clientes() {
     </Pressable>
   ) : null;
   const page = list.slice(0, shown);
+  const lastCell = (c: Item) => {
+    const last = proc ? procLast.get(c.id) : c.last_visit;
+    const since = proc ? null : c.recurrence.daysSinceLast;
+    return since == null ? fmtDate(last) : `${fmtDate(last)}\nhá ${since} dias`;
+  };
   const rec = (c: Item) => <Badge tone={RECURRENCE_META[c.recurrence.status].tone}>{RECURRENCE_META[c.recurrence.status].label}</Badge>;
 
   return (
@@ -116,7 +132,7 @@ export default function Clientes() {
       <View style={{ flexDirection: landscape ? "row" : "column", alignItems: landscape ? "center" : "stretch", gap: 12 }}>
         <View style={{ flex: landscape ? 1 : undefined, maxWidth: 448 }}>
           <View style={{ position: "absolute", left: 12, top: 13, zIndex: 1 }}><Search size={15} color="#A69885" /></View>
-          <TextInput
+          <TextBox
             value={q} onChangeText={setQ} placeholder="Nome, telefone, e-mail ou etiqueta" placeholderTextColor={Brand.placeholder}
             accessibilityLabel="Buscar clientes" style={{ backgroundColor: Brand.white, borderColor: Brand.inputLine, borderWidth: 1, borderRadius: 10, paddingLeft: 36, paddingRight: 12, minHeight: 42, fontSize: 14, color: Brand.ink, fontFamily: Font.body }}
           />
@@ -130,8 +146,16 @@ export default function Clientes() {
       </View>
       <Row wrap gap={6}>
         <Chip label="Aniversariantes do mês" on={birthdays} onPress={() => setBirthdays(!birthdays)} />
+        <Chip label={`Sem vir há ${AWAY_DAYS}+ dias e sem horário marcado`} on={away} onPress={() => setAway(!away)} />
         {allTags.map((t) => <Chip key={t} label={`#${t}`} on={tag === t} onPress={() => setTag(tag === t ? null : t)} />)}
       </Row>
+
+      <View style={{ maxWidth: 360 }}>
+        <Select
+          label="Procedimento já feito" value={proc} onChange={setProc} searchable
+          options={[{ value: "", label: "Qualquer procedimento" }, ...services.map((x) => ({ value: x.id, label: x.name }))]}
+        />
+      </View>
 
       <Card bodyStyle={{ padding: 0, gap: 0 }}>
         <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 8, paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: Brand.lineSoft }}>
@@ -148,10 +172,10 @@ export default function Clientes() {
           <Table
             minWidth={860}
             columns={[{ label: "Cliente", flex: 2.2 }, { label: "WhatsApp", flex: 1.5 }, { label: "Etapa", flex: 1.1 }, { label: "Visitas", flex: 0.9, right: true },
-              { label: "Última visita", flex: 1.3 }, { label: "Investido", flex: 1.1, right: true }, { label: "Retorno", flex: 1.5 }, { label: "", flex: 0.6, right: true }]}
+              { label: proc ? "Último deste procedimento" : "Última visita", flex: 1.3 }, { label: "Investido", flex: 1.1, right: true }, { label: "Retorno", flex: 1.5 }, { label: "", flex: 0.6, right: true }]}
             rows={page.map((c) => ({
               key: c.id, onPress: () => open(c.id),
-              cells: [nameCell(c), formatPhone(c.phone) || "—", stageBadge(c.stage), String(c.visits ?? 0), fmtDate(c.last_visit), brl(c.spent), rec(c), waBtn(c)],
+              cells: [nameCell(c), formatPhone(c.phone) || "—", stageBadge(c.stage), String(c.visits ?? 0), lastCell(c), brl(c.spent), rec(c), waBtn(c)],
             }))}
           />
         ) : (

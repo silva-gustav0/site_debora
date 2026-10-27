@@ -65,6 +65,8 @@ export type AppointmentRow = {
   /** Quanto o voucher cobriu (gravado ao concluir). */
   voucher_amount: number | null;
   discount_pct: number;
+  /** Sessões criadas juntas (agendamento recorrente). */
+  series_id: string | null;
 };
 
 export type AppointmentVoucher = { id: string; code: string; kind: "servico" | "valor"; balance: number; service_name: string | null };

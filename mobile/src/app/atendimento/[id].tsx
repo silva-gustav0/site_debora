@@ -5,10 +5,10 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import { AlertTriangle, ArrowLeft, Check, CheckCircle2, ChevronDown, History, NotebookPen, Pause, Play, Plus } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
-import { Animated, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, Vibration, View } from "react-native";
+import { Animated, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, Vibration, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Circle, G, Path } from "react-native-svg";
-import { Empty, Screen, Sheet, Txt } from "@/components/ui";
+import { Empty, Screen, Sheet, TextBox, Txt } from "@/components/ui";
 import { Brand, Font } from "@/constants/brand";
 import { CompleteForm, isOpen, Label, useAppts, useRows } from "@/lib/agenda";
 import { type Clock, clearAttendance, loadAttendance, type Notes, saveAttendance } from "@/lib/attendance-store";
@@ -208,7 +208,7 @@ export default function Attendance() {
             })}
           </ScrollView>
           <View style={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 16 }}>
-            <TextInput
+            <TextBox
               multiline value={notes.text} onChangeText={(text) => setNotes({ ...notes, text })} placeholderTextColor={Brand.placeholder} style={s.textarea}
               placeholder={`Anotações livres sobre ${a.client_name ? firstName(a.client_name) : "a cliente"}…`}
             />

@@ -9,9 +9,9 @@ import {
 } from "lucide-react-native";
 import { type ReactNode, useState } from "react";
 import { Linking, Share, StyleSheet, Text, View } from "react-native";
-import { Avatar, Badge, Button, DateField, Empty, Field, Row, TimeField, Txt, useToast } from "@/components/ui";
+import { Avatar, Badge, Button, ConfirmButton, DateField, Empty, Field, Row, TimeField, Txt, useToast } from "@/components/ui";
 import { Brand, Font } from "@/constants/brand";
-import { SITE_URL, useSettings } from "@/db/hooks";
+import { SITE_URL, useMe, useSettings } from "@/db/hooks";
 import { type Row as DbRow, save, write } from "@/db/write";
 import { discountLabel } from "@shared/welcome";
 import { CompleteForm, DrawerScreen, isOpen, Label, PKG_SQL, type Pkg, STATUS_TONE, useAppts, useRows, voucherSplit } from "@/lib/agenda";
@@ -28,6 +28,12 @@ export default function AppointmentDetail() {
   const a = useAppts("a.id = ?", [id])[0];
   const pkg = useRows<Pkg>(`${PKG_SQL} where cp.id = ?`, [a?.client_package_id ?? ""])[0];
   const settings = useSettings();
+  const isAdmin = useMe()?.isAdmin ?? false;
+  // Recorrência: sessões em aberto da série a partir desta (o cancelamento atinge todas).
+  const seriesLeft = useRows<{ id: string }>(
+    "select id from appointments where series_id = ? and datetime(starts_at) >= datetime(?) and status in ('solicitado','confirmado')",
+    [a?.series_id ?? "", a?.starts_at ?? ""],
+  );
   const { connected } = useStatus();
   const toast = useToast();
   const [newDate, setNewDate] = useState<string | null>(null);
@@ -47,6 +53,12 @@ export default function AppointmentDetail() {
   const { covered, due } = voucherSplit(a);
   const anamnesisMsg = (url: string) => `Olá, ${vars.nome}! Para seu atendimento, preencha sua ficha de anamnese neste link (válido por 2 horas):\n\n${url}`;
   const future = open && Date.parse(a.starts_at) > now;
+
+  /** Cancela esta sessão e as próximas em aberto da recorrência (só administradoras). */
+  const cancelSeries = () => save(toast, write(async (w) => {
+    const cancel_reason = reason.trim().slice(0, 300) || "Recorrência cancelada pela clínica";
+    for (const r of seriesLeft) await w.update("appointments", r.id, { status: "cancelado", cancel_reason });
+  })).then((ok) => { if (ok) toast("Recorrência cancelada."); });
 
   const reschedule = async () => {
     const d = newDate ?? day, t = newTime ?? time;
@@ -157,6 +169,15 @@ export default function AppointmentDetail() {
               <Button small variant="danger" icon={XCircle} onPress={() => update({ status: "cancelado", cancel_reason: reason.trim().slice(0, 300) || "Cancelado pela clínica" })}>Cancelar horário</Button>
             </View>
           </Row>
+          {isAdmin && seriesLeft.length > 1 && (
+            <View style={[s.box, { borderColor: "#F2C1C1", backgroundColor: "#FFFBFB" }]}>
+              <Txt.strong style={{ fontSize: 14 }}>Cancelar recorrência</Txt.strong>
+              <Txt.muted>{`Cancela esta sessão e as próximas em aberto desta recorrência (${seriesLeft.length} no total). As já concluídas não mudam. Usa o motivo escrito acima.`}</Txt.muted>
+              <View style={{ alignSelf: "flex-start" }}>
+                <ConfirmButton confirmText={`Cancelar ${seriesLeft.length} sessões`} onConfirm={cancelSeries}>Cancelar recorrência</ConfirmButton>
+              </View>
+            </View>
+          )}
         </>
       )}
 

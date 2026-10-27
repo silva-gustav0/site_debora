@@ -27,7 +27,7 @@ const ONE = (v: string | string[] | undefined) => (typeof v === "string" ? v : u
 
 export default async function AgendaPage({ searchParams }: PageProps<"/painel/agenda">) {
   const sp = await searchParams;
-  const { supabase } = await requireStaff();
+  const { supabase, staff } = await requireStaff();
   const today = todaySP();
 
   const d = ONE(sp.d) && /^\d{4}-\d{2}-\d{2}$/.test(ONE(sp.d)!) ? ONE(sp.d)! : today;
@@ -37,13 +37,14 @@ export default async function AgendaPage({ searchParams }: PageProps<"/painel/ag
   const clientParam = ONE(sp.cliente);
   const showNew = ONE(sp.novo) === "1" || Boolean(clientParam);
   const showBlock = ONE(sp.bloquear) === "1";
+  const serviceFilter = ONE(sp.servico) ?? "";
 
   const monday = addDays(d, -((weekday(d) + 6) % 7));
   const from = view === "dia" ? d : monday;
   const to = view === "dia" ? d : addDays(monday, 6);
   const tomorrow = addDays(today, 1);
 
-  const [appts, blocks, settings, services, clientsRes, packages, tomorrowAppts, drawerAppt, anamnesisRes] = await Promise.all([
+  const [allAppts, blocks, settings, services, clientsRes, packages, tomorrowAppts, drawerAppt, anamnesisRes] = await Promise.all([
     appointmentsBetween(supabase, from, to),
     blocksBetween(supabase, from, to),
     getSettings(supabase),
@@ -55,10 +56,14 @@ export default async function AgendaPage({ searchParams }: PageProps<"/painel/ag
     apptId ? supabase.from("anamnesis_links").select("token, expires_at, submitted_at, revoked_at, created_at").eq("appointment_id", apptId).order("created_at", { ascending: false }).limit(1).maybeSingle() : Promise.resolve({ data: null }),
   ]);
 
+  // Filtro por procedimento: a grade e os números mostram só esse serviço.
+  const appts = serviceFilter ? allAppts.filter((a) => a.service_id === serviceFilter) : allAppts;
+  const svcQ = serviceFilter ? `&servico=${encodeURIComponent(serviceFilter)}` : "";
+
   let days = Array.from({ length: view === "dia" ? 1 : 7 }, (_, i) => addDays(from, i));
   if (view === "semana") days = days.filter((day) => weekday(day) !== 0 || appts.some((a) => dateSP(a.starts_at) === day));
 
-  const params = { view, d } as Record<string, string>;
+  const params = { view, d, ...(serviceFilter && { servico: serviceFilter }) } as Record<string, string>;
   const hrefFor = (extra: Record<string, string>) => `/painel/agenda?${new URLSearchParams({ ...params, ...extra })}`;
   const baseHref = hrefFor({});
 
@@ -81,6 +86,11 @@ export default async function AgendaPage({ searchParams }: PageProps<"/painel/ag
   const nowMin = toMinutes(fmtTime(new Date().toISOString()));
   const shift = view === "dia" ? 1 : 7;
   const drawerA = drawerAppt.data as AppointmentWithRefs | null;
+  // Recorrência: quantas sessões em aberto da série (esta e as próximas) o cancelamento atinge.
+  const seriesLeft = drawerA?.series_id && staff.is_admin
+    ? (await supabase.from("appointments").select("id", { count: "exact", head: true }).eq("series_id", drawerA.series_id)
+        .gte("starts_at", drawerA.starts_at).in("status", ["solicitado", "confirmado"])).count ?? 0
+    : 0;
   const drawerBlock = blockId ? blocks.find((b) => b.id === blockId) : undefined;
 
   return (
@@ -93,24 +103,28 @@ export default async function AgendaPage({ searchParams }: PageProps<"/painel/ag
             ? <>{fmtWeekday(d, "long")}, {fmtDate(d, { month: "long", year: undefined })}</>
             : <>Semana de {fmtDate(monday, { year: undefined })}</>
         }
-        subtitle={`${active.length} atendimentos · ${brl(expected)} previstos · ocupação ${occupancy}%${pending.length ? ` · ${pending.length} a confirmar` : ""}`}
+        subtitle={`${serviceFilter ? `Só ${services.find((s) => s.id === serviceFilter)?.name ?? "o procedimento escolhido"} (outros horários ocultos) · ` : ""}${active.length} atendimentos · ${brl(expected)} previstos · ocupação ${occupancy}%${pending.length ? ` · ${pending.length} a confirmar` : ""}`}
         actions={
           <>
             <Chips
               current={view}
               items={[
-                { key: "dia", label: "Dia", href: `/painel/agenda?view=dia&d=${d}` },
-                { key: "semana", label: "Semana", href: `/painel/agenda?view=semana&d=${d}` },
+                { key: "dia", label: "Dia", href: `/painel/agenda?view=dia&d=${d}${svcQ}` },
+                { key: "semana", label: "Semana", href: `/painel/agenda?view=semana&d=${d}${svcQ}` },
               ]}
             />
             <div className="flex items-center gap-1">
-              <Link href={`/painel/agenda?view=${view}&d=${addDays(d, -shift)}`} className="p-btn-ghost" aria-label="Anterior"><ChevronLeft size={16} /></Link>
-              <Link href={`/painel/agenda?view=${view}&d=${today}`} className="p-btn-ghost">Hoje</Link>
-              <Link href={`/painel/agenda?view=${view}&d=${addDays(d, shift)}`} className="p-btn-ghost" aria-label="Próximo"><ChevronRight size={16} /></Link>
+              <Link href={`/painel/agenda?view=${view}&d=${addDays(d, -shift)}${svcQ}`} className="p-btn-ghost" aria-label="Anterior"><ChevronLeft size={16} /></Link>
+              <Link href={`/painel/agenda?view=${view}&d=${today}${svcQ}`} className="p-btn-ghost">Hoje</Link>
+              <Link href={`/painel/agenda?view=${view}&d=${addDays(d, shift)}${svcQ}`} className="p-btn-ghost" aria-label="Próximo"><ChevronRight size={16} /></Link>
             </div>
             <form action="/painel/agenda" className="flex gap-1">
               <input type="hidden" name="view" value={view} />
               <input type="date" name="d" defaultValue={d} aria-label="Ir para data" className="p-input w-auto py-[7px]" />
+              <select name="servico" defaultValue={serviceFilter} aria-label="Filtrar por procedimento" className="p-input w-auto py-[7px] max-w-[190px]">
+                <option value="">Todos os procedimentos</option>
+                {services.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
               <button className="p-btn-ghost">Ir</button>
             </form>
             <Link href={hrefFor({ bloquear: "1" })} scroll={false} className="p-btn-ghost"><Lock size={14} /> Bloquear</Link>
@@ -183,7 +197,7 @@ export default async function AgendaPage({ searchParams }: PageProps<"/painel/ag
 
       {drawerA && (
         <Drawer title="Atendimento" eyebrow={drawerA.source === "site" ? "Agendado pelo site" : "Agendado no painel"} closeHref={baseHref}>
-          <AppointmentPanel appt={drawerA} settings={settings} pkg={packages.find((p) => p.id === drawerA.client_package_id) ?? null} anamnesisLink={anamnesisRes.data as AnamnesisLink | null} />
+          <AppointmentPanel appt={drawerA} settings={settings} pkg={packages.find((p) => p.id === drawerA.client_package_id) ?? null} anamnesisLink={anamnesisRes.data as AnamnesisLink | null} seriesLeft={seriesLeft} />
         </Drawer>
       )}
 
@@ -196,6 +210,7 @@ export default async function AgendaPage({ searchParams }: PageProps<"/painel/ag
             defaultClientId={clientParam}
             defaultDate={ONE(sp.date) ?? (d < today ? today : d)}
             defaultTime={ONE(sp.time)}
+            isAdmin={staff.is_admin}
           />
         </Drawer>
       )}

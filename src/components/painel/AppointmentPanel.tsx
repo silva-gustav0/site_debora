@@ -2,11 +2,12 @@ import Link from "next/link";
 import { discountLabel, withDiscount } from "@/lib/welcome";
 import { BellRing, CalendarClock, CheckCircle2, Clock, Gift, MessageCircle, Package, Play, UserRound, XCircle } from "lucide-react";
 import ActionForm from "./ActionForm";
+import ConfirmButton from "./ConfirmButton";
 import AnamnesisLinkButton from "./AnamnesisLinkButton";
 import SubmitButton from "./SubmitButton";
 import { Avatar, Badge, StatusBadge } from "./ui";
 import {
-  completeAppointment, markReminderSent, rescheduleAppointment, setAppointmentStatus,
+  cancelSeries, completeAppointment, markReminderSent, rescheduleAppointment, setAppointmentStatus,
 } from "@/app/painel/actions";
 import {
   brl, dateSP, fillTemplate, firstName, fmtDate, fmtTime, fmtWeekday, formatPhone, METHOD_LABEL, nowMs, SITE_URL, whatsappLink,
@@ -25,8 +26,12 @@ function StatusButton({ id, status, children, className = "p-btn-ghost p-btn-sm"
 
 /** Tudo sobre um atendimento: dados, mensagens prontas e ações. */
 export default function AppointmentPanel({
-  appt, settings, pkg, anamnesisLink = null,
-}: { appt: AppointmentWithRefs; settings: Settings; pkg?: ClientPackage | null; anamnesisLink?: AnamnesisLink | null }) {
+  appt, settings, pkg, anamnesisLink = null, seriesLeft = 0,
+}: {
+  appt: AppointmentWithRefs; settings: Settings; pkg?: ClientPackage | null; anamnesisLink?: AnamnesisLink | null;
+  /** Sessões em aberto da recorrência a partir desta (só calculado para administradoras). */
+  seriesLeft?: number;
+}) {
   const client = appt.clients;
   const service = appt.services?.name ?? "Atendimento";
   const day = dateSP(appt.starts_at);
@@ -202,6 +207,15 @@ export default function AppointmentPanel({
             <input name="reason" placeholder="Motivo (opcional)" className="p-input" />
             <SubmitButton className="p-btn-ghost p-btn-sm p-btn-danger"><XCircle size={13} /> Cancelar horário</SubmitButton>
           </form>
+          {seriesLeft > 1 && (
+            <form action={cancelSeries} className="sm:col-span-2 rounded-2xl border border-[#F2C1C1] bg-[#FFFBFB] p-4 flex flex-col gap-2">
+              <input type="hidden" name="id" value={appt.id} />
+              <p className="text-sm font-bold text-[#2B221B]">Cancelar recorrência</p>
+              <p className="text-xs text-[#857566]">Cancela esta sessão e as próximas em aberto desta recorrência ({seriesLeft} no total). As já concluídas não mudam.</p>
+              <input name="reason" placeholder="Motivo (opcional)" className="p-input" />
+              <div><ConfirmButton confirmText={`Cancelar ${seriesLeft} sessões`}><XCircle size={13} /> Cancelar recorrência</ConfirmButton></div>
+            </form>
+          )}
         </div>
       )}
 

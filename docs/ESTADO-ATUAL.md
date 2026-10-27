@@ -1,8 +1,32 @@
 # Estado atual do projeto
 
-Última atualização: 30/09/2026. Produção: **Cloudflare Workers** (`clinica-debora`) em
+Última atualização: 27/10/2026. Produção: **Cloudflare Workers** (`clinica-debora`) em
 https://deborasilvaestetica.com.br (DNS e hospedagem no Cloudflare; a Vercel não publica mais).
 Todo push no `master` publica o site (GitHub Actions) e, se mexer em `mobile/**` ou `src/lib/**`, a atualização do app.
+
+## Pedidos da Débora (27/10/2026)
+
+- **Acentos e "ç" no tablet:** letras não entravam nos campos do app. Hipótese: campo controlado do React Native (nova
+  arquitetura) interrompe a composição do teclado. Campos de texto agora usam `TextBox` (`mobile/src/components/ui.tsx`),
+  que não devolve o texto a cada tecla; números/telefone continuam controlados (máscara). **Conferir no tablet.**
+- **Procedimentos opcionais no mesmo horário:** migração `20261027120000_same_client_same_time` troca a regra de
+  sobreposição (a mesma cliente pode ter atendimentos simultâneos; clientes diferentes continuam sem sobrepor).
+  Novo agendamento (painel e app) tem "Procedimentos opcionais no mesmo horário".
+- **Agendamento recorrente (planos):** "Repetir no mesmo horário": dias da semana, total de sessões (5/10/15 ou outro,
+  limitado ao saldo do pacote). Pula dias fechados, bloqueados ou ocupados por outra cliente (`src/lib/repeat.ts`).
+  Só administradoras (aparece só para elas; o painel web também recusa no servidor). Opcionais entram só na
+  primeira sessão. Sessões realizadas/restantes já apareciam em Pacotes e na ficha.
+  As sessões criadas juntas têm o mesmo `appointments.series_id` (migração `20261027140000`): no detalhe do
+  agendamento, "Cancelar recorrência" (só administradoras, dois cliques) cancela esta sessão e as próximas em aberto.
+- **Filtro por procedimento:** na Agenda (só aquele serviço) e em Clientes ("já fez", com a data da última vez).
+  Clientes também ganhou o filtro "Sem vir há 60+ dias e sem horário marcado" e "há N dias" na última visita.
+- **Financeiro previsto pela agenda** (migração `20261027130000_appointment_forecast`, tudo no banco, vale para site,
+  painel e app): todo agendamento vira receita **pendente** (`transactions.forecast = true`, vencimento no dia, Pix),
+  já com desconto de boas-vindas e voucher descontados; sessão de pacote não entra (pago na venda). Mudou preço/data:
+  a previsão acompanha. Cancelado, **falta** ou removido: a previsão some (mesmo se já estava paga). No dia, o pg_cron
+  (`financeiro-agenda-pix`, a cada 30 min) dá como **pago no Pix** ("· Pix (automático)"). Pagamento registrado ao
+  concluir (qualquer forma) substitui a previsão. Agendamentos futuros já existentes ganharam previsão na migração.
+- Contrato para assinar: **não** fazer (o Gustavo não pediu).
 
 ## Onde paramos (29/09/2026)
 

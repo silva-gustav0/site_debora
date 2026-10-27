@@ -25,12 +25,12 @@ export type Appt = {
   confirmed_at: string | null; reminder_sent_at: string | null; cancel_reason: string | null; voucher_id: string | null;
   voucher_amount: number | null; discount_pct: number | null; client_name: string | null; client_phone: string | null; service_name: string | null;
   service_category: string | null; duration_min: number | null; v_code: string | null; v_kind: "servico" | "valor" | null;
-  v_balance: number | null; v_service_name: string | null;
+  v_balance: number | null; v_service_name: string | null; series_id: string | null;
 };
 
 const APPT_SQL = `select a.id, a.client_id, a.service_id, ${ts("a.starts_at")} as starts_at, ${ts("a.ends_at")} as ends_at, a.status,
   a.price, a.notes, a.source, a.client_package_id, a.public_token, ${ts("a.confirmed_at")} as confirmed_at,
-  ${ts("a.reminder_sent_at")} as reminder_sent_at, a.cancel_reason, a.voucher_id, a.voucher_amount, a.discount_pct, c.name as client_name,
+  ${ts("a.reminder_sent_at")} as reminder_sent_at, a.cancel_reason, a.voucher_id, a.voucher_amount, a.discount_pct, a.series_id, c.name as client_name,
   c.phone as client_phone, s.name as service_name, s.category as service_category, s.duration_min, v.code as v_code,
   v.kind as v_kind, v.balance as v_balance, v.service_name as v_service_name
   from appointments a left join clients c on c.id = a.client_id left join services s on s.id = a.service_id

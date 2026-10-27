@@ -283,12 +283,29 @@ export function Chip({ label, on, onPress }: { label: string; on?: boolean; onPr
 }
 
 // ─── Campos ────────────────────────────────────────────────────────────
+/** Teclados sem composição (números, telefone): podem ser controlados, inclusive com máscara. */
+const PLAIN_KEYBOARDS = new Set(["number-pad", "decimal-pad", "numeric", "phone-pad"]);
+
+/**
+ * TextInput que não devolve o texto ao campo a cada tecla. No Android (nova arquitetura), reenviar `value` enquanto
+ * se digita interrompe a composição do teclado e letras como "á", "ã" e "ç" não entram. O campo guarda o que foi
+ * digitado; quando `value` muda por fora (limpar, abrir outro registro), o campo é recriado com o novo texto.
+ */
+export function TextBox({ value, onChangeText, ...props }: TextInputProps) {
+  const [typed, setTyped] = useState(value);
+  const [start, setStart] = useState(value);
+  const [gen, setGen] = useState(0);
+  if (value === undefined || PLAIN_KEYBOARDS.has(props.keyboardType ?? "")) return <TextInput {...props} value={value} onChangeText={onChangeText} />;
+  if (value !== typed) { setTyped(value); setStart(value); setGen(gen + 1); }
+  return <TextInput key={gen} {...props} defaultValue={start} onChangeText={(t) => { setTyped(t); onChangeText?.(t); }} />;
+}
+
 export function Field({ label, hint, error, ...props }: TextInputProps & { label: string; hint?: string; error?: string | null }) {
   const [focus, setFocus] = useState(false);
   return (
     <View style={s.fieldBox}>
       <Text style={s.label}>{label.toUpperCase()}</Text>
-      <TextInput
+      <TextBox
         placeholderTextColor={Brand.placeholder} {...props}
         onFocus={(e) => { setFocus(true); props.onFocus?.(e); }} onBlur={(e) => { setFocus(false); props.onBlur?.(e); }}
         style={[s.input, focus && s.inputFocus, props.multiline && { minHeight: 90, textAlignVertical: "top" }, error && { borderColor: Brand.danger }, props.style]}
@@ -331,7 +348,7 @@ export function Select<T extends string>({ label, value, options, onChange, plac
       </Pressable>
       <Sheet visible={open} onClose={() => { setOpen(false); setQ(""); }} title={label}>
         {(searchable || options.length > 12) && (
-          <TextInput style={[s.input, { marginBottom: 8 }]} placeholder="Buscar…" value={q} onChangeText={setQ} autoFocus placeholderTextColor={Brand.placeholder} />
+          <TextBox style={[s.input, { marginBottom: 8 }]} placeholder="Buscar…" value={q} onChangeText={setQ} autoFocus placeholderTextColor={Brand.placeholder} />
         )}
         <FlatList
           data={list} keyExtractor={(o) => o.value} keyboardShouldPersistTaps="handled" style={{ maxHeight: 420 }}

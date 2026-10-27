@@ -4,11 +4,12 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { requireAdmin, requireStaff } from "@/lib/dal";
-import { addDays, anamnesisUrl, digits, SITE_URL, todaySP } from "@/lib/format";
+import { addDays, anamnesisUrl, digits, fmtDate, SITE_URL, todaySP } from "@/lib/format";
 import { anamnesisUpdate } from "@/lib/anamnesis";
 import { DEFAULT_CONSENT, formOrDefault, sanitizeForm, type AnamnesisFormDef } from "@/lib/anamnesis-schema";
-import { bool, fail, int, isDate, isTime, isUuid, money, opt, str } from "@/lib/form";
+import { bool, fail, int, isDate, isTime, isUuid, list, money, opt, str } from "@/lib/form";
 import { toTimestamp } from "@/lib/hours";
+import { planSessions, REPEAT_MAX } from "@/lib/repeat";
 import { cardFee, getSettings } from "@/lib/settings";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { SERVICE_ICONS } from "@/lib/site-content";
@@ -218,7 +219,9 @@ export async function deletePhoto(fd: FormData) {
 
 // ─── Agenda ────────────────────────────────────────────────────────────
 export async function createAppointment(_prev: ActionState, fd: FormData): Promise<ActionState> {
-  const { supabase } = await requireStaff();
+  const { supabase, staff } = await requireStaff();
+  // Agendamento recorrente: só administradoras.
+  if (bool(fd, "repeat") && !staff.is_admin) return fail("Só administradoras podem agendar de forma recorrente.");
 
   const date = str(fd, "date");
   const time = str(fd, "time");
@@ -244,24 +247,62 @@ export async function createAppointment(_prev: ActionState, fd: FormData): Promi
 
   const duration = int(fd, "duration") || service.duration_min;
   const price = money(fd, "price");
-  const startsAt = toTimestamp(date, time);
-  const endsAt = new Date(Date.parse(startsAt) + duration * 60_000).toISOString();
   const status = str(fd, "status") === "solicitado" ? "solicitado" : "confirmado";
+  const now = new Date().toISOString();
+  const row = (serviceId: string, day: string, mins: number, value: number, pkg: string | null, series: string | null = null) => {
+    const startsAt = toTimestamp(day, time);
+    return {
+      client_id: clientId, service_id: serviceId, starts_at: startsAt, series_id: series,
+      ends_at: new Date(Date.parse(startsAt) + mins * 60_000).toISOString(),
+      price: pkg ? 0 : value, notes: opt(fd, "notes", 1000), status,
+      confirmed_at: status === "confirmado" ? now : null, client_package_id: pkg, source: "painel",
+    };
+  };
 
-  const { error } = await supabase.from("appointments").insert({
-    client_id: clientId,
-    service_id: service.id,
-    starts_at: startsAt,
-    ends_at: endsAt,
-    price: packageId ? 0 : Number.isFinite(price) ? price : service.price,
-    notes: opt(fd, "notes", 1000),
-    status,
-    confirmed_at: status === "confirmado" ? new Date().toISOString() : null,
-    client_package_id: packageId,
-    source: "painel",
-  });
+  // Recorrência (sessões do plano): mesmas regras de horário, pulando o que já está ocupado.
+  let dates = [date];
+  let skipped: string[] = [];
+  let wanted = 1;
+  if (bool(fd, "repeat")) {
+    let count = Math.min(Math.max(int(fd, "repeat_count") || 1, 1), REPEAT_MAX);
+    if (packageId) {
+      const { data: pkg } = await supabase.from("client_package_usage").select("sessions_remaining, sessions_scheduled").eq("id", packageId).maybeSingle();
+      if (pkg) count = Math.min(count, Math.max(Number(pkg.sessions_remaining) - Number(pkg.sessions_scheduled), 1));
+    }
+    const weekdays = list(fd, "repeat_day").map(Number).filter((n) => n >= 0 && n <= 6);
+    const until = addDays(date, 367);
+    const [settings, busyAppts, busyBlocks] = await Promise.all([
+      getSettings(supabase),
+      supabase.from("appointments").select("starts_at, ends_at").neq("client_id", clientId)
+        .in("status", ["solicitado", "confirmado", "concluido"]).gte("starts_at", toTimestamp(date, "00:00")).lt("starts_at", toTimestamp(until, "00:00")),
+      supabase.from("time_blocks").select("starts_at, ends_at").gt("ends_at", toTimestamp(date, "00:00")).lt("starts_at", toTimestamp(until, "00:00")),
+    ]);
+    wanted = count;
+    ({ dates, skipped } = planSessions({
+      date, time, duration, weekdays, count, hours: settings.business_hours, busy: [...(busyAppts.data ?? []), ...(busyBlocks.data ?? [])],
+    }));
+  }
+
+  // Procedimentos opcionais: no mesmo horário da primeira sessão, cada um com sua duração e valor.
+  const extraIds = list(fd, "extra_service_id").filter((id) => id !== service.id);
+  const { data: extras } = extraIds.length
+    ? await supabase.from("services").select("id, duration_min, price").in("id", extraIds)
+    : { data: [] };
+
+  const value = Number.isFinite(price) ? price : service.price;
+  const series = dates.length > 1 ? crypto.randomUUID() : null;
+  const rows = [
+    ...dates.map((day) => row(service.id, day, duration, value, packageId, series)),
+    ...(extras ?? []).map((x) => row(x.id, date, x.duration_min, Number(x.price), null)),
+  ];
+  const { error } = await supabase.from("appointments").insert(rows);
   if (error) return fail(dbError(error.code, "Não foi possível criar o agendamento.", error.message));
-  return done("Agendamento criado.");
+
+  const parts = [dates.length > 1 ? `${dates.length} sessões agendadas (até ${fmtDate(dates[dates.length - 1])})` : "Agendamento criado"];
+  if (extras?.length) parts.push(`${extras.length === 1 ? "1 procedimento opcional" : `${extras.length} procedimentos opcionais`} no mesmo horário`);
+  if (bool(fd, "repeat") && dates.length < wanted) parts.push("não havia horário livre para todas as sessões no próximo ano");
+  if (skipped.length) parts.push(`dias ocupados pulados: ${skipped.slice(0, 6).map((d) => fmtDate(d, { year: undefined })).join(", ")}${skipped.length > 6 ? "…" : ""}`);
+  return done(`${parts.join("; ")}.`);
 }
 
 export async function setAppointmentStatus(fd: FormData) {
@@ -272,6 +313,18 @@ export async function setAppointmentStatus(fd: FormData) {
   if (status === "confirmado") patch.confirmed_at = new Date().toISOString();
   if (status === "cancelado") patch.cancel_reason = opt(fd, "reason", 300) ?? "Cancelado pela clínica";
   await supabase.from("appointments").update(patch).eq("id", str(fd, "id"));
+  refresh();
+}
+
+/** Cancela a recorrência: esta sessão e as próximas da série que ainda estão em aberto (só administradoras). */
+export async function cancelSeries(fd: FormData) {
+  const s = await requireAdmin();
+  if (!s) return;
+  const { data: appt } = await s.supabase.from("appointments").select("series_id, starts_at").eq("id", str(fd, "id")).maybeSingle();
+  if (!appt?.series_id) return;
+  await s.supabase.from("appointments")
+    .update({ status: "cancelado", cancel_reason: opt(fd, "reason", 300) ?? "Recorrência cancelada pela clínica" })
+    .eq("series_id", appt.series_id).gte("starts_at", appt.starts_at).in("status", ["solicitado", "confirmado"]);
   refresh();
 }
 
